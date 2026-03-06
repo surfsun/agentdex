@@ -10,11 +10,32 @@ export const metadata: Metadata = {
   description: 'Discover tools built specifically for AI agents: communication, memory, web scraping, execution, identity and more.',
   keywords: 'AI agents, agent tools, LLM tools, agent infrastructure',
   openGraph: {
-    title: 'AgentDex',
-    description: 'The tool directory built for AI agents',
+    title: 'AgentDex — The tool directory built for AI agents',
+    description: 'Discover tools built specifically for AI agents: communication, memory, web scraping, execution, identity and more.',
     url: 'https://www.agentdex.top',
     siteName: 'AgentDex',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AgentDex — The tool directory built for AI agents',
+    description: 'Discover tools built specifically for AI agents',
+  },
+  alternates: {
+    canonical: 'https://www.agentdex.top',
+  },
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'AgentDex',
+  description: 'The tool directory built for AI agents',
+  url: 'https://www.agentdex.top',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://www.agentdex.top/api/search?q={search_term_string}',
+    'query-input': 'required name=search_term_string',
   },
 }
 
@@ -25,6 +46,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={inter.className}>
         <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
