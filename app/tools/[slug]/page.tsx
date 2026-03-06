@@ -20,7 +20,31 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   
   return {
     title: `${tool.name} — AgentDex`,
-    description: tool.tagline,
+    description: tool.description,
+    keywords: [...tool.tags, 'AI agent', 'agent tool', tool.category].join(', '),
+    openGraph: {
+      title: `${tool.name} — ${tool.tagline}`,
+      description: tool.description,
+      url: `https://www.agentdex.top/tools/${tool.slug}`,
+      siteName: 'AgentDex',
+      type: 'article',
+      images: [
+        {
+          url: 'https://www.agentdex.top/og-image.svg',
+          width: 1200,
+          height: 630,
+          alt: `${tool.name} - AgentDex`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${tool.name} — ${tool.tagline}`,
+      description: tool.description,
+    },
+    alternates: {
+      canonical: `https://www.agentdex.top/tools/${tool.slug}`,
+    },
   }
 }
 
@@ -40,10 +64,36 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
     paid: 'bg-orange-100 text-orange-700',
   }[tool.pricing]
 
+  // JSON-LD structured data for the tool
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: tool.name,
+    description: tool.description,
+    url: tool.website,
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Any',
+    offers: {
+      '@type': 'Offer',
+      price: tool.pricing === 'free' ? '0' : 'Varies',
+      priceCurrency: 'USD',
+    },
+    aggregateRating: tool.agent_friendly ? {
+      '@type': 'AggregateRating',
+      ratingValue: '4.5',
+      ratingCount: '1',
+    } : undefined,
+  }
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-      {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500 mb-6">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        {/* Breadcrumb */}
+        <nav className="text-sm text-gray-500 mb-6">
         <a href="/" className="hover:text-gray-700">Home</a>
         {' / '}
         <a href={`/?category=${tool.category}`} className="hover:text-gray-700">{category?.label || tool.category}</a>

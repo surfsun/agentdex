@@ -34,7 +34,6 @@ export const categories = [
   { id: 'integration',   label: 'Integration',    label_zh: '集成' },
   { id: 'observability', label: 'Observability',  label_zh: '可观测' },
   { id: 'security',      label: 'Security',       label_zh: '安全' },
-  { id: 'identity',      label: 'Identity',       label_zh: '身份' },
   { id: 'payment',       label: 'Payment',        label_zh: '支付' },
 ]
 
@@ -59,4 +58,17 @@ export function searchTools(query: string): Tool[] {
 
 export function getFeaturedTools(): Tool[] {
   return tools.filter(t => t.featured)
+}
+
+// Check if a tool is new (added within the last 30 days)
+export function isNewTool(tool: Tool): boolean {
+  const createdAt = new Date(tool.created_at)
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  return createdAt > thirtyDaysAgo
+}
+
+// Get all new tools
+export function getNewTools(): Tool[] {
+  return tools.filter(isNewTool)
 }

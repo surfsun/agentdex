@@ -1,0 +1,57 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  
+  <!-- Grid pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff10" stroke-width="1"/>
+  </pattern>
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+  
+  <!-- Logo -->
+  <text x="80" y="120" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="bold">
+    <tspan fill="#ffffff">Agent</tspan><tspan fill="#3b82f6">Dex</tspan>
+  </text>
+  
+  <!-- Tagline -->
+  <text x="80" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#94a3b8">
+    The tool directory built for AI agents
+  </text>
+  
+  <!-- Stats -->
+  <g transform="translate(80, 320)">
+    <rect width="180" height="80" rx="12" fill="#ffffff10"/>
+    <text x="20" y="35" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#94a3b8">Tools</text>
+    <text x="20" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="#ffffff">26+</text>
+  </g>
+  
+  <g transform="translate(280, 320)">
+    <rect width="180" height="80" rx="12" fill="#ffffff10"/>
+    <text x="20" y="35" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#94a3b8">Agent-Friendly</text>
+    <text x="20" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="#3b82f6">22+</text>
+  </g>
+  
+  <g transform="translate(480, 320)">
+    <rect width="180" height="80" rx="12" fill="#ffffff10"/>
+    <text x="20" y="35" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#94a3b8">Open Source</text>
+    <text x="20" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="#10b981">19+</text>
+  </g>
+  
+  <!-- API hint -->
+  <text x="80" y="480" font-family="monospace" font-size="18" fill="#3b82f6">
+    GET https://www.agentdex.top/api/tools
+  </text>
+  
+  <!-- Robot icon -->
+  <g transform="translate(950, 200)">
+    <circle cx="80" cy="80" r="80" fill="#3b82f620"/>
+    <text x="80" y="110" font-size="100" text-anchor="middle">🤖</text>
+  </g>
+</svg>
