@@ -103,7 +103,7 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
           </div>
           <a
             href="/"
-                       className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
+            className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
           >
             ← Back to Home
           </a>
@@ -170,9 +170,13 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Tags</h2>
         <div className="flex flex-wrap gap-2">
           {tool.tags.map(tag => (
-            <span key={tag} className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+            <a 
+              key={tag} 
+              href={`/?q=${encodeURIComponent(tag)}`}
+              className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full hover:bg-gray-200 transition"
+            >
               {tag}
-            </span>
+            </a>
           ))}
         </div>
       </div>
@@ -199,9 +203,34 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
         )}
       </div>
 
+      {/* Quick Start for Agents - 新增 */}
+      {tool.api_available && (
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-8">
+          <h3 className="text-lg font-semibold text-purple-900 mb-3 flex items-center gap-2">
+            🤖 Quick Start for Agents
+          </h3>
+          <div className="space-y-3">
+            <div>
+              <div className="text-xs text-purple-600 font-mono mb-1"># Get tool info via API</div>
+              <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
+                curl https://www.agentdex.top/api/tools/{tool.slug}
+              </code>
+            </div>
+            {tool.website && (
+              <div>
+                <div className="text-xs text-purple-600 font-mono mb-1"># Direct API endpoint</div>
+                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
+                  {tool.website}
+                </code>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* API Info */}
-      <div className="bg-gray-900 rounded-xl p-6 text-sm">
-        <h3 className="text-gray-400 font-mono mb-2"># Get this tool via API</h3>
+      <div className="bg-gray-900 rounded-xl p-6 text-sm mb-8">
+        <h3 className="text-gray-400 font-mono mb-2"># Get this tool via AgentDex API</h3>
         <code className="text-green-400">
           curl https://www.agentdex.top/api/tools/{tool.slug}
         </code>

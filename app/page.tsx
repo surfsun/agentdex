@@ -56,6 +56,36 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   }
 }
 
+// 构建筛选 URL，支持多条件组合
+function buildFilterUrl(params: {
+  category?: string
+  agent_friendly?: boolean
+  open_source?: boolean
+  pricing?: string
+  q?: string
+}): string {
+  const searchParams = new URLSearchParams()
+  
+  if (params.category && params.category !== 'all') {
+    searchParams.set('category', params.category)
+  }
+  if (params.agent_friendly) {
+    searchParams.set('agent_friendly', 'true')
+  }
+  if (params.open_source) {
+    searchParams.set('open_source', 'true')
+  }
+  if (params.pricing) {
+    searchParams.set('pricing', params.pricing)
+  }
+  if (params.q) {
+    searchParams.set('q', params.q)
+  }
+  
+  const queryString = searchParams.toString()
+  return queryString ? `/?${queryString}` : '/'
+}
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -70,7 +100,7 @@ export default async function HomePage({
 
   let displayTools = tools
   
-  // 先应用筛选
+  // 先应用筛选（可组合）
   if (agentFriendlyFilter) {
     displayTools = displayTools.filter(t => t.agent_friendly)
   }
@@ -94,6 +124,12 @@ export default async function HomePage({
     displayTools = displayTools.filter(t => t.category === activeCategory)
   }
 
+  // 计算各筛选条件下的工具数量（用于智能提示）
+  const agentFriendlyCount = tools.filter(t => t.agent_friendly).length
+  const openSourceCount = tools.filter(t => t.open_source).length
+  const freeCount = tools.filter(t => t.pricing === 'free').length
+  const freemiumCount = tools.filter(t => t.pricing === 'freemium').length
+
   // 生成 JSON-LD 结构化数据
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -112,6 +148,14 @@ export default async function HomePage({
       },
     })),
   }
+
+  // 计算当前活跃的筛选器数量
+  const activeFilterCount = [
+    agentFriendlyFilter,
+    openSourceFilter,
+    !!pricingFilter,
+    activeCategory !== 'all'
+  ].filter(Boolean).length
 
   return (
     <>
@@ -145,64 +189,88 @@ export default async function HomePage({
       {/* Search with Real-time Filter */}
       <ClientSearch currentQuery={query} />
 
-      {/* Stats */}
+      {/* Stats - 实时更新 */}
       <div className="flex gap-6 text-sm text-gray-400 mb-6">
-        <span>{displayTools.length} tools</span>
+        <span className="font-medium text-gray-600">{displayTools.length} tools</span>
         <span>{displayTools.filter(t => t.agent_friendly).length} agent-friendly</span>
         <span>{displayTools.filter(t => t.open_source).length} open source</span>
       </div>
 
-      {/* Agent 快捷筛选 */}
+      {/* Agent 快捷筛选 - 支持组合 */}
       <div className="flex flex-wrap gap-2 mb-6 p-4 bg-gray-50 rounded-lg">
-        <span className="text-sm text-gray-500 font-medium">Agent Filters:</span>
+        <span className="text-sm text-gray-500 font-medium">Filters:</span>
         <a
-          href={agentFriendlyFilter ? '?' : '?agent_friendly=true'}
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: !agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined
+          })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             agentFriendlyFilter
               ? 'bg-purple-600 text-white border-purple-600'
               : 'bg-white text-gray-600 border-gray-300 hover:border-purple-400'
           }`}
         >
-          🤖 Agent-friendly
+          🤖 Agent-friendly <span className="text-xs opacity-60">({agentFriendlyCount})</span>
         </a>
         <a
-          href={openSourceFilter ? '?' : '?open_source=true'}
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: !openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined
+          })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             openSourceFilter
               ? 'bg-emerald-600 text-white border-emerald-600'
               : 'bg-white text-gray-600 border-gray-300 hover:border-emerald-400'
           }`}
         >
-          📦 Open Source
+          📦 Open Source <span className="text-xs opacity-60">({openSourceCount})</span>
         </a>
         <span className="text-gray-300">|</span>
         <span className="text-sm text-gray-500">Pricing:</span>
         <a
-          href={pricingFilter === 'free' ? '?' : '?pricing=free'}
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter === 'free' ? undefined : 'free',
+            q: query || undefined
+          })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             pricingFilter === 'free'
               ? 'bg-green-600 text-white border-green-600'
               : 'bg-white text-gray-600 border-gray-300 hover:border-green-400'
           }`}
         >
-          💚 Free
+          💚 Free <span className="text-xs opacity-60">({freeCount})</span>
         </a>
         <a
-          href={pricingFilter === 'freemium' ? '?' : '?pricing=freemium'}
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter === 'freemium' ? undefined : 'freemium',
+            q: query || undefined
+          })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             pricingFilter === 'freemium'
               ? 'bg-blue-600 text-white border-blue-600'
               : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
           }`}
         >
-          💙 Freemium
+          💙 Freemium <span className="text-xs opacity-60">({freemiumCount})</span>
         </a>
-        {(agentFriendlyFilter || openSourceFilter || pricingFilter) && (
+        {activeFilterCount > 0 && (
           <a
             href="/"
-            className="px-3 py-1 rounded-full text-sm text-red-500 hover:text-red-700"
+            className="px-3 py-1 rounded-full text-sm text-red-500 hover:text-red-700 border border-red-200 hover:border-red-300"
           >
-            ✕ Clear filters
+            ✕ Clear ({activeFilterCount})
           </a>
         )}
       </div>
@@ -221,7 +289,13 @@ export default async function HomePage({
           return (
             <a
               key={cat.id}
-              href={query ? `/?category=${cat.id}` : `/?category=${cat.id}`}
+              href={buildFilterUrl({
+                category: cat.id,
+                agent_friendly: agentFriendlyFilter,
+                open_source: openSourceFilter,
+                pricing: pricingFilter || undefined,
+                q: query || undefined
+              })}
               className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                 isActive
                   ? 'bg-blue-600 text-white border-blue-600'
@@ -243,6 +317,18 @@ export default async function HomePage({
           Found {displayTools.length} result{displayTools.length !== 1 ? 's' : ''} for &quot;{query}&quot;
           {' — '}
           <a href="/" className="text-blue-500 hover:underline">Clear search</a>
+        </div>
+      )}
+
+      {/* Active Filters Summary - Agent 友好显示 */}
+      {activeFilterCount > 0 && !query && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+          <span className="font-medium">Active filters:</span>{' '}
+          {agentFriendlyFilter && <span className="mr-2">🤖 Agent-friendly</span>}
+          {openSourceFilter && <span className="mr-2">📦 Open Source</span>}
+          {pricingFilter && <span className="mr-2">💰 {pricingFilter}</span>}
+          {activeCategory !== 'all' && <span className="mr-2">📁 {categories.find(c => c.id === activeCategory)?.label}</span>}
+          <span className="text-blue-500">→ {displayTools.length} tools found</span>
         </div>
       )}
 
