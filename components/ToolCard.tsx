@@ -1,4 +1,4 @@
-import { Tool } from '@/lib/tools'
+import { Tool, isNewTool } from '@/lib/tools'
 
 export default function ToolCard({ tool }: { tool: Tool }) {
   const pricingColor = {
@@ -6,6 +6,8 @@ export default function ToolCard({ tool }: { tool: Tool }) {
     freemium: 'bg-blue-100 text-blue-700',
     paid: 'bg-orange-100 text-orange-700',
   }[tool.pricing]
+
+  const isNew = isNewTool(tool)
 
   return (
     <a
@@ -19,6 +21,11 @@ export default function ToolCard({ tool }: { tool: Tool }) {
           <p className="text-gray-500 text-xs mt-0.5">{tool.tagline}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
+          {isNew && (
+            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full whitespace-nowrap font-medium">
+              🆕 NEW
+            </span>
+          )}
           {tool.agent_friendly && (
             <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full whitespace-nowrap">
               🤖 Agent-friendly

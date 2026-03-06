@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://www.agentdex.top',
     types: {
-      'application/rss+xml': 'https://www.agentdex.top/feed.xml',
+      'application/rss+xml': 'https://www.agentdex.top/rss',
     },
   },
   openGraph: {
