@@ -44,6 +44,9 @@ export default function ForAgentsPage() {
             { method: 'GET', path: '/api/tools', desc: 'List all tools. Supports ?category=memory&agent_friendly=true&pricing=free' },
             { method: 'GET', path: '/api/tools/{slug}', desc: 'Get a specific tool by slug (e.g. /api/tools/mem0)' },
             { method: 'GET', path: '/api/search?q={query}', desc: 'Search tools by name, description, or tags' },
+            { method: 'GET', path: '/api/tools/compare?category={cat}', desc: 'Compare tools in a category with recommendations' },
+            { method: 'GET', path: '/api/recommend?task={description}', desc: 'AI-powered tool recommendations based on task' },
+            { method: 'GET', path: '/api/tags?tag={tag}', desc: 'Get all tools with a specific tag' },
             { method: 'POST', path: '/api/tools/submit', desc: 'Submit a new tool for review' },
           ].map(endpoint => (
             <div key={endpoint.path} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg">

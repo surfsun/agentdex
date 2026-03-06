@@ -211,14 +211,14 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
           </h3>
           <div className="space-y-3">
             <div>
-              <div className="text-xs text-purple-600 font-mono mb-1"># Get tool info via API</div>
+              <div className="text-xs text-purple-600 font-mono mb-1"># Get tool info via AgentDex API</div>
               <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
                 curl https://www.agentdex.top/api/tools/{tool.slug}
               </code>
             </div>
             {tool.website && (
               <div>
-                <div className="text-xs text-purple-600 font-mono mb-1"># Direct API endpoint</div>
+                <div className="text-xs text-purple-600 font-mono mb-1"># Tool website</div>
                 <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
                   {tool.website}
                 </code>

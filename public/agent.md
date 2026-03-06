@@ -92,6 +92,32 @@ The `_agent_hint` field always tells you what you can do next.
 - No authentication required for read operations
 - Submit operations: 10 per day per IP
 
+## Advanced API Endpoints
+
+### Compare Tools
+Get a comparison matrix with recommendations for the best tool.
+```bash
+# Compare all tools in a category
+curl "https://www.agentdex.top/api/tools/compare?category=memory"
+
+# Compare specific tools
+curl "https://www.agentdex.top/api/tools/compare?slugs=mem0,zep,letta"
+```
+
+### Get Recommendations
+AI-powered tool recommendations based on your task description.
+```bash
+curl "https://www.agentdex.top/api/recommend?task=I%20need%20to%20scrape%20websites"
+curl "https://www.agentdex.top/api/recommend?task=send%20emails"
+```
+
+### Get Tools by Tag
+Find all tools with a specific tag.
+```bash
+curl "https://www.agentdex.top/api/tags?tag=api-first"
+curl "https://www.agentdex.top/api/tags?tag=open-source"
+```
+
 ## Full API Reference
 
 | Method | Endpoint | Description |
@@ -101,4 +127,8 @@ The `_agent_hint` field always tells you what you can do next.
 | GET | /api/tools?agent_friendly=true | Agent-friendly only |
 | GET | /api/tools/{slug} | Get specific tool |
 | GET | /api/search?q={query} | Search tools |
+| GET | /api/tools/compare?category={cat} | Compare tools in category |
+| GET | /api/tools/compare?slugs={slugs} | Compare specific tools |
+| GET | /api/recommend?task={task} | Get AI recommendations |
+| GET | /api/tags?tag={tag} | Get tools by tag |
 | POST | /api/tools/submit | Submit new tool |

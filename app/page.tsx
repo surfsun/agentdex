@@ -178,12 +178,20 @@ export default async function HomePage({
           GET https://www.agentdex.top/api/tools — machine-readable, agent-friendly
         </p>
         {/* Agent 入口 */}
-        <a
-          href="/agent.md"
-          className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-purple-200 transition"
-        >
-          🤖 Agent? Read /agent.md
-        </a>
+        <div className="flex justify-center gap-3">
+          <a
+            href="/agent.md"
+            className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-purple-200 transition"
+          >
+            🤖 Agent? Read /agent.md
+          </a>
+          <a
+            href="/for-agents"
+            className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
+          >
+            📖 API Reference
+          </a>
+        </div>
       </div>
 
       {/* Search with Real-time Filter */}
