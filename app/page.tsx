@@ -1,26 +1,32 @@
-import { tools, categories, getFeaturedTools } from '@/lib/tools'
+import { tools, categories } from '@/lib/tools'
 import ToolCard from '@/components/ToolCard'
 
-export default function HomePage({
+interface SearchParams {
+  category?: string
+  q?: string
+}
+
+export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { category?: string; q?: string }
+  searchParams: Promise<SearchParams>
 }) {
-  const activeCategory = searchParams.category || 'all'
-  const query = searchParams.q || ''
+  const params = await searchParams
+  const activeCategory = params.category || 'all'
+  const query = params.q || ''
 
   let displayTools = tools
   if (query) {
+    // 搜索时忽略分类筛选
     displayTools = tools.filter(t =>
       t.name.toLowerCase().includes(query.toLowerCase()) ||
       t.tagline.toLowerCase().includes(query.toLowerCase()) ||
-      t.tags.some(tag => tag.includes(query.toLowerCase()))
+      t.description.toLowerCase().includes(query.toLowerCase()) ||
+      t.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
     )
   } else if (activeCategory !== 'all') {
     displayTools = tools.filter(t => t.category === activeCategory)
   }
-
-  const featuredTools = getFeaturedTools()
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
@@ -35,7 +41,7 @@ export default function HomePage({
           not adapted from human tools.
         </p>
         <p className="text-sm text-blue-600 font-mono">
-          GET https://agentdex.dev/api/tools — machine-readable, agent-friendly
+          GET https://agentdex-lovat.vercel.app/api/tools — machine-readable, agent-friendly
         </p>
       </div>
 
@@ -52,22 +58,24 @@ export default function HomePage({
         </form>
       </div>
 
-      {/* Category Filter */}
-      <div className="flex flex-wrap gap-2 mb-8">
-        {categories.map(cat => (
-          <a
-            key={cat.id}
-            href={`/?category=${cat.id}`}
-            className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-              activeCategory === cat.id
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
-            }`}
-          >
-            {cat.label}
-          </a>
-        ))}
-      </div>
+      {/* Category Filter - 搜索时隐藏 */}
+      {!query && (
+        <div className="flex flex-wrap gap-2 mb-8">
+          {categories.map(cat => (
+            <a
+              key={cat.id}
+              href={`/?category=${cat.id}`}
+              className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                activeCategory === cat.id
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              {cat.label}
+            </a>
+          ))}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="flex gap-6 text-sm text-gray-400 mb-8">
@@ -75,6 +83,15 @@ export default function HomePage({
         <span>{tools.filter(t => t.agent_friendly).length} agent-friendly</span>
         <span>{tools.filter(t => t.open_source).length} open source</span>
       </div>
+
+      {/* Search Results Header */}
+      {query && (
+        <div className="mb-4 text-sm text-gray-600">
+          Found {displayTools.length} result{displayTools.length !== 1 ? 's' : ''} for &quot;{query}&quot;
+          {' — '}
+          <a href="/" className="text-blue-500 hover:underline">Clear search</a>
+        </div>
+      )}
 
       {/* Tool Grid */}
       {displayTools.length === 0 ? (
