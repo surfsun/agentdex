@@ -3,13 +3,14 @@ import { getToolBySlug } from '@/lib/tools'
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
-  const tool = getToolBySlug(params.slug)
+  const { slug } = await params
+  const tool = getToolBySlug(slug)
 
   if (!tool) {
     return NextResponse.json(
-      { success: false, error: 'Tool not found', slug: params.slug },
+      { success: false, error: 'Tool not found', slug },
       { status: 404 }
     )
   }
