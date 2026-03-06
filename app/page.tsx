@@ -6,6 +6,9 @@ import ClientSearch from '@/components/ClientSearch'
 interface SearchParams {
   category?: string
   q?: string
+  agent_friendly?: string
+  open_source?: string
+  pricing?: string
 }
 
 // 动态生成 metadata，支持分类页面 SEO
@@ -61,18 +64,34 @@ export default async function HomePage({
   const params = await searchParams
   const activeCategory = params.category || 'all'
   const query = params.q || ''
+  const agentFriendlyFilter = params.agent_friendly === 'true'
+  const openSourceFilter = params.open_source === 'true'
+  const pricingFilter = params.pricing || ''
 
   let displayTools = tools
+  
+  // 先应用筛选
+  if (agentFriendlyFilter) {
+    displayTools = displayTools.filter(t => t.agent_friendly)
+  }
+  if (openSourceFilter) {
+    displayTools = displayTools.filter(t => t.open_source)
+  }
+  if (pricingFilter) {
+    displayTools = displayTools.filter(t => t.pricing === pricingFilter)
+  }
+  
+  // 再应用搜索/分类
   if (query) {
     // 搜索时忽略分类筛选
-    displayTools = tools.filter(t =>
+    displayTools = displayTools.filter(t =>
       t.name.toLowerCase().includes(query.toLowerCase()) ||
       t.tagline.toLowerCase().includes(query.toLowerCase()) ||
       t.description.toLowerCase().includes(query.toLowerCase()) ||
       t.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
     )
   } else if (activeCategory !== 'all') {
-    displayTools = tools.filter(t => t.category === activeCategory)
+    displayTools = displayTools.filter(t => t.category === activeCategory)
   }
 
   // 生成 JSON-LD 结构化数据
@@ -126,6 +145,68 @@ export default async function HomePage({
       {/* Search with Real-time Filter */}
       <ClientSearch currentQuery={query} />
 
+      {/* Stats */}
+      <div className="flex gap-6 text-sm text-gray-400 mb-6">
+        <span>{displayTools.length} tools</span>
+        <span>{displayTools.filter(t => t.agent_friendly).length} agent-friendly</span>
+        <span>{displayTools.filter(t => t.open_source).length} open source</span>
+      </div>
+
+      {/* Agent 快捷筛选 */}
+      <div className="flex flex-wrap gap-2 mb-6 p-4 bg-gray-50 rounded-lg">
+        <span className="text-sm text-gray-500 font-medium">Agent Filters:</span>
+        <a
+          href={agentFriendlyFilter ? '?' : '?agent_friendly=true'}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            agentFriendlyFilter
+              ? 'bg-purple-600 text-white border-purple-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-purple-400'
+          }`}
+        >
+          🤖 Agent-friendly
+        </a>
+        <a
+          href={openSourceFilter ? '?' : '?open_source=true'}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            openSourceFilter
+              ? 'bg-emerald-600 text-white border-emerald-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-emerald-400'
+          }`}
+        >
+          📦 Open Source
+        </a>
+        <span className="text-gray-300">|</span>
+        <span className="text-sm text-gray-500">Pricing:</span>
+        <a
+          href={pricingFilter === 'free' ? '?' : '?pricing=free'}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            pricingFilter === 'free'
+              ? 'bg-green-600 text-white border-green-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-green-400'
+          }`}
+        >
+          💚 Free
+        </a>
+        <a
+          href={pricingFilter === 'freemium' ? '?' : '?pricing=freemium'}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            pricingFilter === 'freemium'
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+          }`}
+        >
+          💙 Freemium
+        </a>
+        {(agentFriendlyFilter || openSourceFilter || pricingFilter) && (
+          <a
+            href="/"
+            className="px-3 py-1 rounded-full text-sm text-red-500 hover:text-red-700"
+          >
+            ✕ Clear filters
+          </a>
+        )}
+      </div>
+
       {/* Category Filter - 始终显示，搜索时显示工具的分类标签 */}
       <div className="flex flex-wrap gap-2 mb-8">
         {categories.map(cat => {
@@ -154,13 +235,6 @@ export default async function HomePage({
             </a>
           )
         })}
-      </div>
-
-      {/* Stats */}
-      <div className="flex gap-6 text-sm text-gray-400 mb-8">
-        <span>{tools.length} tools indexed</span>
-        <span>{tools.filter(t => t.agent_friendly).length} agent-friendly</span>
-        <span>{tools.filter(t => t.open_source).length} open source</span>
       </div>
 
       {/* Search Results Header */}

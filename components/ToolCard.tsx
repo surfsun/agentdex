@@ -53,9 +53,22 @@ export default function ToolCard({ tool }: { tool: Tool }) {
 
       {/* Footer */}
       <div className="flex items-center justify-between">
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pricingColor}`}>
-          {tool.pricing}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pricingColor}`}>
+            {tool.pricing}
+          </span>
+          {/* Agent 关键信息：API 可用 + 开源 */}
+          {tool.api_available && (
+            <span className="text-xs bg-cyan-50 text-cyan-600 px-2 py-0.5 rounded-full" title="API Available">
+              🔌 API
+            </span>
+          )}
+          {tool.open_source && (
+            <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full" title="Open Source">
+              📦 OSS
+            </span>
+          )}
+        </div>
         <span className="text-xs text-blue-500 font-medium">
           View details →
         </span>
