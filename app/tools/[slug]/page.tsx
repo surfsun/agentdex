@@ -93,12 +93,20 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
       />
       <div className="max-w-4xl mx-auto px-4 py-10">
         {/* Breadcrumb */}
-        <nav className="text-sm text-gray-500 mb-6">
-          <a href="/" className="hover:text-gray-700">Home</a>
-          {' / '}
-          <a href={`/?category=${tool.category}`} className="hover:text-gray-700">{category?.label || tool.category}</a>
-          {' / '}
-          <span className="text-gray-900">{tool.name}</span>
+        <nav className="text-sm text-gray-500 mb-6 flex items-center justify-between">
+          <div>
+            <a href="/" className="hover:text-gray-700">Home</a>
+            {' / '}
+            <a href={`/?category=${tool.category}`} className="hover:text-gray-700">{category?.label || tool.category}</a>
+            {' / '}
+            <span className="text-gray-900">{tool.name}</span>
+          </div>
+          <a
+            href="/"
+                       className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
+          >
+            ← Back to Home
+          </a>
         </nav>
 
       {/* Header */}
