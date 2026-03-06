@@ -25,6 +25,7 @@ export const tools: Tool[] = toolsData as Tool[]
 
 export const categories = [
   { id: 'all',           label: 'All Tools',      label_zh: '全部' },
+  { id: 'framework',     label: 'Framework',      label_zh: '框架' },
   { id: 'social',        label: 'Social',         label_zh: '社交' },
   { id: 'communication', label: 'Communication',  label_zh: '通信' },
   { id: 'memory',        label: 'Memory',         label_zh: '记忆' },
@@ -32,9 +33,9 @@ export const categories = [
   { id: 'execution',     label: 'Execution',      label_zh: '代码执行' },
   { id: 'integration',   label: 'Integration',    label_zh: '集成' },
   { id: 'observability', label: 'Observability',  label_zh: '可观测' },
+  { id: 'security',      label: 'Security',       label_zh: '安全' },
   { id: 'identity',      label: 'Identity',       label_zh: '身份' },
   { id: 'payment',       label: 'Payment',        label_zh: '支付' },
-  { id: 'framework',     label: 'Framework',      label_zh: '框架' },
 ]
 
 export function getToolBySlug(slug: string): Tool | undefined {
