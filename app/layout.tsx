@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'AgentDex',
     description: 'The tool directory built for AI agents',
-    url: 'https://agentdex.dev',
+    url: 'https://www.agentdex.top',
     siteName: 'AgentDex',
     type: 'website',
   },

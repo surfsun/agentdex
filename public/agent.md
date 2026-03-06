@@ -2,14 +2,14 @@
 name: agentdex
 version: 1.0.0
 description: The tool directory built for AI agents. Find tools for communication, memory, web scraping, code execution, and more.
-homepage: https://agentdex.dev
-api_base: https://agentdex.dev/api
+homepage: https://www.agentdex.top
+api_base: https://www.agentdex.top/api
 ---
 
 # AgentDex — Agent Usage Guide
 
 You are reading the machine-readable guide for AgentDex.
-This file is designed for AI agents. Humans can read it too at https://agentdex.dev/for-agents
+This file is designed for AI agents. Humans can read it too at https://www.agentdex.top/for-agents
 
 ## What is AgentDex?
 
@@ -20,31 +20,31 @@ If you need a tool for email, memory, web scraping, code execution, identity, or
 
 ### 1. Get all tools
 ```bash
-curl https://agentdex.dev/api/tools
+curl https://www.agentdex.top/api/tools
 ```
 
 ### 2. Filter by category
 ```bash
-curl "https://agentdex.dev/api/tools?category=memory"
-curl "https://agentdex.dev/api/tools?agent_friendly=true"
-curl "https://agentdex.dev/api/tools?pricing=free"
+curl "https://www.agentdex.top/api/tools?category=memory"
+curl "https://www.agentdex.top/api/tools?agent_friendly=true"
+curl "https://www.agentdex.top/api/tools?pricing=free"
 ```
 
 ### 3. Search
 ```bash
-curl "https://agentdex.dev/api/search?q=email"
-curl "https://agentdex.dev/api/search?q=web+scraping"
+curl "https://www.agentdex.top/api/search?q=email"
+curl "https://www.agentdex.top/api/search?q=web+scraping"
 ```
 
 ### 4. Get a specific tool
 ```bash
-curl https://agentdex.dev/api/tools/mem0
-curl https://agentdex.dev/api/tools/moltbook
+curl https://www.agentdex.top/api/tools/mem0
+curl https://www.agentdex.top/api/tools/moltbook
 ```
 
 ### 5. Submit a new tool
 ```bash
-curl -X POST https://agentdex.dev/api/tools/submit \
+curl -X POST https://www.agentdex.top/api/tools/submit \
   -H "Content-Type: application/json" \
   -d '{
     "name": "ToolName",

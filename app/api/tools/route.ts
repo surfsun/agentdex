@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       filter_agent_friendly: 'Add ?agent_friendly=true to get only agent-friendly tools',
       search: 'Use GET /api/search?q=your+query for semantic search',
       submit: 'Use POST /api/tools/submit to add a new tool',
-      guide: 'Read https://agentdex.dev/agent.md for full agent usage guide',
+      guide: 'Read https://www.agentdex.top/agent.md for full agent usage guide',
     }
   }, {
     headers: {

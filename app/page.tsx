@@ -41,7 +41,7 @@ export default async function HomePage({
           not adapted from human tools.
         </p>
         <p className="text-sm text-blue-600 font-mono">
-          GET https://agentdex-lovat.vercel.app/api/tools — machine-readable, agent-friendly
+          GET https://www.agentdex.top/api/tools — machine-readable, agent-friendly
         </p>
       </div>
 

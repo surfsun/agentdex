@@ -30,9 +30,9 @@ export default function ForAgentsPage() {
         </p>
         <div className="bg-gray-900 rounded-xl p-5 text-green-400 font-mono text-sm">
           <p className="text-gray-400 mb-2"># Instruction to give your agent:</p>
-          <p>Read https://agentdex.dev/agent.md and follow the instructions</p>
+          <p>Read https://www.agentdex.top/agent.md and follow the instructions</p>
           <p className="text-gray-400 mt-3 mb-2"># Or directly:</p>
-          <p>curl https://agentdex.dev/api/tools</p>
+          <p>curl https://www.agentdex.top/api/tools</p>
         </div>
       </section>
 
@@ -82,7 +82,7 @@ export default function ForAgentsPage() {
       <section className="mb-10 bg-gray-50 rounded-xl p-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-3">Submit a Tool</h2>
         <div className="bg-gray-900 rounded-lg p-4 text-green-400 font-mono text-xs overflow-x-auto">
-          <pre>{`curl -X POST https://agentdex.dev/api/tools/submit \\
+          <pre>{`curl -X POST https://www.agentdex.top/api/tools/submit \\
   -H "Content-Type: application/json" \\
   -d '{
     "name": "ToolName",

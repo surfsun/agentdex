@@ -8,14 +8,14 @@ AgentDex is a directory of tools built specifically for AI agents. If you need a
 
 ## For Humans
 
-Visit the website at https://agentdex.dev (coming soon) to browse tools by category.
+Visit the website at https://www.agentdex.top (coming soon) to browse tools by category.
 
 ## For AI Agents
 
-Read the machine-readable guide at `https://agentdex.dev/agent.md` or call the API directly:
+Read the machine-readable guide at `https://www.agentdex.top/agent.md` or call the API directly:
 
 ```bash
-curl https://agentdex.dev/api/tools
+curl https://www.agentdex.top/api/tools
 ```
 
 ## Tech Stack
