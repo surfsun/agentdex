@@ -7,17 +7,18 @@ export async function GET(request: Request) {
   const category = searchParams.get('category')
 
   // 基于任务关键词推荐工具
+  // 注意：关键词映射到实际的分类 ID（如 'web' 而不是 'scraping'）
   const taskKeywords: Record<string, string[]> = {
     memory: ['remember', 'memory', 'store', 'persist', 'context', 'recall'],
-    scraping: ['scrape', 'crawl', 'extract', 'web', 'html', 'parse'],
-    email: ['email', 'mail', 'send', 'inbox'],
-    code: ['code', 'execute', 'run', 'python', 'javascript', 'sandbox'],
-    integration: ['integrate', 'connect', 'api', 'tool', 'automation'],
-    framework: ['build', 'create', 'agent', 'framework', 'develop'],
+    web: ['scrape', 'crawl', 'extract', 'web', 'html', 'parse', 'browser', 'website'],
+    communication: ['email', 'mail', 'send', 'inbox'],
+    execution: ['code', 'execute', 'run', 'python', 'javascript', 'sandbox', 'serverless'],
+    integration: ['integrate', 'connect', 'api', 'tool', 'automation', 'workflow'],
+    framework: ['build', 'create', 'agent', 'framework', 'develop', 'llm'],
     social: ['social', 'post', 'community', 'network'],
     observability: ['debug', 'trace', 'monitor', 'log', 'observe'],
     security: ['security', 'validate', 'guard', 'protect', 'safety'],
-    payment: ['pay', 'payment', 'transaction', 'money', 'usdc'],
+    payment: ['pay', 'payment', 'transaction', 'money', 'usdc', 'micropayment'],
   }
 
   // 如果指定了任务，基于任务推荐
