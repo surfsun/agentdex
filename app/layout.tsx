@@ -7,11 +7,17 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'AgentDex — The tool directory built for AI agents',
-  description: 'Discover tools built specifically for AI agents: communication, memory, web scraping, execution, identity and more.',
+  description: 'Discover tools built specifically for AI agents: communication, memory, web scraping, code execution, integration and more.',
   keywords: 'AI agents, agent tools, LLM tools, agent infrastructure',
+  alternates: {
+    canonical: 'https://www.agentdex.top',
+    types: {
+      'application/rss+xml': 'https://www.agentdex.top/feed.xml',
+    },
+  },
   openGraph: {
     title: 'AgentDex — The tool directory built for AI agents',
-    description: 'Discover tools built specifically for AI agents: communication, memory, web scraping, execution, identity and more.',
+    description: 'Discover tools built specifically for AI agents: communication, memory, web scraping, code execution, integration and more.',
     url: 'https://www.agentdex.top',
     siteName: 'AgentDex',
     type: 'website',
@@ -28,9 +34,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AgentDex — The tool directory built for AI agents',
     description: 'Discover tools built specifically for AI agents',
-  },
-  alternates: {
-    canonical: 'https://www.agentdex.top',
+    images: ['https://www.agentdex.top/og-image.svg'],
   },
 }
 
