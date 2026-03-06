@@ -8,8 +8,10 @@ export default function ToolCard({ tool }: { tool: Tool }) {
   }[tool.pricing]
 
   return (
-    <div className="border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-sm transition-all bg-white">
-
+    <a
+      href={`/tools/${tool.slug}`}
+      className="block border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-sm transition-all bg-white"
+    >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div>
@@ -47,27 +49,10 @@ export default function ToolCard({ tool }: { tool: Tool }) {
         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pricingColor}`}>
           {tool.pricing}
         </span>
-        <div className="flex gap-2">
-          {tool.github && (
-            <a
-              href={tool.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-gray-400 hover:text-gray-600"
-            >
-              GitHub
-            </a>
-          )}
-          <a
-            href={tool.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-blue-500 hover:text-blue-700 font-medium"
-          >
-            Visit →
-          </a>
-        </div>
+        <span className="text-xs text-blue-500 font-medium">
+          View details →
+        </span>
       </div>
-    </div>
+    </a>
   )
 }

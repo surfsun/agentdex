@@ -40,9 +40,16 @@ export default async function HomePage({
           Discover infrastructure tools designed specifically for AI agents —
           not adapted from human tools.
         </p>
-        <p className="text-sm text-blue-600 font-mono">
+        <p className="text-sm text-blue-600 font-mono mb-3">
           GET https://www.agentdex.top/api/tools — machine-readable, agent-friendly
         </p>
+        {/* Agent 入口 */}
+        <a
+          href="/agent.md"
+          className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-purple-200 transition"
+        >
+          🤖 Agent? Read /agent.md
+        </a>
       </div>
 
       {/* Search */}

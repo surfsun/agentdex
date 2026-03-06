@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
-// 提交的工具会发到 GitHub Issue 或邮件，人工审核后合并
-// 初期不自动写入 tools.json，避免垃圾数据
+// GitHub API 配置
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN
+const GITHUB_REPO = 'surfsun/agentdex'
 
 export async function POST(request: Request) {
   try {
@@ -32,24 +33,82 @@ export async function POST(request: Request) {
       )
     }
 
+    // 构建 Issue 内容
+    const issueTitle = `[Tool Submission] ${body.name}`
+    const issueBody = `## Tool Submission
+
+**Name:** ${body.name}
+**Website:** ${body.website}
+**Category:** ${body.category}
+**Tagline:** ${body.tagline}
+
+${body.description ? `**Description:**\n${body.description}` : ''}
+
+${body.github ? `**GitHub:** ${body.github}` : ''}
+
+${body.tags ? `**Tags:** ${body.tags.join(', ')}` : ''}
+
+**Pricing:** ${body.pricing || 'unknown'}
+**Agent-friendly:** ${body.agent_friendly ? 'Yes' : 'No'}
+**API available:** ${body.api_available ? 'Yes' : 'No'}
+**Open source:** ${body.open_source ? 'Yes' : 'No'}
+
+---
+*Submitted via API at ${new Date().toISOString()}*`
+
+    // 如果有 GitHub Token，创建 Issue
+    let issueUrl = null
+    if (GITHUB_TOKEN) {
+      try {
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/issues`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+            'User-Agent': 'AgentDex/1.0',
+          },
+          body: JSON.stringify({
+            title: issueTitle,
+            body: issueBody,
+            labels: ['tool-submission'],
+          }),
+        })
+
+        if (response.ok) {
+          const issue = await response.json()
+          issueUrl = issue.html_url
+        } else {
+          console.error('[AgentDex] GitHub API error:', await response.text())
+        }
+      } catch (err) {
+        console.error('[AgentDex] Failed to create GitHub issue:', err)
+      }
+    }
+
     // 构建提交记录
     const submission = {
       ...body,
       submitted_at: new Date().toISOString(),
       submitted_by: 'agent',
       status: 'pending_review',
+      issue_url: issueUrl,
     }
 
-    // TODO: 后续接入 GitHub API 自动创建 Issue
-    // 现在先记录到日志（Vercel Function Logs 可查看）
+    // 记录到日志（Vercel Function Logs 可查看）
     console.log('[AgentDex Submission]', JSON.stringify(submission))
 
     return NextResponse.json({
       success: true,
-      message: 'Tool submission received. It will be reviewed and added within 48 hours.',
+      message: issueUrl 
+        ? 'Tool submission received. A GitHub issue has been created for review.'
+        : 'Tool submission received. It will be reviewed and added within 48 hours.',
       submission_id: `sub_${Date.now()}`,
+      issue_url: issueUrl,
       submitted: submission,
-      _note: 'Submissions are manually reviewed before being added to the directory.',
+      _note: issueUrl 
+        ? 'Track your submission at the issue URL above.'
+        : 'Submissions are manually reviewed before being added to the directory.',
     }, {
       headers: { 'Access-Control-Allow-Origin': '*' }
     })
