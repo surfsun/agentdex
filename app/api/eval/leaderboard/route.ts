@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const SESSIONS_DIR = path.join(process.cwd(), 'data/eval/sessions');
+import { supabaseAdmin } from '@/lib/supabase';
 
 interface LeaderboardEntry {
   rank: number;
@@ -28,44 +25,37 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const framework = searchParams.get('framework');
+    const entries: LeaderboardEntry[] = [];
+    let query = supabaseAdmin
+      .from('eval_sessions')
+      .select('agent_info, answers, questions, level, completed_at, created_at')
+      .eq('status', 'completed');
 
-    // 扫描 sessions 目录
-    if (!fs.existsSync(SESSIONS_DIR)) {
-      return NextResponse.json({ entries: [], total: 0 });
+    if (framework) {
+      query = query.filter('agent_info->>framework', 'eq', framework);
     }
 
-    const files = fs.readdirSync(SESSIONS_DIR).filter(f => f.endsWith('.json'));
-    const entries: LeaderboardEntry[] = [];
+    const { data: sessions, error } = await query;
 
-    for (const file of files) {
-      try {
-        const content = fs.readFileSync(path.join(SESSIONS_DIR, file), 'utf-8');
-        const session = JSON.parse(content);
+    if (error) {
+      throw error;
+    }
 
-        // 只统计已完成的评测
-        if (session.status !== 'completed') continue;
+    for (const session of sessions || []) {
+      const answers = Array.isArray(session.answers) ? session.answers : [];
+      const questionCount = Array.isArray(session.questions) ? session.questions.length : 0;
+      const sumScore = answers.reduce((sum: number, answer: any) => sum + (Number(answer?.score) || 0), 0);
+      const avgScore = questionCount > 0 ? sumScore / questionCount : 0;
 
-        // 框架筛选
-        if (framework && session.agent_info?.framework !== framework) continue;
-
-        // 计算总分
-        const totalScore = session.answers?.reduce((sum: number, a: any) => sum + (a.score || 0), 0) || 0;
-        const avgScore = session.answers?.length > 0 
-          ? Math.round(totalScore / session.answers.length) 
-          : 0;
-
-        entries.push({
-          rank: 0,
-          agent_name: sanitize(session.agent_info?.name || 'Anonymous'),
-          agent_framework: session.agent_info?.framework || 'unknown',
-          model: session.agent_info?.model || 'unknown',
-          total_score: avgScore,
-          level: session.level || 'Basic',
-          eval_date: session.completed_at || session.created_at,
-        });
-      } catch {
-        // 跳过无效文件
-      }
+      entries.push({
+        rank: 0,
+        agent_name: sanitize(session.agent_info?.name || 'Anonymous'),
+        agent_framework: session.agent_info?.framework || 'unknown',
+        model: session.agent_info?.model || 'unknown',
+        total_score: avgScore,
+        level: session.level || 'Basic',
+        eval_date: session.completed_at || session.created_at,
+      });
     }
 
     // 按分数排序
