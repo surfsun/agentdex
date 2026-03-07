@@ -1,22 +1,19 @@
 /**
  * AgentDex Eval - Session Management
- * 评测会话管理模块
+ * 评测会话管理模块 - Supabase 版本
  */
 
 import { randomUUID } from 'crypto';
-import { mkdir, readFile, writeFile, access } from 'fs/promises';
-import { join } from 'path';
+import { supabaseAdmin } from '@/lib/supabase';
 import {
   EvalSession,
   EvalMode,
   AgentInfo,
-  SessionStatus,
   AnswerRecord,
   SessionEvent,
   Dimension,
   QuestionBank,
   Question,
-  DynamicAnswers,
 } from './types';
 
 // 直接导入内联题库数据（解决 Vercel 部署路径问题）
@@ -24,26 +21,10 @@ import { questionBankData } from './questions';
 
 // ==================== 常量配置 ====================
 
-const SESSION_DIR = join(process.cwd(), 'data', 'eval', 'sessions');
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-// ==================== 内存存储 ====================
-
-const sessions = new Map<string, EvalSession>();
 const questionBank: QuestionBank = questionBankData as unknown as QuestionBank;
 
 // ==================== 工具函数 ====================
-
-/**
- * 确保会话目录存在
- */
-async function ensureSessionDir(): Promise<void> {
-  try {
-    await access(SESSION_DIR);
-  } catch {
-    await mkdir(SESSION_DIR, { recursive: true });
-  }
-}
 
 /**
  * 加载题库
@@ -92,37 +73,6 @@ function generateWatchUrl(sessionId: string): string {
   return `${baseUrl}/eval/live/${sessionId}`;
 }
 
-// ==================== 持久化函数 ====================
-
-/**
- * 获取会话文件路径
- */
-function getSessionFilePath(sessionId: string): string {
-  return join(SESSION_DIR, `${sessionId}.json`);
-}
-
-/**
- * 保存会话到文件
- */
-async function persistSession(session: EvalSession): Promise<void> {
-  await ensureSessionDir();
-  const filePath = getSessionFilePath(session.id);
-  await writeFile(filePath, JSON.stringify(session, null, 2), 'utf-8');
-}
-
-/**
- * 从文件加载会话
- */
-async function loadSessionFromFile(sessionId: string): Promise<EvalSession | null> {
-  try {
-    const filePath = getSessionFilePath(sessionId);
-    const content = await readFile(filePath, 'utf-8');
-    return JSON.parse(content) as EvalSession;
-  } catch {
-    return null;
-  }
-}
-
 // ==================== 主要 API 函数 ====================
 
 /**
@@ -165,9 +115,29 @@ export async function createSession(
     data: { question_id: session.questions[0], index: 0 },
   });
 
-  // 存储到内存和文件
-  sessions.set(sessionId, session);
-  await persistSession(session);
+  // 写入 Supabase
+  const { error } = await supabaseAdmin
+    .from('eval_sessions')
+    .insert({
+      id: session.id,
+      mode: session.mode,
+      agent_info: session.agent_info,
+      status: session.status,
+      questions: session.questions,
+      current_question_index: session.current_question_index,
+      current_round: session.current_round,
+      answers: session.answers,
+      events: session.events,
+      dynamic_answers: session.dynamic_answers || {},
+      created_at: session.created_at,
+      expires_at: session.expires_at,
+      watch_url: session.watch_url,
+    });
+
+  if (error) {
+    console.error('[Eval] Failed to create session in Supabase:', error);
+    throw error;
+  }
 
   return session;
 }
@@ -176,29 +146,30 @@ export async function createSession(
  * 获取会话
  */
 export async function getSession(sessionId: string): Promise<EvalSession | null> {
-  // 先从内存获取
-  let session: EvalSession | null | undefined = sessions.get(sessionId) ?? null;
+  const { data, error } = await supabaseAdmin
+    .from('eval_sessions')
+    .select('*')
+    .eq('id', sessionId)
+    .single();
 
-  if (!session) {
-    // 从文件加载
-    session = await loadSessionFromFile(sessionId);
-    if (session) {
-      sessions.set(sessionId, session);
-    }
+  if (error || !data) {
+    return null;
   }
 
   // 检查是否过期
-  if (session && new Date(session.expires_at) < new Date()) {
-    session.status = 'expired';
-    session.events.push({
-      timestamp: new Date().toISOString(),
-      type: 'expired',
-      data: { reason: 'session_expired' },
-    });
-    await persistSession(session);
+  if (new Date(data.expires_at) < new Date()) {
+    await supabaseAdmin
+      .from('eval_sessions')
+      .update({ status: 'expired' })
+      .eq('id', sessionId);
+
+    return {
+      ...data,
+      status: 'expired',
+    } as EvalSession;
   }
 
-  return session ?? null;
+  return data as EvalSession;
 }
 
 /**
@@ -213,11 +184,19 @@ export async function updateSession(
     return null;
   }
 
-  const updated = { ...session, ...updates };
-  sessions.set(sessionId, updated);
-  await persistSession(updated);
+  const { error } = await supabaseAdmin
+    .from('eval_sessions')
+    .update({
+      ...updates,
+    })
+    .eq('id', sessionId);
 
-  return updated;
+  if (error) {
+    console.error('[Eval] Failed to update session:', error);
+    return null;
+  }
+
+  return getSession(sessionId);
 }
 
 /**
@@ -234,23 +213,27 @@ export async function addAnswer(
 
   const updatedAnswers = [...session.answers, answer];
 
-  const updated = {
-    ...session,
-    answers: updatedAnswers,
-    events: [
-      ...session.events,
-      {
-        timestamp: new Date().toISOString(),
-        type: 'answer_received' as const,
-        data: { question_id: answer.question_id, round: answer.round },
-      },
-    ],
-  };
+  const { error } = await supabaseAdmin
+    .from('eval_sessions')
+    .update({
+      answers: updatedAnswers,
+      events: [
+        ...session.events,
+        {
+          timestamp: new Date().toISOString(),
+          type: 'answer_received',
+          data: { question_id: answer.question_id, round: answer.round },
+        },
+      ],
+    })
+    .eq('id', sessionId);
 
-  sessions.set(sessionId, updated);
-  await persistSession(updated);
+  if (error) {
+    console.error('[Eval] Failed to add answer:', error);
+    return null;
+  }
 
-  return updated;
+  return getSession(sessionId);
 }
 
 /**
@@ -272,15 +255,19 @@ export async function addEvent(
     data,
   };
 
-  const updated = {
-    ...session,
-    events: [...session.events, event],
-  };
+  const { error } = await supabaseAdmin
+    .from('eval_sessions')
+    .update({
+      events: [...session.events, event],
+    })
+    .eq('id', sessionId);
 
-  sessions.set(sessionId, updated);
-  await persistSession(updated);
+  if (error) {
+    console.error('[Eval] Failed to add event:', error);
+    return null;
+  }
 
-  return updated;
+  return getSession(sessionId);
 }
 
 /**
@@ -298,45 +285,54 @@ export async function moveToNextQuestion(
 
   if (nextIndex >= session.questions.length) {
     // 评测完成
-    const completed = {
-      ...session,
-      status: 'completed' as const,
-      completed_at: new Date().toISOString(),
-      events: [
-        ...session.events,
-        {
-          timestamp: new Date().toISOString(),
-          type: 'completed' as const,
-          data: { total_questions: session.questions.length },
-        },
-      ],
-    };
+    const { error } = await supabaseAdmin
+      .from('eval_sessions')
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        events: [
+          ...session.events,
+          {
+            timestamp: new Date().toISOString(),
+            type: 'completed',
+            data: { total_questions: session.questions.length },
+          },
+        ],
+      })
+      .eq('id', sessionId);
 
-    sessions.set(sessionId, completed);
-    await persistSession(completed);
+    if (error) {
+      console.error('[Eval] Failed to complete session:', error);
+    }
 
+    const completed = await getSession(sessionId);
     return { session: completed, completed: true };
   }
 
   // 移动到下一题
-  const updated = {
-    ...session,
-    current_question_index: nextIndex,
-    current_round: 1,
-    events: [
-      ...session.events,
-      {
-        timestamp: new Date().toISOString(),
-        type: 'question_sent' as const,
-        data: { question_id: session.questions[nextIndex], index: nextIndex },
-      },
-    ],
-  };
+  const { error } = await supabaseAdmin
+    .from('eval_sessions')
+    .update({
+      current_question_index: nextIndex,
+      current_round: 1,
+      events: [
+        ...session.events,
+        {
+          timestamp: new Date().toISOString(),
+          type: 'question_sent',
+          data: { question_id: session.questions[nextIndex], index: nextIndex },
+        },
+      ],
+    })
+    .eq('id', sessionId);
 
-  sessions.set(sessionId, updated);
-  await persistSession(updated);
+  if (error) {
+    console.error('[Eval] Failed to move to next question:', error);
+    return { session: null, completed: false };
+  }
 
-  return { session: updated ?? null, completed: false };
+  const updated = await getSession(sessionId);
+  return { session: updated, completed: false };
 }
 
 /**
@@ -346,43 +342,39 @@ export async function updateRound(
   sessionId: string,
   round: number
 ): Promise<EvalSession | null> {
-  const session = await getSession(sessionId);
-  if (!session) {
+  const { error } = await supabaseAdmin
+    .from('eval_sessions')
+    .update({ current_round: round })
+    .eq('id', sessionId);
+
+  if (error) {
+    console.error('[Eval] Failed to update round:', error);
     return null;
   }
 
-  const updated = {
-    ...session,
-    current_round: round,
-  };
-
-  sessions.set(sessionId, updated);
-  await persistSession(updated);
-
-  return updated;
+  return getSession(sessionId);
 }
 
 /**
  * 清理过期会话
  */
 export async function expireSessions(): Promise<number> {
-  let expiredCount = 0;
-  const now = new Date();
+  const now = new Date().toISOString();
 
-  for (const [sessionId, session] of sessions) {
-    if (new Date(session.expires_at) < now && session.status !== 'expired') {
-      session.status = 'expired';
-      session.events.push({
-        timestamp: now.toISOString(),
-        type: 'expired',
-        data: { reason: 'cleanup' },
-      });
-      await persistSession(session);
-      expiredCount++;
-    }
+  const { data, error } = await supabaseAdmin
+    .from('eval_sessions')
+    .update({ status: 'expired' })
+    .lt('expires_at', now)
+    .neq('status', 'expired')
+    .neq('status', 'completed')
+    .select('id');
+
+  if (error) {
+    console.error('[Eval] Failed to expire sessions:', error);
+    return 0;
   }
 
-  return expiredCount;
+  return data?.length || 0;
 }
 
 /**
@@ -412,21 +404,25 @@ export async function failSession(
     return null;
   }
 
-  const updated = {
-    ...session,
-    status: 'failed' as const,
-    events: [
-      ...session.events,
-      {
-        timestamp: new Date().toISOString(),
-        type: 'error' as const,
-        data: { reason },
-      },
-    ],
-  };
+  const { error } = await supabaseAdmin
+    .from('eval_sessions')
+    .update({
+      status: 'failed',
+      events: [
+        ...session.events,
+        {
+          timestamp: new Date().toISOString(),
+          type: 'error',
+          data: { reason },
+        },
+      ],
+    })
+    .eq('id', sessionId);
 
-  sessions.set(sessionId, updated);
-  await persistSession(updated);
+  if (error) {
+    console.error('[Eval] Failed to mark session as failed:', error);
+    return null;
+  }
 
-  return updated;
+  return getSession(sessionId);
 }

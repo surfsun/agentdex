@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
 
 // GitHub API 配置
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
@@ -33,9 +34,44 @@ export async function POST(request: Request) {
       )
     }
 
-    // 构建 Issue 内容
-    const issueTitle = `[Tool Submission] ${body.name}`
-    const issueBody = `## Tool Submission
+    // 防重复：同一 website 24 小时内只能提交一次
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    const { data: existing } = await supabaseAdmin
+      .from('tool_submissions')
+      .select('id')
+      .eq('tool_data->>website', body.website)
+      .gte('created_at', oneDayAgo)
+      .limit(1)
+
+    if (existing && existing.length > 0) {
+      return NextResponse.json(
+        { error: 'This tool was already submitted recently' },
+        { status: 429 }
+      )
+    }
+
+    // 写入 Supabase 审核队列
+    const { data: submission, error: dbError } = await supabaseAdmin
+      .from('tool_submissions')
+      .insert({
+        tool_data: body,
+        submitted_by: body.submitted_by ?? 'anonymous',
+        status: 'pending'
+      })
+      .select('id')
+      .single()
+
+    if (dbError) {
+      console.error('[AgentDex] Supabase insert error:', dbError)
+      // 继续处理，不阻断流程
+    }
+
+    // 如果有 GitHub Token，创建 Issue
+    let issueUrl = null
+    if (GITHUB_TOKEN) {
+      try {
+        const issueTitle = `[Tool Submission] ${body.name}`
+        const issueBody = `## Tool Submission
 
 **Name:** ${body.name}
 **Website:** ${body.website}
@@ -54,12 +90,9 @@ ${body.tags ? `**Tags:** ${body.tags.join(', ')}` : ''}
 **Open source:** ${body.open_source ? 'Yes' : 'No'}
 
 ---
-*Submitted via API at ${new Date().toISOString()}*`
+*Submitted via API at ${new Date().toISOString()}*
+Submission ID: ${submission?.id || 'N/A'}`
 
-    // 如果有 GitHub Token，创建 Issue
-    let issueUrl = null
-    if (GITHUB_TOKEN) {
-      try {
         const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/issues`, {
           method: 'POST',
           headers: {
@@ -86,27 +119,14 @@ ${body.tags ? `**Tags:** ${body.tags.join(', ')}` : ''}
       }
     }
 
-    // 构建提交记录
-    const submission = {
-      ...body,
-      submitted_at: new Date().toISOString(),
-      submitted_by: 'agent',
-      status: 'pending_review',
-      issue_url: issueUrl,
-    }
-
-    // 记录到日志（Vercel Function Logs 可查看）
-    console.log('[AgentDex Submission]', JSON.stringify(submission))
-
     return NextResponse.json({
       success: true,
-      message: issueUrl 
+      message: issueUrl
         ? 'Tool submission received. A GitHub issue has been created for review.'
         : 'Tool submission received. It will be reviewed and added within 48 hours.',
-      submission_id: `sub_${Date.now()}`,
+      submission_id: submission?.id || `sub_${Date.now()}`,
       issue_url: issueUrl,
-      submitted: submission,
-      _note: issueUrl 
+      _note: issueUrl
         ? 'Track your submission at the issue URL above.'
         : 'Submissions are manually reviewed before being added to the directory.',
     }, {
@@ -114,6 +134,7 @@ ${body.tags ? `**Tags:** ${body.tags.join(', ')}` : ''}
     })
 
   } catch (error) {
+    console.error('[AgentDex] Submit error:', error)
     return NextResponse.json(
       { success: false, error: 'Invalid JSON body' },
       { status: 400 }

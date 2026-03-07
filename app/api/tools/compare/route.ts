@@ -1,96 +1,208 @@
 import { NextResponse } from 'next/server'
-import { tools, categories } from '@/lib/tools'
+import { supabase } from '@/lib/supabase'
+import { tools as fallbackTools, categories } from '@/lib/tools'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const category = searchParams.get('category')
   const slugs = searchParams.get('slugs')?.split(',').filter(Boolean)
 
-  // 如果指定了具体工具，对比这些工具
-  if (slugs && slugs.length >= 2) {
-    const selectedTools = tools.filter(t => slugs.includes(t.slug))
-    
-    if (selectedTools.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'No tools found with the given slugs' },
-        { status: 404 }
-      )
+  try {
+    // 如果指定了具体工具，对比这些工具
+    if (slugs && slugs.length >= 2) {
+      const { data, error } = await supabase
+        .from('tools')
+        .select('*')
+        .in('slug', slugs)
+        .eq('status', 'active')
+
+      if (error) throw error
+
+      const selectedTools = data || []
+
+      if (selectedTools.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'No tools found with the given slugs' },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        count: selectedTools.length,
+        comparison: selectedTools.map(t => ({
+          name: t.name,
+          slug: t.slug,
+          category: t.category,
+          pricing: t.pricing,
+          agent_friendly: t.agent_friendly,
+          api_available: t.api_available,
+          open_source: t.open_source,
+          tags: t.tags,
+          tagline: t.tagline,
+          website: t.website,
+          github: t.github,
+        })),
+        matrix: buildComparisonMatrix(selectedTools),
+      })
     }
+
+    // 如果指定了分类，对比该分类下的所有工具
+    if (category) {
+      const { data, error } = await supabase
+        .from('tools')
+        .select('*')
+        .eq('category', category)
+        .eq('status', 'active')
+
+      if (error) throw error
+
+      const categoryTools = data || []
+
+      if (categoryTools.length === 0) {
+        return NextResponse.json(
+          { success: false, error: `No tools found in category: ${category}` },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        category,
+        category_name: categories.find(c => c.id === category)?.label || category,
+        count: categoryTools.length,
+        comparison: categoryTools.map(t => ({
+          name: t.name,
+          slug: t.slug,
+          pricing: t.pricing,
+          agent_friendly: t.agent_friendly,
+          api_available: t.api_available,
+          open_source: t.open_source,
+          tags: t.tags,
+          tagline: t.tagline,
+        })),
+        matrix: buildComparisonMatrix(categoryTools),
+        recommendation: getRecommendation(categoryTools),
+      })
+    }
+
+    // 返回所有分类的工具数量
+    const { data: allTools, error } = await supabase
+      .from('tools')
+      .select('category, agent_friendly')
+      .eq('status', 'active')
+
+    if (error) throw error
+
+    const categoryStats = categories
+      .filter(c => c.id !== 'all')
+      .map(c => {
+        const categoryTools = (allTools || []).filter(t => t.category === c.id)
+        return {
+          id: c.id,
+          label: c.label,
+          tool_count: categoryTools.length,
+          agent_friendly_count: categoryTools.filter(t => t.agent_friendly).length,
+        }
+      })
+      .filter(c => c.tool_count > 0)
 
     return NextResponse.json({
       success: true,
-      count: selectedTools.length,
-      comparison: selectedTools.map(t => ({
-        name: t.name,
-        slug: t.slug,
-        category: t.category,
-        pricing: t.pricing,
-        agent_friendly: t.agent_friendly,
-        api_available: t.api_available,
-        open_source: t.open_source,
-        tags: t.tags,
-        tagline: t.tagline,
-        website: t.website,
-        github: t.github,
-      })),
-      matrix: buildComparisonMatrix(selectedTools),
+      message: 'Compare tools by category or by specific slugs',
+      usage: {
+        by_category: 'GET /api/tools/compare?category=memory',
+        by_slugs: 'GET /api/tools/compare?slugs=mem0,zep,letta',
+      },
+      categories: categoryStats,
     })
-  }
+  } catch (error) {
+    // Fallback 到 JSON 文件
+    console.error('[API /tools/compare] Supabase error, falling back to JSON:', error)
 
-  // 如果指定了分类，对比该分类下的所有工具
-  if (category) {
-    const categoryTools = tools.filter(t => t.category === category)
-    
-    if (categoryTools.length === 0) {
-      return NextResponse.json(
-        { success: false, error: `No tools found in category: ${category}` },
-        { status: 404 }
-      )
+    if (slugs && slugs.length >= 2) {
+      const selectedTools = fallbackTools.filter(t => slugs.includes(t.slug))
+
+      if (selectedTools.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'No tools found with the given slugs' },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        count: selectedTools.length,
+        comparison: selectedTools.map(t => ({
+          name: t.name,
+          slug: t.slug,
+          category: t.category,
+          pricing: t.pricing,
+          agent_friendly: t.agent_friendly,
+          api_available: t.api_available,
+          open_source: t.open_source,
+          tags: t.tags,
+          tagline: t.tagline,
+          website: t.website,
+          github: t.github,
+        })),
+        matrix: buildComparisonMatrix(selectedTools),
+      })
     }
+
+    if (category) {
+      const categoryTools = fallbackTools.filter(t => t.category === category)
+
+      if (categoryTools.length === 0) {
+        return NextResponse.json(
+          { success: false, error: `No tools found in category: ${category}` },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        category,
+        category_name: categories.find(c => c.id === category)?.label || category,
+        count: categoryTools.length,
+        comparison: categoryTools.map(t => ({
+          name: t.name,
+          slug: t.slug,
+          pricing: t.pricing,
+          agent_friendly: t.agent_friendly,
+          api_available: t.api_available,
+          open_source: t.open_source,
+          tags: t.tags,
+          tagline: t.tagline,
+        })),
+        matrix: buildComparisonMatrix(categoryTools),
+        recommendation: getRecommendation(categoryTools),
+      })
+    }
+
+    const categoryStats = categories
+      .filter(c => c.id !== 'all')
+      .map(c => ({
+        id: c.id,
+        label: c.label,
+        tool_count: fallbackTools.filter(t => t.category === c.id).length,
+        agent_friendly_count: fallbackTools.filter(t => t.category === c.id && t.agent_friendly).length,
+      }))
+      .filter(c => c.tool_count > 0)
 
     return NextResponse.json({
       success: true,
-      category,
-      category_name: categories.find(c => c.id === category)?.label || category,
-      count: categoryTools.length,
-      comparison: categoryTools.map(t => ({
-        name: t.name,
-        slug: t.slug,
-        pricing: t.pricing,
-        agent_friendly: t.agent_friendly,
-        api_available: t.api_available,
-        open_source: t.open_source,
-        tags: t.tags,
-        tagline: t.tagline,
-      })),
-      matrix: buildComparisonMatrix(categoryTools),
-      recommendation: getRecommendation(categoryTools),
+      message: 'Compare tools by category or by specific slugs',
+      usage: {
+        by_category: 'GET /api/tools/compare?category=memory',
+        by_slugs: 'GET /api/tools/compare?slugs=mem0,zep,letta',
+      },
+      categories: categoryStats,
     })
   }
-
-  // 返回所有分类的工具数量
-  const categoryStats = categories
-    .filter(c => c.id !== 'all')
-    .map(c => ({
-      id: c.id,
-      label: c.label,
-      tool_count: tools.filter(t => t.category === c.id).length,
-      agent_friendly_count: tools.filter(t => t.category === c.id && t.agent_friendly).length,
-    }))
-    .filter(c => c.tool_count > 0)
-
-  return NextResponse.json({
-    success: true,
-    message: 'Compare tools by category or by specific slugs',
-    usage: {
-      by_category: 'GET /api/tools/compare?category=memory',
-      by_slugs: 'GET /api/tools/compare?slugs=mem0,zep,letta',
-    },
-    categories: categoryStats,
-  })
 }
 
-function buildComparisonMatrix(toolsList: typeof tools) {
+function buildComparisonMatrix(toolsList: any[]) {
   const features = [
     { key: 'agent_friendly', label: 'Agent-friendly', type: 'boolean' },
     { key: 'api_available', label: 'API Available', type: 'boolean' },
@@ -111,8 +223,7 @@ function buildComparisonMatrix(toolsList: typeof tools) {
   }
 }
 
-function getRecommendation(toolsList: typeof tools) {
-  // 如果只有一个工具，直接推荐
+function getRecommendation(toolsList: any[]) {
   if (toolsList.length === 1) {
     return {
       top_pick: toolsList[0].name,
@@ -120,7 +231,6 @@ function getRecommendation(toolsList: typeof tools) {
     }
   }
 
-  // 按评分排序
   const scored = toolsList.map(t => {
     let score = 0
     if (t.agent_friendly) score += 3
@@ -133,7 +243,7 @@ function getRecommendation(toolsList: typeof tools) {
   }).sort((a, b) => b.score - a.score)
 
   const top = scored[0]
-  
+
   const reasons = []
   if (top.tool.agent_friendly) reasons.push('agent-friendly')
   if (top.tool.api_available) reasons.push('has API')
