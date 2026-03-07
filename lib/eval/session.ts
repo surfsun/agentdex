@@ -19,16 +19,19 @@ import {
   DynamicAnswers,
 } from './types';
 
+// 直接导入题库（解决 Vercel 部署路径问题）
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const questionBankData = require('@/data/eval/questions.json');
+
 // ==================== 常量配置 ====================
 
 const SESSION_DIR = join(process.cwd(), 'data', 'eval', 'sessions');
-const QUESTIONS_FILE = join(process.cwd(), 'data', 'eval', 'questions.json');
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // ==================== 内存存储 ====================
 
 const sessions = new Map<string, EvalSession>();
-let questionBank: QuestionBank | null = null;
+const questionBank: QuestionBank = questionBankData as unknown as QuestionBank;
 
 // ==================== 工具函数 ====================
 
@@ -47,18 +50,7 @@ async function ensureSessionDir(): Promise<void> {
  * 加载题库
  */
 async function loadQuestionBank(): Promise<QuestionBank> {
-  if (questionBank) {
-    return questionBank;
-  }
-
-  try {
-    const content = await readFile(QUESTIONS_FILE, 'utf-8');
-    questionBank = JSON.parse(content) as QuestionBank;
-    return questionBank!;
-  } catch (error) {
-    console.error('Failed to load question bank:', error);
-    throw new Error('Question bank not found. Please ensure data/eval/questions.json exists.');
-  }
+  return questionBank;
 }
 
 /**
