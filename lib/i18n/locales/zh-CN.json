@@ -5,6 +5,7 @@
   },
   "nav": {
     "forAgents": "For Agents",
+    "eval": "评测",
     "api": "API",
     "github": "GitHub"
   },

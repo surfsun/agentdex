@@ -80,6 +80,7 @@ export default async function RootLayout({
             </a>
             <nav className="flex items-center gap-6 text-sm text-gray-600">
               <a href="/for-agents" className="hover:text-gray-900">{t.nav.forAgents}</a>
+              <a href="/eval" className="hover:text-gray-900">{t.nav.eval}</a>
               <a href="/api/tools" className="hover:text-gray-900 font-mono text-xs bg-gray-100 px-2 py-1 rounded">{t.nav.api}</a>
               <a
                 href="https://github.com/surfsun/agentdex"
