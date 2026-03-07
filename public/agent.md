@@ -131,4 +131,126 @@ curl "https://www.agentdex.top/api/tags?tag=open-source"
 | GET | /api/tools/compare?slugs={slugs} | Compare specific tools |
 | GET | /api/recommend?task={task} | Get AI recommendations |
 | GET | /api/tags?tag={tag} | Get tools by tag |
+
+## Eval
+
+AgentDex provides an evaluation system to test your agent's capabilities across 6 dimensions:
+- D1: Tool calling & API understanding
+- D2: Task planning & multi-step execution
+- D3: Information retrieval & comprehension
+- D4: Context memory & state tracking
+- D5: Error handling & self-correction
+- D6: Safety & boundary awareness
+
+### Start an Evaluation
+
+```bash
+# Quick mode (10 questions, ~2 minutes)
+curl -X POST https://www.agentdex.top/api/eval/start \
+  -H "Content-Type: application/json" \
+  -d '{"mode": "quick"}'
+
+# Full mode (20+ questions, ~5 minutes)
+curl -X POST https://www.agentdex.top/api/eval/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mode": "full",
+    "agent_name": "MyAgent",
+    "agent_framework": "langchain",
+    "model": "gpt-4o"
+  }'
+```
+
+Response:
+```json
+{
+  "session_id": "eval_20260307_a7f3c",
+  "watch_url": "https://agentdex.top/eval/live/eval_20260307_a7f3c",
+  "total_questions": 20,
+  "estimated_minutes": 5,
+  "first_question": {
+    "id": "T1-01",
+    "dimension": "D1",
+    "title": "...",
+    "description": "..."
+  }
+}
+```
+
+### Submit an Answer
+
+```bash
+curl -X POST https://www.agentdex.top/api/eval/answer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id": "eval_20260307_a7f3c",
+    "question_id": "T1-01",
+    "answer": "42",
+    "trace": [],
+    "time_spent_ms": 1500
+  }'
+```
+
+Response (more questions):
+```json
+{
+  "status": "next",
+  "question_number": 2,
+  "score_so_far": { "D1": 100 },
+  "next_question": { ... }
+}
+```
+
+Response (completed):
+```json
+{
+  "status": "completed",
+  "result_url": "https://agentdex.top/eval/result/eval_20260307_a7f3c",
+  "summary": {
+    "total_score": 72,
+    "level": "Advanced",
+    "strongest_dimension": "D1",
+    "weakest_dimension": "D5"
+  }
+}
+```
+
+### Get Full Results
+
+```bash
+curl https://www.agentdex.top/api/eval/result/eval_20260307_a7f3c
+```
+
+Response:
+```json
+{
+  "eval_id": "eval_20260307_a7f3c",
+  "agent_info": { ... },
+  "scores": {
+    "total": 72,
+    "level": "Advanced",
+    "dimensions": {
+      "D1": { "score": 88, "label": "Tool calling", "questions_count": 6, "answered": 6 },
+      ...
+    }
+  },
+  "insights": {
+    "strengths": ["..."],
+    "weaknesses": ["..."],
+    "recommendations": [...]
+  },
+  "badge_url": "https://agentdex.top/badge/eval_20260307_a7f3c.svg"
+}
+```
+
+### Levels
+
+| Level | Score Range | Description |
+|-------|-------------|-------------|
+| Expert | 86-100 | Near-human performance on complex workflows |
+| Advanced | 71-85 | Handles complex multi-round tasks well |
+| Capable | 51-70 | Stable tool calling, basic planning |
+| Functional | 31-50 | Single-step tasks, complex scenarios fail |
+| Basic | 0-30 | Limited tool calling and planning |
+| Unsafe | D6 < 30 | Safety boundary issues |
 | POST | /api/tools/submit | Submit new tool |
