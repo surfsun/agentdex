@@ -1,10 +1,24 @@
 import { Tool, isNewTool } from '@/lib/tools'
+import { Locale, getTranslations } from '@/lib/i18n'
 
-export default function ToolCard({ tool }: { tool: Tool }) {
+interface ToolCardProps {
+  tool: Tool
+  locale: Locale
+}
+
+export default function ToolCard({ tool, locale }: ToolCardProps) {
+  const t = getTranslations(locale)
+  
   const pricingColor = {
     free: 'bg-green-100 text-green-700',
     freemium: 'bg-blue-100 text-blue-700',
     paid: 'bg-orange-100 text-orange-700',
+  }[tool.pricing]
+
+  const pricingLabel = {
+    free: t.pricing.free,
+    freemium: t.pricing.freemium,
+    paid: t.pricing.paid,
   }[tool.pricing]
 
   const isNew = isNewTool(tool)
@@ -23,17 +37,17 @@ export default function ToolCard({ tool }: { tool: Tool }) {
         <div className="flex flex-col items-end gap-1">
           {isNew && (
             <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full whitespace-nowrap font-medium">
-              🆕 NEW
+              {t.toolCard.new}
             </span>
           )}
           {tool.agent_friendly && (
             <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full whitespace-nowrap">
-              🤖 Agent-friendly
+              {t.toolCard.agentFriendly}
             </span>
           )}
           {tool.featured && (
             <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
-              ⭐ Featured
+              {t.toolCard.featured}
             </span>
           )}
         </div>
@@ -55,22 +69,22 @@ export default function ToolCard({ tool }: { tool: Tool }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pricingColor}`}>
-            {tool.pricing}
+            {pricingLabel}
           </span>
           {/* Agent 关键信息：API 可用 + 开源 */}
           {tool.api_available && (
             <span className="text-xs bg-cyan-50 text-cyan-600 px-2 py-0.5 rounded-full" title="API Available">
-              🔌 API
+              {t.toolCard.api}
             </span>
           )}
           {tool.open_source && (
             <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full" title="Open Source">
-              📦 OSS
+              {t.toolCard.oss}
             </span>
           )}
         </div>
         <span className="text-xs text-blue-500 font-medium">
-          View details →
+          {t.toolCard.viewDetails}
         </span>
       </div>
     </a>

@@ -1,54 +1,63 @@
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { tools, categories } from '@/lib/tools'
+import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 
 export const metadata: Metadata = {
   title: 'AgentDex — For AI Agents',
   description: 'Machine-readable API and usage guide for AI agents to query and submit tools.',
 }
 
-export default function ForAgentsPage() {
+export default async function ForAgentsPage() {
+  const cookieStore = await cookies()
+  const localeCookie = cookieStore.get('locale')?.value
+  const locale: Locale = getLocaleFromCookie(localeCookie)
+  const t = getTranslations(locale)
+
+  const endpoints = [
+    { method: 'GET', path: '/api/tools', desc: locale === 'zh-CN' ? '列出所有工具。支持 ?category=memory&agent_friendly=true&pricing=free' : 'List all tools. Supports ?category=memory&agent_friendly=true&pricing=free' },
+    { method: 'GET', path: '/api/tools/{slug}', desc: locale === 'zh-CN' ? '根据 slug 获取特定工具（如 /api/tools/mem0）' : 'Get a specific tool by slug (e.g. /api/tools/mem0)' },
+    { method: 'GET', path: '/api/search?q={query}', desc: locale === 'zh-CN' ? '按名称、描述或标签搜索工具' : 'Search tools by name, description, or tags' },
+    { method: 'GET', path: '/api/tools/compare?category={cat}', desc: locale === 'zh-CN' ? '比较同类工具并给出推荐' : 'Compare tools in a category with recommendations' },
+    { method: 'GET', path: '/api/recommend?task={description}', desc: locale === 'zh-CN' ? '基于任务描述的 AI 智能推荐' : 'AI-powered tool recommendations based on task' },
+    { method: 'GET', path: '/api/tags?tag={tag}', desc: locale === 'zh-CN' ? '获取特定标签的所有工具' : 'Get all tools with a specific tag' },
+    { method: 'POST', path: '/api/tools/submit', desc: locale === 'zh-CN' ? '提交新工具待审核' : 'Submit a new tool for review' },
+  ]
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
 
       <div className="mb-10">
         <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
-          🤖 Designed for AI Agents
+          {t.forAgents.badge}
         </span>
         <h1 className="text-3xl font-bold text-gray-900 mt-4 mb-2">
-          AgentDex API — Agent Usage Guide
+          {t.forAgents.title}
         </h1>
         <p className="text-gray-500">
-          AgentDex provides a machine-readable HTTP API so AI agents can query and submit tools without parsing HTML.
+          {t.forAgents.subtitle}
         </p>
       </div>
 
       {/* Quick Start */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Start</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">{t.forAgents.quickStart}</h2>
         <p className="text-sm text-gray-500 mb-3">
-          Send this instruction to your agent to get started:
+          {t.forAgents.quickStartHint}
         </p>
         <div className="bg-gray-900 rounded-xl p-5 text-green-400 font-mono text-sm">
-          <p className="text-gray-400 mb-2"># Instruction to give your agent:</p>
-          <p>Read https://www.agentdex.top/agent.md and follow the instructions</p>
-          <p className="text-gray-400 mt-3 mb-2"># Or directly:</p>
-          <p>curl https://www.agentdex.top/api/tools</p>
+          <p className="text-gray-400 mb-2">{t.forAgents.instructionToAgent}</p>
+          <p>{t.forAgents.readAgentMd}</p>
+          <p className="text-gray-400 mt-3 mb-2">{t.forAgents.orDirectly}</p>
+          <p>{t.forAgents.curlCommand}</p>
         </div>
       </section>
 
       {/* API Reference */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">API Reference</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">{t.forAgents.apiReference}</h2>
         <div className="space-y-3">
-          {[
-            { method: 'GET', path: '/api/tools', desc: 'List all tools. Supports ?category=memory&agent_friendly=true&pricing=free' },
-            { method: 'GET', path: '/api/tools/{slug}', desc: 'Get a specific tool by slug (e.g. /api/tools/mem0)' },
-            { method: 'GET', path: '/api/search?q={query}', desc: 'Search tools by name, description, or tags' },
-            { method: 'GET', path: '/api/tools/compare?category={cat}', desc: 'Compare tools in a category with recommendations' },
-            { method: 'GET', path: '/api/recommend?task={description}', desc: 'AI-powered tool recommendations based on task' },
-            { method: 'GET', path: '/api/tags?tag={tag}', desc: 'Get all tools with a specific tag' },
-            { method: 'POST', path: '/api/tools/submit', desc: 'Submit a new tool for review' },
-          ].map(endpoint => (
+          {endpoints.map(endpoint => (
             <div key={endpoint.path} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg">
               <span className={`text-xs font-bold px-2 py-1 rounded shrink-0 ${
                 endpoint.method === 'GET' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
@@ -66,24 +75,28 @@ export default function ForAgentsPage() {
 
       {/* Categories */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Available Categories</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">{t.forAgents.categories}</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {categories.filter(c => c.id !== 'all').map(cat => (
-            <a
-              key={cat.id}
-              href={`/api/tools?category=${cat.id}`}
-              className="font-mono text-sm p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition"
-            >
-              <span className="text-gray-400">category=</span>
-              <span className="text-blue-600">{cat.id}</span>
-            </a>
-          ))}
+          {categories.filter(c => c.id !== 'all').map(cat => {
+            const catLabel = locale === 'zh-CN' && cat.label_zh ? cat.label_zh : cat.label
+            return (
+              <a
+                key={cat.id}
+                href={`/api/tools?category=${cat.id}`}
+                className="font-mono text-sm p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition"
+              >
+                <span className="text-gray-400">category=</span>
+                <span className="text-blue-600">{cat.id}</span>
+                <span className="text-gray-400 ml-2">({catLabel})</span>
+              </a>
+            )
+          })}
         </div>
       </section>
 
       {/* Submit */}
       <section className="mb-10 bg-gray-50 rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">Submit a Tool</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">{t.forAgents.submitTool}</h2>
         <div className="bg-gray-900 rounded-lg p-4 text-green-400 font-mono text-xs overflow-x-auto">
           <pre>{`curl -X POST https://www.agentdex.top/api/tools/submit \\
   -H "Content-Type: application/json" \\
@@ -104,16 +117,18 @@ export default function ForAgentsPage() {
 
       {/* Stats */}
       <section className="grid grid-cols-3 gap-4 text-center">
-        {[
-          { value: tools.length, label: 'Tools Indexed' },
-          { value: tools.filter(t => t.agent_friendly).length, label: 'Agent-Friendly' },
-          { value: categories.length - 1, label: 'Categories' },
-        ].map(stat => (
-          <div key={stat.label} className="border border-gray-200 rounded-xl p-4">
-            <div className="text-3xl font-bold text-blue-600">{stat.value}</div>
-            <div className="text-sm text-gray-500 mt-1">{stat.label}</div>
-          </div>
-        ))}
+        <div className="border border-gray-200 rounded-xl p-4">
+          <div className="text-3xl font-bold text-blue-600">{tools.length}</div>
+          <div className="text-sm text-gray-500 mt-1">{t.forAgents.toolsIndexed}</div>
+        </div>
+        <div className="border border-gray-200 rounded-xl p-4">
+          <div className="text-3xl font-bold text-blue-600">{tools.filter(t => t.agent_friendly).length}</div>
+          <div className="text-sm text-gray-500 mt-1">{t.forAgents.agentFriendlyStats}</div>
+        </div>
+        <div className="border border-gray-200 rounded-xl p-4">
+          <div className="text-3xl font-bold text-blue-600">{categories.length - 1}</div>
+          <div className="text-sm text-gray-500 mt-1">{t.forAgents.categoriesStats}</div>
+        </div>
       </section>
     </div>
   )
