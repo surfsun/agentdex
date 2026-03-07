@@ -19,9 +19,8 @@ import {
   DynamicAnswers,
 } from './types';
 
-// 直接导入题库（解决 Vercel 部署路径问题）
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const questionBankData = require('@/data/eval/questions.json');
+// 直接导入内联题库数据（解决 Vercel 部署路径问题）
+import { questionBankData } from './questions';
 
 // ==================== 常量配置 ====================
 
