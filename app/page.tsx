@@ -120,6 +120,12 @@ export default async function HomePage({
       t.description.toLowerCase().includes(query.toLowerCase()) ||
       t.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
     )
+    // 搜索结果排序：featured 优先，然后按 agent_friendly
+    displayTools.sort((a, b) => {
+      if (a.featured !== b.featured) return a.featured ? -1 : 1
+      if (a.agent_friendly !== b.agent_friendly) return a.agent_friendly ? -1 : 1
+      return 0
+    })
   } else if (activeCategory !== 'all') {
     displayTools = displayTools.filter(t => t.category === activeCategory)
   }

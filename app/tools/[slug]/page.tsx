@@ -206,22 +206,88 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
       {/* Quick Start for Agents - 新增 */}
       {tool.api_available && (
         <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-8">
-          <h3 className="text-lg font-semibold text-purple-900 mb-3 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-purple-900 mb-4 flex items-center gap-2">
             🤖 Quick Start for Agents
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {/* AgentDex API */}
             <div>
               <div className="text-xs text-purple-600 font-mono mb-1"># Get tool info via AgentDex API</div>
               <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
                 curl https://www.agentdex.top/api/tools/{tool.slug}
               </code>
             </div>
-            {tool.website && (
+            
+            {/* 根据工具类型显示不同的使用示例 */}
+            {tool.category === 'memory' && (
+              <div>
+                <div className="text-xs text-purple-600 font-mono mb-1"># Python quick start (Mem0 example)</div>
+                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from mem0 import Memory
+
+m = Memory()
+m.add("User prefers dark mode", user_id="user_123")
+memories = m.search("preferences", user_id="user_123")`}</code>
+              </div>
+            )}
+            
+            {tool.category === 'web' && tool.slug === 'jina-reader' && (
+              <div>
+                <div className="text-xs text-purple-600 font-mono mb-1"># Convert any URL to markdown</div>
+                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
+                  curl https://r.jina.ai/https://example.com
+                </code>
+              </div>
+            )}
+            
+            {tool.category === 'web' && tool.slug === 'firecrawl' && (
+              <div>
+                <div className="text-xs text-purple-600 font-mono mb-1"># Crawl a website (Firecrawl)</div>
+                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`curl -X POST https://api.firecrawl.dev/v1/crawl \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"url": "https://example.com"}'`}</code>
+              </div>
+            )}
+            
+            {tool.category === 'execution' && tool.slug === 'e2b' && (
+              <div>
+                <div className="text-xs text-purple-600 font-mono mb-1"># Execute Python code in sandbox</div>
+                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from e2b_code_interpreter import Sandbox
+
+with Sandbox() as sandbox:
+    execution = sandbox.run_code("print('Hello!')")
+    print(execution.stdout)`}</code>
+              </div>
+            )}
+            
+            {tool.category === 'framework' && tool.slug === 'langchain' && (
+              <div>
+                <div className="text-xs text-purple-600 font-mono mb-1"># Build a simple agent with LangChain</div>
+                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from langchain.agents import initialize_agent
+from langchain.tools import Tool
+
+tools = [Tool(name="calc", func=lambda x: eval(x))]
+agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</code>
+              </div>
+            )}
+            
+            {/* 通用网站链接 */}
+            {tool.website && !['jina-reader', 'firecrawl', 'e2b', 'langchain', 'mem0'].includes(tool.slug) && (
               <div>
                 <div className="text-xs text-purple-600 font-mono mb-1"># Tool website</div>
                 <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
                   {tool.website}
                 </code>
+              </div>
+            )}
+            
+            {/* 官方文档链接 */}
+            {tool.github && (
+              <div className="pt-2 border-t border-purple-200">
+                <span className="text-xs text-purple-600">📚 Docs: </span>
+                <a href={tool.github} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-700 hover:text-purple-900 underline">
+                  {tool.github}
+                </a>
               </div>
             )}
           </div>
@@ -236,7 +302,7 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
         </code>
       </div>
 
-      {/* Related Tools */}
+      {/* Related Tools - 同类工具 */}
       <div className="mt-12">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Other tools in {category?.label || tool.category}</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
@@ -255,6 +321,41 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
             ))}
         </div>
       </div>
+
+      {/* Alternatives - 替代工具推荐（基于标签相似度） */}
+      {(() => {
+        // 找到标签相似的工具（排除同分类，因为上面已经显示了）
+        const alternatives = tools
+          .filter(t => t.id !== tool.id && t.category !== tool.category)
+          .map(t => ({
+            ...t,
+            score: t.tags.filter(tag => tool.tags.includes(tag)).length
+          }))
+          .filter(t => t.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3)
+
+        if (alternatives.length === 0) return null
+
+        return (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Similar tools you might like</h2>
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {alternatives.map(t => (
+                <a
+                  key={t.id}
+                  href={`/tools/${t.slug}`}
+                  className="flex-shrink-0 border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition min-w-[200px]"
+                >
+                  <div className="font-medium text-gray-900">{t.name}</div>
+                  <div className="text-sm text-gray-500 mt-1 line-clamp-1">{t.tagline}</div>
+                  <div className="text-xs text-blue-500 mt-2">{categories.find(c => c.id === t.category)?.label || t.category}</div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
     </div>
     </>
   )
