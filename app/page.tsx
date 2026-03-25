@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
-import { tools, categories } from '@/lib/tools'
+import { tools, categories, sortByRecentlyAdded, getBrandNewCount } from '@/lib/tools'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import ClientSearch from '@/components/ClientSearch'
 import ClientCompare from '@/components/ClientCompare'
@@ -11,6 +11,7 @@ interface SearchParams {
   agent_friendly?: string
   open_source?: string
   pricing?: string
+  sort?: string
 }
 
 // 动态生成 metadata，支持分类页面 SEO
@@ -65,6 +66,7 @@ function buildFilterUrl(params: {
   open_source?: boolean
   pricing?: string
   q?: string
+  sort?: string
 }): string {
   const searchParams = new URLSearchParams()
   
@@ -83,6 +85,9 @@ function buildFilterUrl(params: {
   if (params.q) {
     searchParams.set('q', params.q)
   }
+  if (params.sort) {
+    searchParams.set('sort', params.sort)
+  }
   
   const queryString = searchParams.toString()
   return queryString ? `/?${queryString}` : '/'
@@ -99,6 +104,7 @@ export default async function HomePage({
   const agentFriendlyFilter = params.agent_friendly === 'true'
   const openSourceFilter = params.open_source === 'true'
   const pricingFilter = params.pricing || ''
+  const sortFilter = params.sort || ''
 
   // Get locale from cookie
   const cookieStore = await cookies()
@@ -128,14 +134,20 @@ export default async function HomePage({
       t.description.toLowerCase().includes(query.toLowerCase()) ||
       t.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
     )
-    // 搜索结果排序：featured 优先，然后按 agent_friendly
+  } else if (activeCategory !== 'all') {
+    displayTools = displayTools.filter(t => t.category === activeCategory)
+  }
+
+  // 应用排序
+  if (sortFilter === 'recent') {
+    displayTools = sortByRecentlyAdded(displayTools)
+  } else {
+    // 默认排序：featured 优先，然后按 agent_friendly
     displayTools.sort((a, b) => {
       if (a.featured !== b.featured) return a.featured ? -1 : 1
       if (a.agent_friendly !== b.agent_friendly) return a.agent_friendly ? -1 : 1
       return 0
     })
-  } else if (activeCategory !== 'all') {
-    displayTools = displayTools.filter(t => t.category === activeCategory)
   }
 
   // 计算各筛选条件下的工具数量（用于智能提示）
@@ -143,6 +155,7 @@ export default async function HomePage({
   const openSourceCount = tools.filter(t => t.open_source).length
   const freeCount = tools.filter(t => t.pricing === 'free').length
   const freemiumCount = tools.filter(t => t.pricing === 'freemium').length
+  const brandNewCount = getBrandNewCount()
 
   // 生成 JSON-LD 结构化数据
   const jsonLd = {
@@ -168,7 +181,8 @@ export default async function HomePage({
     agentFriendlyFilter,
     openSourceFilter,
     !!pricingFilter,
-    activeCategory !== 'all'
+    activeCategory !== 'all',
+    sortFilter === 'recent'
   ].filter(Boolean).length
 
   return (
@@ -226,7 +240,8 @@ export default async function HomePage({
             agent_friendly: !agentFriendlyFilter,
             open_source: openSourceFilter,
             pricing: pricingFilter || undefined,
-            q: query || undefined
+            q: query || undefined,
+            sort: sortFilter || undefined
           })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             agentFriendlyFilter
@@ -242,7 +257,8 @@ export default async function HomePage({
             agent_friendly: agentFriendlyFilter,
             open_source: !openSourceFilter,
             pricing: pricingFilter || undefined,
-            q: query || undefined
+            q: query || undefined,
+            sort: sortFilter || undefined
           })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             openSourceFilter
@@ -260,7 +276,8 @@ export default async function HomePage({
             agent_friendly: agentFriendlyFilter,
             open_source: openSourceFilter,
             pricing: pricingFilter === 'free' ? undefined : 'free',
-            q: query || undefined
+            q: query || undefined,
+            sort: sortFilter || undefined
           })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             pricingFilter === 'free'
@@ -276,7 +293,8 @@ export default async function HomePage({
             agent_friendly: agentFriendlyFilter,
             open_source: openSourceFilter,
             pricing: pricingFilter === 'freemium' ? undefined : 'freemium',
-            q: query || undefined
+            q: query || undefined,
+            sort: sortFilter || undefined
           })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             pricingFilter === 'freemium'
@@ -285,6 +303,25 @@ export default async function HomePage({
           }`}
         >
           {t.filters.freemium} <span className="text-xs opacity-60">({freemiumCount})</span>
+        </a>
+        <span className="text-gray-300">|</span>
+        <span className="text-sm text-gray-500">{t.filters.sort}</span>
+        <a
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined,
+            sort: sortFilter === 'recent' ? undefined : 'recent'
+          })}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            sortFilter === 'recent'
+              ? 'bg-red-600 text-white border-red-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-red-400'
+          }`}
+        >
+          {t.filters.recentlyAdded} <span className="text-xs opacity-60">({brandNewCount})</span>
         </a>
         {activeFilterCount > 0 && (
           <a
@@ -320,7 +357,8 @@ export default async function HomePage({
                 agent_friendly: agentFriendlyFilter,
                 open_source: openSourceFilter,
                 pricing: pricingFilter || undefined,
-                q: query || undefined
+                q: query || undefined,
+                sort: sortFilter || undefined
               })}
               className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                 isActive

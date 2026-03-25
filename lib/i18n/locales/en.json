@@ -29,7 +29,11 @@
     "free": "💚 Free",
     "freemium": "💙 Freemium",
     "paid": "💰 Paid",
-    "clear": "✕ Clear"
+    "clear": "✕ Clear",
+    "sort": "Sort:",
+    "recentlyAdded": "🆕 Recently Added",
+    "featured": "⭐ Featured",
+    "all": "📋 All"
   },
   "stats": {
     "tools": "tools",
@@ -48,6 +52,7 @@
   },
   "toolCard": {
     "new": "🆕 NEW",
+    "recent": "🕐 Recent",
     "agentFriendly": "🤖 Agent-friendly",
     "featured": "⭐ Featured",
     "api": "🔌 API",

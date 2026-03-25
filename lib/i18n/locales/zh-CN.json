@@ -29,7 +29,11 @@
     "free": "💚 免费",
     "freemium": "💙 免费增值",
     "paid": "💰 付费",
-    "clear": "✕ 清除"
+    "clear": "✕ 清除",
+    "sort": "排序：",
+    "recentlyAdded": "🆕 最新上架",
+    "featured": "⭐ 精选",
+    "all": "📋 全部"
   },
   "stats": {
     "tools": "个工具",
@@ -47,7 +51,8 @@
     "toolsFound": "个工具"
   },
   "toolCard": {
-    "new": "🆕 新上线",
+    "new": "🆕 新上架",
+    "recent": "🕐 最新",
     "agentFriendly": "🤖 Agent 友好",
     "featured": "⭐ 精选",
     "api": "🔌 API",

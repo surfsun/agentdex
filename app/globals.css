@@ -155,3 +155,26 @@ body {
 .dark .hover\:border-gray-400:hover {
   border-color: #525252 !important;
 }
+
+/* NEW badge in dark mode */
+.dark .bg-red-100 {
+  background-color: #7f1d1d !important;
+}
+
+.dark .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+/* Recent badge in dark mode */
+.dark .bg-blue-100 {
+  background-color: #1e3a5f !important;
+}
+
+.dark .text-blue-700 {
+  color: #93c5fd !important;
+}
+
+/* Sort button active state in dark mode */
+.dark .bg-red-600 {
+  background-color: #dc2626 !important;
+}

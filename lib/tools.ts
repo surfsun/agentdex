@@ -60,6 +60,14 @@ export function getFeaturedTools(): Tool[] {
   return tools.filter(t => t.featured)
 }
 
+// Check if a tool is brand new (added within the last 7 days)
+export function isBrandNewTool(tool: Tool): boolean {
+  const createdAt = new Date(tool.created_at)
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  return createdAt > sevenDaysAgo
+}
+
 // Check if a tool is new (added within the last 30 days)
 export function isNewTool(tool: Tool): boolean {
   const createdAt = new Date(tool.created_at)
@@ -68,7 +76,21 @@ export function isNewTool(tool: Tool): boolean {
   return createdAt > thirtyDaysAgo
 }
 
-// Get all new tools
+// Get all new tools (within 30 days)
 export function getNewTools(): Tool[] {
   return tools.filter(isNewTool)
+}
+
+// Sort tools by created_at (most recent first)
+export function sortByRecentlyAdded(toolList: Tool[]): Tool[] {
+  return [...toolList].sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime()
+    const dateB = new Date(b.created_at).getTime()
+    return dateB - dateA
+  })
+}
+
+// Get count of tools added within 7 days
+export function getBrandNewCount(): number {
+  return tools.filter(isBrandNewTool).length
 }

@@ -1,4 +1,4 @@
-import { Tool, isNewTool } from '@/lib/tools'
+import { Tool, isNewTool, isBrandNewTool } from '@/lib/tools'
 import { Locale, getTranslations } from '@/lib/i18n'
 
 interface ToolCardProps {
@@ -21,6 +21,7 @@ export default function ToolCard({ tool, locale }: ToolCardProps) {
     paid: t.pricing.paid,
   }[tool.pricing]
 
+  const isBrandNew = isBrandNewTool(tool)
   const isNew = isNewTool(tool)
 
   return (
@@ -35,9 +36,14 @@ export default function ToolCard({ tool, locale }: ToolCardProps) {
           <p className="text-gray-500 text-xs mt-0.5">{tool.tagline}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          {isNew && (
+          {isBrandNew && (
             <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full whitespace-nowrap font-medium">
               {t.toolCard.new}
+            </span>
+          )}
+          {!isBrandNew && isNew && (
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full whitespace-nowrap font-medium">
+              {t.toolCard.recent}
             </span>
           )}
           {tool.agent_friendly && (
