@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { cookies } from 'next/headers'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import ThemeSwitcher from '@/components/ThemeSwitcher'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -90,6 +91,7 @@ export default async function RootLayout({
               >
                 {t.nav.github}
               </a>
+              <ThemeSwitcher />
               <LanguageSwitcher currentLocale={locale} />
             </nav>
           </div>

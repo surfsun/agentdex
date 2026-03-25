@@ -299,11 +299,13 @@ export default async function HomePage({
       {/* Category Filter - 始终显示，搜索时显示工具的分类标签 */}
       <div className="flex flex-wrap gap-2 mb-8">
         {categories.map(cat => {
+          // 计算该分类下的工具数量（始终显示）
+          const categoryToolCount = tools.filter(t => t.category === cat.id).length
           // 搜索时显示匹配该分类的工具数量
-          const count = query
+          const searchMatchCount = query
             ? displayTools.filter(t => t.category === cat.id).length
             : undefined
-          
+
           // 搜索时不高亮分类，但显示各分类的结果数
           const isActive = !query && activeCategory === cat.id
           
@@ -327,9 +329,8 @@ export default async function HomePage({
               }`}
             >
               {catLabel}
-              {query && count !== undefined && count > 0 && (
-                <span className="ml-1 text-xs text-blue-500">({count})</span>
-              )}
+              {/* 始终显示分类数量 */}
+              <span className="ml-1 text-xs opacity-60">({query && searchMatchCount !== undefined ? searchMatchCount : categoryToolCount})</span>
             </a>
           )
         })}
