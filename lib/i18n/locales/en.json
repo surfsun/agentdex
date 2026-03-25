@@ -149,5 +149,20 @@
       "advanced": "⭐⭐ Advanced",
       "optional": "⭐ Optional"
     }
+  },
+  "changelog": {
+    "title": "API Changelog",
+    "current": "Current",
+    "breakingChanges": "Breaking Changes Detected",
+    "breakingWarning": "This tool has recent breaking changes. Review the migration guides below before upgrading.",
+    "breaking": "Breaking",
+    "migrationGuide": "Migration Guide:",
+    "changeTypes": {
+      "breaking": "Breaking Change",
+      "feature": "New Feature",
+      "fix": "Bug Fix",
+      "deprecation": "Deprecation",
+      "security": "Security Update"
+    }
   }
 }

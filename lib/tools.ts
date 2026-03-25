@@ -2,6 +2,23 @@ import toolsData from '@/data/tools.json'
 
 export type IntegrationLevel = 'quick_start' | 'standard' | 'advanced'
 
+export type ChangeType = 'breaking' | 'feature' | 'fix' | 'deprecation' | 'security'
+
+export type ChangelogChange = {
+  type: ChangeType
+  description: string
+  description_zh?: string
+}
+
+export type ChangelogEntry = {
+  version: string
+  date: string
+  breaking: boolean
+  changes: ChangelogChange[]
+  migration_guide?: string
+  migration_guide_zh?: string
+}
+
 export type Tool = {
   id: string
   slug: string
@@ -24,6 +41,9 @@ export type Tool = {
   votes?: number  // Optional: number of upvotes
   integration_level?: IntegrationLevel  // Quick Start / Standard / Advanced
   quickstart_time?: string  // e.g., "5 min", "15 min"
+  changelog?: ChangelogEntry[]  // API changelog entries
+  api_version?: string  // Current API version
+  api_stability?: 'stable' | 'beta' | 'alpha'  // API stability level
 }
 
 export const tools: Tool[] = toolsData as Tool[]

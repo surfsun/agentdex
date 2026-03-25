@@ -63,7 +63,64 @@
     "submitted_by": "human",
     "created_at": "2025-01-01",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "api_version": "2.0.0",
+    "api_stability": "stable",
+    "changelog": [
+      {
+        "version": "2.0.0",
+        "date": "2025-03-15",
+        "breaking": true,
+        "changes": [
+          {
+            "type": "breaking",
+            "description": "add_memory() now requires user_id to be optional, auto-generates session_id",
+            "description_zh": "add_memory() 的 user_id 参数从必选变为可选，自动生成 session_id"
+          },
+          {
+            "type": "feature",
+            "description": "Added batch_add() for bulk memory insertion",
+            "description_zh": "新增 batch_add() 支持批量添加记忆"
+          },
+          {
+            "type": "feature",
+            "description": "Graph memory support for entity relationships",
+            "description_zh": "图谱记忆支持实体关系存储"
+          }
+        ],
+        "migration_guide": "Replace user_id='xxx' with session_id='xxx' or omit to auto-generate",
+        "migration_guide_zh": "将 user_id='xxx' 替换为 session_id='xxx'，或省略以自动生成"
+      },
+      {
+        "version": "1.5.0",
+        "date": "2025-02-01",
+        "breaking": false,
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Added semantic_search() with hybrid retrieval",
+            "description_zh": "新增 semantic_search() 支持混合检索"
+          },
+          {
+            "type": "fix",
+            "description": "Fixed memory decay calculation for long-running sessions",
+            "description_zh": "修复长会话的记忆衰减计算问题"
+          }
+        ]
+      },
+      {
+        "version": "1.0.0",
+        "date": "2025-01-01",
+        "breaking": false,
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Initial release with core memory APIs",
+            "description_zh": "首次发布，包含核心记忆 API"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "zep",
@@ -217,7 +274,45 @@
     "submitted_by": "human",
     "created_at": "2025-01-01",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "api_version": "1.2.0",
+    "api_stability": "stable",
+    "changelog": [
+      {
+        "version": "1.2.0",
+        "date": "2025-03-10",
+        "breaking": false,
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Added support for custom Docker images in sandboxes",
+            "description_zh": "支持在沙箱中使用自定义 Docker 镜像"
+          },
+          {
+            "type": "feature",
+            "description": "New file system API with streaming support",
+            "description_zh": "新文件系统 API 支持流式传输"
+          }
+        ]
+      },
+      {
+        "version": "1.1.0",
+        "date": "2025-02-15",
+        "breaking": false,
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Added Node.js runtime support",
+            "description_zh": "新增 Node.js 运行时支持"
+          },
+          {
+            "type": "security",
+            "description": "Enhanced sandbox isolation with seccomp filters",
+            "description_zh": "增强沙箱隔离，添加 seccomp 过滤器"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "modal",
@@ -437,7 +532,52 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "15 min"
+    "quickstart_time": "15 min",
+    "api_version": "0.3.0",
+    "api_stability": "stable",
+    "changelog": [
+      {
+        "version": "0.3.0",
+        "date": "2025-03-01",
+        "breaking": true,
+        "changes": [
+          {
+            "type": "breaking",
+            "description": "LangGraph is now the recommended way to build agents, AgentExecutor deprecated",
+            "description_zh": "LangGraph 成为推荐的 Agent 构建方式，AgentExecutor 已弃用"
+          },
+          {
+            "type": "feature",
+            "description": "Native async support for all LLM providers",
+            "description_zh": "所有 LLM 提供商原生支持异步"
+          },
+          {
+            "type": "feature",
+            "description": "Structured output with Pydantic models",
+            "description_zh": "使用 Pydantic 模型进行结构化输出"
+          }
+        ],
+        "migration_guide": "Migrate from AgentExecutor to LangGraph's create_react_agent()",
+        "migration_guide_zh": "从 AgentExecutor 迁移到 LangGraph 的 create_react_agent()"
+      },
+      {
+        "version": "0.2.0",
+        "date": "2025-01-15",
+        "breaking": false,
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Added LangGraph for stateful agent workflows",
+            "description_zh": "新增 LangGraph 支持有状态 Agent 工作流"
+          },
+          {
+            "type": "feature",
+            "description": "Improved tool calling with automatic schema generation",
+            "description_zh": "改进工具调用，自动生成 schema"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "crewai",

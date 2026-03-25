@@ -149,5 +149,20 @@
       "advanced": "⭐⭐ 高级",
       "optional": "⭐ 按需"
     }
+  },
+  "changelog": {
+    "title": "API 更新日志",
+    "current": "当前版本",
+    "breakingChanges": "检测到破坏性变更",
+    "breakingWarning": "该工具有最近的破坏性变更。升级前请查看下方的迁移指南。",
+    "breaking": "破坏性变更",
+    "migrationGuide": "迁移指南：",
+    "changeTypes": {
+      "breaking": "破坏性变更",
+      "feature": "新功能",
+      "fix": "修复",
+      "deprecation": "弃用",
+      "security": "安全更新"
+    }
   }
 }
