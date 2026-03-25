@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react'
 import { VotesProvider } from '@/lib/VotesContext'
+import { IdentityProvider } from '@/components/IdentityProvider'
 
 interface ProvidersProps {
   children: ReactNode
@@ -10,7 +11,9 @@ interface ProvidersProps {
 export default function Providers({ children }: ProvidersProps) {
   return (
     <VotesProvider>
-      {children}
+      <IdentityProvider>
+        {children}
+      </IdentityProvider>
     </VotesProvider>
   )
 }

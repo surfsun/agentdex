@@ -1,9 +1,10 @@
 'use client'
 
-import { Tool } from '@/lib/tools'
+import { Tool, Identity } from '@/lib/tools'
 import { Locale, getTranslations } from '@/lib/i18n'
 import { useCompare } from '@/lib/useCompare'
 import { useBookmarks } from '@/lib/useBookmarks'
+import { useIdentity } from '@/components/IdentityProvider'
 import ClientToolCard from './ClientToolCard'
 import CompareTray from './CompareTray'
 import BookmarksTray from './BookmarksTray'
@@ -17,6 +18,7 @@ interface ClientCompareProps {
 export default function ClientCompare({ tools, locale, bookmarkedFilter }: ClientCompareProps) {
   const { selectedTools, toggleCompare, isSelected, canAddMore, removeFromCompare, clearCompare } = useCompare()
   const { bookmarks, isLoaded: bookmarksLoaded } = useBookmarks()
+  const { identity } = useIdentity()
   const t = getTranslations(locale)
 
   // Filter by bookmarks if needed
@@ -46,6 +48,7 @@ export default function ClientCompare({ tools, locale, bookmarkedFilter }: Clien
             key={tool.id}
             tool={tool}
             locale={locale}
+            identity={identity}
             compareSelected={isSelected(tool.id)}
             canAddToCompare={canAddMore || isSelected(tool.id)}
             onToggleCompare={toggleCompare}

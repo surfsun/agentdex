@@ -19,6 +19,16 @@ export type ChangelogEntry = {
   migration_guide_zh?: string
 }
 
+export type Identity = 'developer' | 'founder' | 'researcher' | 'pm'
+
+export type RecommendedFor = {
+  [key in Identity]?: {
+    priority: number  // 1 = highest priority
+    reason: string
+    reason_zh?: string
+  }
+}
+
 export type Tool = {
   id: string
   slug: string
@@ -44,6 +54,7 @@ export type Tool = {
   changelog?: ChangelogEntry[]  // API changelog entries
   api_version?: string  // Current API version
   api_stability?: 'stable' | 'beta' | 'alpha'  // API stability level
+  recommended_for?: RecommendedFor  // Identity-based recommendations
 }
 
 export const tools: Tool[] = toolsData as Tool[]
@@ -119,3 +130,27 @@ export function sortByRecentlyAdded(toolList: Tool[]): Tool[] {
 export function getBrandNewCount(): number {
   return tools.filter(isBrandNewTool).length
 }
+
+// Identity-related functions
+export function sortToolsByIdentity(toolList: Tool[], identity: Identity | null): Tool[] {
+  if (!identity) return toolList
+  
+  return [...toolList].sort((a, b) => {
+    const priorityA = a.recommended_for?.[identity]?.priority ?? 999
+    const priorityB = b.recommended_for?.[identity]?.priority ?? 999
+    return priorityA - priorityB
+  })
+}
+
+export function getRecommendedReason(tool: Tool, identity: Identity, locale: 'en' | 'zh-CN' = 'en'): string | null {
+  const rec = tool.recommended_for?.[identity]
+  if (!rec) return null
+  return locale === 'zh-CN' && rec.reason_zh ? rec.reason_zh : rec.reason
+}
+
+export const identities: { id: Identity; label: string; label_zh: string; icon: string }[] = [
+  { id: 'developer', label: 'Developer', label_zh: '开发者', icon: '👨‍💻' },
+  { id: 'founder', label: 'Founder', label_zh: '创始人', icon: '🚀' },
+  { id: 'researcher', label: 'Researcher', label_zh: '研究者', icon: '🔬' },
+  { id: 'pm', label: 'Product Manager', label_zh: '产品经理', icon: '📊' },
+]

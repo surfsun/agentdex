@@ -1,12 +1,13 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { tools, categories, sortByRecentlyAdded, getBrandNewCount } from '@/lib/tools'
+import { tools, categories, sortByRecentlyAdded, getBrandNewCount, sortToolsByIdentity, Identity } from '@/lib/tools'
 import { scenarios } from '@/lib/scenarios'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import ClientSearch from '@/components/ClientSearch'
 import ClientCompare from '@/components/ClientCompare'
 import BookmarksFilter from '@/components/BookmarksFilter'
+import IdentitySection from '@/components/IdentitySection'
 
 interface SearchParams {
   category?: string
@@ -17,6 +18,7 @@ interface SearchParams {
   sort?: string
   bookmarked?: string
   integration_level?: string
+  identity?: string
 }
 
 // 动态生成 metadata，支持分类页面 SEO
@@ -74,6 +76,7 @@ function buildFilterUrl(params: {
   sort?: string
   bookmarked?: boolean
   integration_level?: string
+  identity?: string
 }): string {
   const searchParams = new URLSearchParams()
   
@@ -101,6 +104,9 @@ function buildFilterUrl(params: {
   if (params.integration_level) {
     searchParams.set('integration_level', params.integration_level)
   }
+  if (params.identity) {
+    searchParams.set('identity', params.identity)
+  }
   
   const queryString = searchParams.toString()
   return queryString ? `/?${queryString}` : '/'
@@ -120,6 +126,7 @@ export default async function HomePage({
   const sortFilter = params.sort || ''
   const bookmarkedFilter = params.bookmarked === 'true'
   const integrationLevelFilter = params.integration_level || ''
+  const identityParam = params.identity || ''
 
   // Get locale from cookie
   const cookieStore = await cookies()
@@ -169,6 +176,9 @@ export default async function HomePage({
       if (a.agent_friendly !== b.agent_friendly) return a.agent_friendly ? -1 : 1
       return 0
     })
+  } else if (identityParam && ['developer', 'founder', 'researcher', 'pm'].includes(identityParam)) {
+    // 身份排序：按推荐优先级排序
+    displayTools = sortToolsByIdentity(displayTools, identityParam as Identity)
   } else {
     // 默认排序：featured 优先，然后按 agent_friendly
     displayTools.sort((a, b) => {
@@ -253,6 +263,9 @@ export default async function HomePage({
           </a>
         </div>
       </div>
+
+      {/* Identity Selector - I am a... */}
+      <IdentitySection locale={locale} />
 
       {/* Search with Real-time Filter */}
       <ClientSearch currentQuery={query} locale={locale} />

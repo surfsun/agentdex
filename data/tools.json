@@ -19,7 +19,11 @@
     "submitted_by": "human",
     "created_at": "2025-01-01",
     "integration_level": "quick_start",
-    "quickstart_time": "1 min"
+    "quickstart_time": "1 min",
+    "recommended_for": {
+      "developer": { "priority": 3, "reason": "Simple API, quick integration for agent social features", "reason_zh": "简单 API，快速集成 Agent 社交功能" },
+      "researcher": { "priority": 2, "reason": "Study agent-to-agent communication patterns", "reason_zh": "研究 Agent 间通信模式的理想平台" }
+    }
   },
   {
     "id": "agentmail",
@@ -41,7 +45,12 @@
     "submitted_by": "human",
     "created_at": "2025-01-01",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "recommended_for": {
+      "developer": { "priority": 1, "reason": "Clean API, essential for agent communication", "reason_zh": "干净的 API，Agent 通信必备" },
+      "founder": { "priority": 2, "reason": "Enable agents to handle customer emails autonomously", "reason_zh": "让 Agent 自主处理客户邮件" },
+      "pm": { "priority": 2, "reason": "Automate email workflows without human intervention", "reason_zh": "无需人工介入的邮件自动化" }
+    }
   },
   {
     "id": "mem0",
@@ -66,6 +75,12 @@
     "quickstart_time": "5 min",
     "api_version": "2.0.0",
     "api_stability": "stable",
+    "recommended_for": {
+      "developer": { "priority": 1, "reason": "Most popular memory solution, excellent SDK support", "reason_zh": "最流行的记忆方案，SDK 支持完善" },
+      "founder": { "priority": 1, "reason": "Essential for personalized user experiences", "reason_zh": "个性化用户体验必备" },
+      "researcher": { "priority": 2, "reason": "Graph memory for studying agent cognition", "reason_zh": "图谱记忆适合研究 Agent 认知" },
+      "pm": { "priority": 1, "reason": "Enables persistent user context across sessions", "reason_zh": "实现跨会话的持久用户上下文" }
+    },
     "changelog": [
       {
         "version": "2.0.0",
@@ -142,7 +157,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Fast context retrieval, great for production", "reason_zh": "快速上下文检索，适合生产环境" },
+      "researcher": { "priority": 1, "reason": "Graph-based memory for complex relationships", "reason_zh": "基于图谱的记忆适合复杂关系研究" }
+    }
   },
   {
     "id": "letta",
@@ -164,7 +183,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "15 min"
+    "quickstart_time": "15 min",
+    "recommended_for": {
+      "researcher": { "priority": 1, "reason": "Self-editing memory for advanced agent architectures", "reason_zh": "自编辑记忆适合高级 Agent 架构研究" },
+      "developer": { "priority": 3, "reason": "Stateful agents with persistent identity", "reason_zh": "有状态 Agent 保持持久身份" }
+    }
   },
   {
     "id": "jina-reader",
@@ -186,7 +209,11 @@
     "submitted_by": "human",
     "created_at": "2025-01-01",
     "integration_level": "quick_start",
-    "quickstart_time": "1 min"
+    "quickstart_time": "1 min",
+    "recommended_for": {
+      "developer": { "priority": 1, "reason": "Simplest way to get clean content from URLs", "reason_zh": "获取干净网页内容的最简单方式" },
+      "pm": { "priority": 2, "reason": "Extract content from any webpage instantly", "reason_zh": "即时从任何网页提取内容" }
+    }
   },
   {
     "id": "firecrawl",
@@ -208,7 +235,11 @@
     "submitted_by": "human",
     "created_at": "2025-01-01",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "LLM-ready structured data output", "reason_zh": "输出 LLM 就绪的结构化数据" },
+      "founder": { "priority": 3, "reason": "Extract data from competitor websites", "reason_zh": "从竞品网站提取数据" }
+    }
   },
   {
     "id": "browserbase",
@@ -230,7 +261,12 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "10 min"
+    "quickstart_time": "10 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Full browser control for complex interactions", "reason_zh": "完整浏览器控制，适合复杂交互" },
+      "founder": { "priority": 2, "reason": "Automate web tasks like form filling", "reason_zh": "自动化网页任务如填表" },
+      "pm": { "priority": 1, "reason": "Best for testing and automating web workflows", "reason_zh": "测试和自动化网页工作流的首选" }
+    }
   },
   {
     "id": "apify",
@@ -252,7 +288,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "15 min"
+    "quickstart_time": "15 min",
+    "recommended_for": {
+      "founder": { "priority": 1, "reason": "2000+ ready-made scrapers, no coding needed", "reason_zh": "2000+ 现成爬虫，无需编码" },
+      "pm": { "priority": 2, "reason": "Extract data from major platforms instantly", "reason_zh": "即时从主流平台提取数据" }
+    }
   },
   {
     "id": "e2b",
@@ -277,6 +317,11 @@
     "quickstart_time": "5 min",
     "api_version": "1.2.0",
     "api_stability": "stable",
+    "recommended_for": {
+      "developer": { "priority": 1, "reason": "Best sandbox for code execution, Python/JS SDK", "reason_zh": "最佳代码执行沙箱，Python/JS SDK" },
+      "founder": { "priority": 2, "reason": "Secure code execution without infrastructure", "reason_zh": "无需基础设施的安全代码执行" },
+      "researcher": { "priority": 3, "reason": "Isolated environment for agent experiments", "reason_zh": "隔离环境适合 Agent 实验" }
+    },
     "changelog": [
       {
         "version": "1.2.0",
@@ -334,7 +379,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "15 min"
+    "quickstart_time": "15 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Deploy agents as serverless functions", "reason_zh": "将 Agent 部署为无服务器函数" },
+      "founder": { "priority": 3, "reason": "Scale agent workloads without managing servers", "reason_zh": "无需管理服务器即可扩展 Agent 负载" }
+    }
   },
   {
     "id": "daytona",
@@ -356,7 +405,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "20 min"
+    "quickstart_time": "20 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Full dev environment for coding agents", "reason_zh": "编程 Agent 的完整开发环境" },
+      "researcher": { "priority": 2, "reason": "Isolated environment for safe experiments", "reason_zh": "隔离环境适合安全实验" }
+    }
   },
   {
     "id": "inngest",
@@ -378,7 +431,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "15 min"
+    "quickstart_time": "15 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Durable workflows for long-running agents", "reason_zh": "长运行 Agent 的持久化工作流" },
+      "founder": { "priority": 2, "reason": "Reliable agent workflows with auto-retry", "reason_zh": "可靠 Agent 工作流带自动重试" }
+    }
   },
   {
     "id": "composio",
@@ -400,7 +457,12 @@
     "submitted_by": "human",
     "created_at": "2025-01-01",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "200+ integrations with one line of code", "reason_zh": "一行代码集成 200+ 应用" },
+      "founder": { "priority": 1, "reason": "Instant integrations without development cost", "reason_zh": "零开发成本即时集成" },
+      "pm": { "priority": 2, "reason": "Connect agents to existing tools quickly", "reason_zh": "快速连接 Agent 到现有工具" }
+    }
   },
   {
     "id": "toolhouse",
@@ -422,7 +484,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "recommended_for": {
+      "developer": { "priority": 3, "reason": "Pre-built tools ready to use", "reason_zh": "预构建工具即开即用" },
+      "founder": { "priority": 2, "reason": "Add capabilities without building tools", "reason_zh": "无需开发工具即可添加能力" }
+    }
   },
   {
     "id": "n8n",
@@ -444,7 +510,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "advanced",
-    "quickstart_time": "1+ hour"
+    "quickstart_time": "1+ hour",
+    "recommended_for": {
+      "founder": { "priority": 2, "reason": "Visual workflow builder, no coding needed", "reason_zh": "可视化工作流构建，无需编码" },
+      "pm": { "priority": 1, "reason": "Best for automating complex business processes", "reason_zh": "自动化复杂业务流程的首选" }
+    }
   },
   {
     "id": "langfuse",
@@ -466,7 +536,11 @@
     "submitted_by": "human",
     "created_at": "2025-01-01",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Debug agent behavior with full tracing", "reason_zh": "完整追踪调试 Agent 行为" },
+      "founder": { "priority": 3, "reason": "Monitor costs and agent performance", "reason_zh": "监控成本和 Agent 性能" }
+    }
   },
   {
     "id": "langsmith",
@@ -488,7 +562,10 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "10 min"
+    "quickstart_time": "10 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Best tool if using LangChain ecosystem", "reason_zh": "使用 LangChain 生态的最佳工具" }
+    }
   },
   {
     "id": "helicone",
@@ -510,7 +587,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "quick_start",
-    "quickstart_time": "5 min"
+    "quickstart_time": "5 min",
+    "recommended_for": {
+      "developer": { "priority": 3, "reason": "Framework-agnostic LLM monitoring", "reason_zh": "框架无关的 LLM 监控" },
+      "founder": { "priority": 2, "reason": "Cost tracking and caching for savings", "reason_zh": "成本追踪和缓存节省开支" }
+    }
   },
   {
     "id": "langchain",
@@ -535,6 +616,12 @@
     "quickstart_time": "15 min",
     "api_version": "0.3.0",
     "api_stability": "stable",
+    "recommended_for": {
+      "developer": { "priority": 1, "reason": "Most popular framework, extensive ecosystem", "reason_zh": "最流行框架，生态最丰富" },
+      "founder": { "priority": 1, "reason": "Largest community, easy to hire talent", "reason_zh": "最大社区，容易招人" },
+      "researcher": { "priority": 2, "reason": "Industry standard for agent research", "reason_zh": "Agent 研究的行业标准" },
+      "pm": { "priority": 2, "reason": "Rich examples and documentation", "reason_zh": "丰富的示例和文档" }
+    },
     "changelog": [
       {
         "version": "0.3.0",
@@ -599,7 +686,12 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "20 min"
+    "quickstart_time": "20 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Easiest multi-agent framework, low code", "reason_zh": "最简单的多 Agent 框架，代码量少" },
+      "founder": { "priority": 2, "reason": "Build teams of agents quickly", "reason_zh": "快速构建 Agent 团队" },
+      "researcher": { "priority": 1, "reason": "Study multi-agent collaboration patterns", "reason_zh": "研究多 Agent 协作模式" }
+    }
   },
   {
     "id": "autogen",
@@ -621,7 +713,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "20 min"
+    "quickstart_time": "20 min",
+    "recommended_for": {
+      "developer": { "priority": 3, "reason": "Microsoft-backed, enterprise-ready", "reason_zh": "微软背书，企业级可用" },
+      "researcher": { "priority": 1, "reason": "Advanced multi-agent conversation research", "reason_zh": "高级多 Agent 对话研究" }
+    }
   },
   {
     "id": "llamaindex",
@@ -643,7 +739,12 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "15 min"
+    "quickstart_time": "15 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Best for RAG and document-heavy agents", "reason_zh": "RAG 和文档密集型 Agent 的最佳选择" },
+      "founder": { "priority": 3, "reason": "Turn documents into agent knowledge base", "reason_zh": "将文档转化为 Agent 知识库" },
+      "researcher": { "priority": 2, "reason": "Advanced RAG research capabilities", "reason_zh": "高级 RAG 研究能力" }
+    }
   },
   {
     "id": "dify",
@@ -665,7 +766,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "30 min"
+    "quickstart_time": "30 min",
+    "recommended_for": {
+      "founder": { "priority": 1, "reason": "Build agents without coding, fastest to MVP", "reason_zh": "无需编码构建 Agent，最快到 MVP" },
+      "pm": { "priority": 1, "reason": "Visual builder, perfect for non-developers", "reason_zh": "可视化构建，非开发者首选" }
+    }
   },
   {
     "id": "guardrails-ai",
@@ -687,7 +792,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "15 min"
+    "quickstart_time": "15 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Essential for production agent safety", "reason_zh": "生产环境 Agent 安全必备" },
+      "founder": { "priority": 2, "reason": "Protect against harmful outputs and data leaks", "reason_zh": "防护有害输出和数据泄露" }
+    }
   },
   {
     "id": "x402",
@@ -709,6 +818,11 @@
     "submitted_by": "human",
     "created_at": "2025-03-06",
     "integration_level": "standard",
-    "quickstart_time": "10 min"
+    "quickstart_time": "10 min",
+    "recommended_for": {
+      "developer": { "priority": 2, "reason": "Enable agents to pay autonomously", "reason_zh": "让 Agent 自主支付" },
+      "founder": { "priority": 3, "reason": "Monetize API access for agents", "reason_zh": "为 Agent API 访问收费" },
+      "researcher": { "priority": 1, "reason": "Study agent economic autonomy", "reason_zh": "研究 Agent 经济自主性" }
+    }
   }
 ]

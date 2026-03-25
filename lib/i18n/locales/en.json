@@ -16,6 +16,15 @@
     "agentRead": "🤖 Agent? Read /agent.md",
     "apiReference": "📖 API Reference"
   },
+  "identity": {
+    "label": "I am a...",
+    "developer": "👨‍💻 Developer",
+    "founder": "🚀 Founder",
+    "researcher": "🔬 Researcher",
+    "pm": "📊 PM",
+    "recommended": "Recommended for you",
+    "pick": "Developer Pick"
+  },
   "search": {
     "placeholder": "Search tools... (type to filter instantly)",
     "hint": "💡 Real-time search enabled — no need to press Enter",
