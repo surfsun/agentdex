@@ -16,7 +16,7 @@ interface ClientCompareProps {
 }
 
 export default function ClientCompare({ tools, locale, bookmarkedFilter }: ClientCompareProps) {
-  const { selectedTools, toggleCompare, isSelected, canAddMore, removeFromCompare, clearCompare } = useCompare()
+  const { selectedTools, toggleCompare, isSelected, canAddMore, removeFromCompare, clearCompare, getShareUrl } = useCompare()
   const { bookmarks, isLoaded: bookmarksLoaded } = useBookmarks()
   const { identity } = useIdentity()
   const t = getTranslations(locale)
@@ -62,6 +62,7 @@ export default function ClientCompare({ tools, locale, bookmarkedFilter }: Clien
         onRemove={removeFromCompare}
         onClear={clearCompare}
         locale={locale}
+        getShareUrl={getShareUrl}
       />
 
       {/* Bookmarks Tray */}

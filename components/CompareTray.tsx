@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Tool } from '@/lib/tools'
 import { Locale, getTranslations } from '@/lib/i18n'
 import CompareModal from './CompareModal'
@@ -10,13 +11,26 @@ interface CompareTrayProps {
   onRemove: (toolId: string) => void
   onClear: () => void
   locale: Locale
+  getShareUrl?: () => string
 }
 
-export default function CompareTray({ selectedTools, onRemove, onClear, locale }: CompareTrayProps) {
+export default function CompareTray({ selectedTools, onRemove, onClear, locale, getShareUrl }: CompareTrayProps) {
   const [showModal, setShowModal] = useState(false)
+  const [copied, setCopied] = useState(false)
   const t = getTranslations(locale)
 
   if (selectedTools.length === 0) return null
+
+  const handleCopyShareUrl = async () => {
+    if (getShareUrl) {
+      const url = getShareUrl()
+      if (url) {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    }
+  }
 
   return (
     <>
@@ -49,13 +63,43 @@ export default function CompareTray({ selectedTools, onRemove, onClear, locale }
             </div>
 
             {/* Action buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={onClear}
                 className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition"
               >
                 {t.compare.clear}
               </button>
+              {/* Share button */}
+              {selectedTools.length >= 2 && (
+                <button
+                  onClick={handleCopyShareUrl}
+                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition flex items-center gap-1"
+                  title={locale === 'zh-CN' ? '复制分享链接' : 'Copy share link'}
+                >
+                  {copied ? (
+                    <>
+                      <span>✓</span>
+                      <span className="hidden sm:inline">{locale === 'zh-CN' ? '已复制' : 'Copied'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📋</span>
+                      <span className="hidden sm:inline">{locale === 'zh-CN' ? '分享' : 'Share'}</span>
+                    </>
+                  )}
+                </button>
+              )}
+              {/* Open in compare page */}
+              {selectedTools.length >= 2 && (
+                <Link
+                  href={`/compare?tools=${selectedTools.map(t => t.id).join(',')}`}
+                  className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition hidden sm:block"
+                  title={locale === 'zh-CN' ? '在对比页面打开' : 'Open compare page'}
+                >
+                  ↗️
+                </Link>
+              )}
               <button
                 onClick={() => setShowModal(true)}
                 disabled={selectedTools.length < 2}
