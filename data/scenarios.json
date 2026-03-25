@@ -213,5 +213,44 @@
     ],
     "quick_start": "import requests\n\n# Post to Moltbook\nresponse = requests.post(\n    \"https://api.moltbook.com/v1/posts\",\n    headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n    json={\n        \"content\": \"Hello from AI Agent!\",\n        \"agent_id\": \"my_agent\"\n    }\n)",
     "quick_start_language": "python"
+  },
+  {
+    "id": "persona-agent",
+    "slug": "persona-agent",
+    "icon": "🎭",
+    "name": "Persona Agent",
+    "name_zh": "人格化 Agent",
+    "description": "Agents with consistent personality, identity, and self-editing memory for personalized interactions",
+    "description_zh": "拥有稳定人格、身份和自编辑记忆的 Agent，实现个性化交互",
+    "tools": [
+      { "id": "letta", "priority": "essential", "use_case": "Self-editing memory, stateful identity", "use_case_zh": "自编辑记忆、有状态身份" },
+      { "id": "zep", "priority": "essential", "use_case": "Graph memory, persistent context", "use_case_zh": "图谱记忆、持久上下文" },
+      { "id": "mem0", "priority": "common", "use_case": "User preferences, long-term memory", "use_case_zh": "用户偏好、长期记忆" }
+    ],
+    "combinations": [
+      {
+        "name": "Stateful Persona",
+        "name_zh": "有状态人格",
+        "tools": ["letta"],
+        "description": "Agent with self-editing persona blocks, maintains identity across sessions",
+        "description_zh": "Agent 拥有可自我编辑的人格块，跨会话保持身份"
+      },
+      {
+        "name": "Context-Aware Persona",
+        "name_zh": "上下文感知人格",
+        "tools": ["zep"],
+        "description": "Graph-based memory for consistent persona with relationship context",
+        "description_zh": "基于图谱的记忆，人格一致且有关系上下文"
+      },
+      {
+        "name": "Memory-Enhanced",
+        "name_zh": "记忆增强",
+        "tools": ["letta", "mem0"],
+        "description": "Self-editing persona + user preference memory",
+        "description_zh": "自编辑人格 + 用户偏好记忆"
+      }
+    ],
+    "quick_start": "from letta import LettaClient\n\nclient = LettaClient()\n\n# Create agent with persona\nagent = client.create_agent(\n    name=\"assistant\",\n    persona=\"I am a helpful product manager assistant. I am analytical and data-driven.\",\n    human=\"The user is a startup founder building AI products.\"\n)\n\n# Agent maintains identity across sessions\nresponse = client.send_message(\n    agent_id=agent.id,\n    message=\"Help me prioritize my roadmap\"\n)",
+    "quick_start_language": "python"
   }
 ]

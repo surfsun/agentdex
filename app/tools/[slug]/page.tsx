@@ -156,6 +156,64 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
         </div>
       </div>
 
+      {/* Persona Capabilities */}
+      {tool.persona && (
+        <div className="mb-8 bg-pink-50 border border-pink-200 rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-pink-800 mb-4 flex items-center gap-2">
+            🎭 Persona Capabilities
+          </h2>
+          <p className="text-sm text-pink-700 mb-4">
+            This tool supports Agent persona/personality features, allowing agents to maintain consistent identity and behavior.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {tool.persona.self_editing_memory && (
+              <div className="bg-white p-3 rounded-lg border border-pink-100">
+                <div className="text-xs text-pink-500 mb-1">Self-Editing Memory</div>
+                <div className="text-sm font-medium text-gray-900">✓ Agent can modify its own persona</div>
+              </div>
+            )}
+            {tool.persona.stateful_identity && (
+              <div className="bg-white p-3 rounded-lg border border-pink-100">
+                <div className="text-xs text-pink-500 mb-1">Stateful Identity</div>
+                <div className="text-sm font-medium text-gray-900">✓ Consistent across sessions</div>
+              </div>
+            )}
+            {tool.persona.model_agnostic && (
+              <div className="bg-white p-3 rounded-lg border border-pink-100">
+                <div className="text-xs text-pink-500 mb-1">Model Agnostic</div>
+                <div className="text-sm font-medium text-gray-900">✓ Works with multiple LLMs</div>
+              </div>
+            )}
+            {tool.persona.communication_style && (
+              <div className="bg-white p-3 rounded-lg border border-pink-100">
+                <div className="text-xs text-pink-500 mb-1">Communication Style</div>
+                <div className="text-sm font-medium text-gray-900">{tool.persona.communication_style}</div>
+              </div>
+            )}
+            {tool.persona.personality_traits && Object.keys(tool.persona.personality_traits).length > 0 && (
+              <div className="bg-white p-3 rounded-lg border border-pink-100 col-span-2 md:col-span-1">
+                <div className="text-xs text-pink-500 mb-1">Personality Traits</div>
+                <div className="flex flex-wrap gap-1">
+                  {Object.entries(tool.persona.personality_traits).map(([trait, value]) => (
+                    <span key={trait} className="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">
+                      {trait}: {value}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="mt-4">
+            <a 
+              href="/scenarios/persona-agent"
+              className="text-sm text-pink-600 hover:text-pink-800 font-medium"
+            >
+              → Explore Persona Agent Scenario
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Description */}
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>

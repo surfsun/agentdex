@@ -31,6 +31,17 @@ export type RecommendedFor = {
 
 export type IntegrationComplexity = 'low' | 'medium' | 'high'
 
+// Persona capabilities for agents
+export type PersonaCapabilities = {
+  self_editing_memory?: boolean  // Agent can modify its own persona
+  stateful_identity?: boolean     // Maintains consistent identity across sessions
+  communication_style?: string    // e.g., "data-driven, concise"
+  personality_traits?: {          // Configurable personality dimensions
+    [key: string]: number         // e.g., { "analytical": 0.9, "empathetic": 0.7 }
+  }
+  model_agnostic?: boolean        // Works with multiple LLM providers
+}
+
 export type Tool = {
   id: string
   slug: string
@@ -62,6 +73,8 @@ export type Tool = {
   integration_complexity?: IntegrationComplexity  // Integration difficulty
   best_for?: string[]  // Use cases this tool is best for
   best_for_zh?: string[]  // Chinese version of best_for
+  // Persona capabilities
+  persona?: PersonaCapabilities  // Agent persona/personality support
 }
 
 export const tools: Tool[] = toolsData as Tool[]

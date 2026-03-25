@@ -19,6 +19,7 @@ interface SearchParams {
   bookmarked?: string
   integration_level?: string
   identity?: string
+  persona?: string
 }
 
 // 动态生成 metadata，支持分类页面 SEO
@@ -77,6 +78,7 @@ function buildFilterUrl(params: {
   bookmarked?: boolean
   integration_level?: string
   identity?: string
+  persona?: boolean
 }): string {
   const searchParams = new URLSearchParams()
   
@@ -107,6 +109,9 @@ function buildFilterUrl(params: {
   if (params.identity) {
     searchParams.set('identity', params.identity)
   }
+  if (params.persona) {
+    searchParams.set('persona', 'true')
+  }
   
   const queryString = searchParams.toString()
   return queryString ? `/?${queryString}` : '/'
@@ -127,6 +132,7 @@ export default async function HomePage({
   const bookmarkedFilter = params.bookmarked === 'true'
   const integrationLevelFilter = params.integration_level || ''
   const identityParam = params.identity || ''
+  const personaFilter = params.persona === 'true'
 
   // Get locale from cookie
   const cookieStore = await cookies()
@@ -148,6 +154,9 @@ export default async function HomePage({
   }
   if (integrationLevelFilter) {
     displayTools = displayTools.filter(t => t.integration_level === integrationLevelFilter)
+  }
+  if (personaFilter) {
+    displayTools = displayTools.filter(t => t.persona !== undefined)
   }
   
   // 再应用搜索/分类
@@ -199,6 +208,9 @@ export default async function HomePage({
   const quickStartCount = tools.filter(t => t.integration_level === 'quick_start').length
   const standardCount = tools.filter(t => t.integration_level === 'standard').length
   const advancedCount = tools.filter(t => t.integration_level === 'advanced').length
+  
+  // Persona-enabled count
+  const personaCount = tools.filter(t => t.persona !== undefined).length
 
   // 生成 JSON-LD 结构化数据
   const jsonLd = {
@@ -450,6 +462,26 @@ export default async function HomePage({
           }`}
         >
           {t.integration.advanced} <span className="text-xs opacity-60">({advancedCount})</span>
+        </a>
+        <span className="text-gray-300">|</span>
+        <a
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined,
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter || undefined,
+            persona: !personaFilter
+          })}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            personaFilter
+              ? 'bg-pink-600 text-white border-pink-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-pink-400'
+          }`}
+        >
+          🎭 Persona <span className="text-xs opacity-60">({personaCount})</span>
         </a>
         <span className="text-gray-300">|</span>
         <span className="text-sm text-gray-500">{t.filters.sort}</span>

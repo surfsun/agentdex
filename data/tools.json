@@ -169,6 +169,13 @@
     "recommended_for": {
       "developer": { "priority": 2, "reason": "Fast context retrieval, great for production", "reason_zh": "快速上下文检索，适合生产环境" },
       "researcher": { "priority": 1, "reason": "Graph-based memory for complex relationships", "reason_zh": "基于图谱的记忆适合复杂关系研究" }
+    },
+    "persona": {
+      "self_editing_memory": true,
+      "stateful_identity": true,
+      "model_agnostic": true,
+      "communication_style": "Context-aware, data-driven",
+      "personality_traits": { "analytical": 0.9, "consistent": 0.8 }
     }
   },
   {
@@ -199,7 +206,14 @@
     "github_stars": 12000,
     "integration_complexity": "medium",
     "best_for": ["Stateful agents", "Self-editing memory", "Agent identity"],
-    "best_for_zh": ["有状态 Agent", "自编辑记忆", "Agent 身份"]
+    "best_for_zh": ["有状态 Agent", "自编辑记忆", "Agent 身份"],
+    "persona": {
+      "self_editing_memory": true,
+      "stateful_identity": true,
+      "model_agnostic": true,
+      "communication_style": "Context-aware, adaptive",
+      "personality_traits": { "analytical": 0.8, "empathetic": 0.6 }
+    }
   },
   {
     "id": "jina-reader",

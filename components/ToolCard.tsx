@@ -68,6 +68,11 @@ export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
               {t.toolCard.agentFriendly}
             </span>
           )}
+          {tool.persona && (
+            <span className="text-xs bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400 px-2 py-0.5 rounded-full whitespace-nowrap" title="Persona-enabled: Agent can have consistent personality">
+              🎭 Persona
+            </span>
+          )}
           {tool.featured && (
             <span className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 px-2 py-0.5 rounded-full">
               {t.toolCard.featured}
