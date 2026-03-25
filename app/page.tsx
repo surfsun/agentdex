@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { tools, categories } from '@/lib/tools'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
-import ClientToolCard from '@/components/ClientToolCard'
 import ClientSearch from '@/components/ClientSearch'
+import ClientCompare from '@/components/ClientCompare'
 
 interface SearchParams {
   category?: string
@@ -363,11 +363,7 @@ export default async function HomePage({
           <p>{t.results.noTools} <a href="/" className="text-blue-500 hover:underline">{t.results.clearFilters}</a></p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {displayTools.map(tool => (
-            <ClientToolCard key={tool.id} tool={tool} locale={locale} />
-          ))}
-        </div>
+        <ClientCompare tools={displayTools} locale={locale} />
       )}
 
       {/* Submit CTA */}

@@ -86,5 +86,19 @@
     "free": "Free",
     "freemium": "Freemium",
     "paid": "Paid"
+  },
+  "compare": {
+    "selected": "Selected for comparison",
+    "clear": "Clear",
+    "compare": "Compare",
+    "title": "Compare Tools",
+    "pricing": "Pricing",
+    "agentFriendly": "Agent Friendly",
+    "openSource": "Open Source",
+    "apiAvailable": "API Available",
+    "tags": "Tags",
+    "add": "Add to compare",
+    "remove": "Remove from compare",
+    "maxReached": "Maximum 4 tools can be compared"
   }
 }

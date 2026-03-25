@@ -7,9 +7,12 @@ import BookmarkButton from './BookmarkButton'
 interface ClientToolCardProps {
   tool: Tool
   locale: Locale
+  compareSelected?: boolean
+  canAddToCompare?: boolean
+  onToggleCompare?: (toolId: string) => void
 }
 
-export default function ClientToolCard({ tool, locale }: ClientToolCardProps) {
+export default function ClientToolCard({ tool, locale, compareSelected, canAddToCompare = true, onToggleCompare }: ClientToolCardProps) {
   const t = getTranslations(locale)
   
   const pricingColor = {
@@ -28,6 +31,33 @@ export default function ClientToolCard({ tool, locale }: ClientToolCardProps) {
 
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-sm transition-all bg-white dark:bg-gray-800 relative group">
+      {/* Compare Checkbox */}
+      <div className="absolute top-3 left-3 z-10">
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onToggleCompare?.(tool.id)
+          }}
+          disabled={!compareSelected && !canAddToCompare}
+          className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+            compareSelected
+              ? 'bg-blue-600 border-blue-600 text-white'
+              : canAddToCompare
+                ? 'border-gray-300 dark:border-gray-600 hover:border-blue-400 bg-white dark:bg-gray-800'
+                : 'border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed'
+          }`}
+          title={compareSelected ? t.compare.remove : canAddToCompare ? t.compare.add : t.compare.maxReached}
+          aria-label={compareSelected ? t.compare.remove : t.compare.add}
+        >
+          {compareSelected && (
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </button>
+      </div>
+
       {/* Bookmark Button */}
       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
         <BookmarkButton toolId={tool.id} toolName={tool.name} />

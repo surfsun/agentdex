@@ -86,5 +86,19 @@
     "free": "免费",
     "freemium": "免费增值",
     "paid": "付费"
+  },
+  "compare": {
+    "selected": "已选择对比",
+    "clear": "清除",
+    "compare": "对比",
+    "title": "工具对比",
+    "pricing": "价格",
+    "agentFriendly": "Agent 友好",
+    "openSource": "开源",
+    "apiAvailable": "API 可用",
+    "tags": "标签",
+    "add": "添加到对比",
+    "remove": "从对比中移除",
+    "maxReached": "最多对比 4 个工具"
   }
 }
