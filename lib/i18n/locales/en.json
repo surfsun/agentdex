@@ -111,5 +111,16 @@
     "add": "Upvote this tool",
     "remove": "Remove upvote",
     "upvoted": "Upvoted"
+  },
+  "bookmarks": {
+    "myBookmarks": "My Bookmarks",
+    "bookmarked": "Bookmarked",
+    "empty": "No bookmarked tools yet",
+    "viewAll": "View all bookmarks",
+    "clearAll": "Clear all",
+    "clearConfirm": "Clear all bookmarks?",
+    "add": "Add to bookmarks",
+    "remove": "Remove from bookmarks",
+    "filter": "🔖 Bookmarked"
   }
 }

@@ -4,6 +4,7 @@ import { tools, categories, sortByRecentlyAdded, getBrandNewCount } from '@/lib/
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import ClientSearch from '@/components/ClientSearch'
 import ClientCompare from '@/components/ClientCompare'
+import BookmarksFilter from '@/components/BookmarksFilter'
 
 interface SearchParams {
   category?: string
@@ -12,6 +13,7 @@ interface SearchParams {
   open_source?: string
   pricing?: string
   sort?: string
+  bookmarked?: string
 }
 
 // 动态生成 metadata，支持分类页面 SEO
@@ -67,6 +69,7 @@ function buildFilterUrl(params: {
   pricing?: string
   q?: string
   sort?: string
+  bookmarked?: boolean
 }): string {
   const searchParams = new URLSearchParams()
   
@@ -88,6 +91,9 @@ function buildFilterUrl(params: {
   if (params.sort) {
     searchParams.set('sort', params.sort)
   }
+  if (params.bookmarked) {
+    searchParams.set('bookmarked', 'true')
+  }
   
   const queryString = searchParams.toString()
   return queryString ? `/?${queryString}` : '/'
@@ -105,6 +111,7 @@ export default async function HomePage({
   const openSourceFilter = params.open_source === 'true'
   const pricingFilter = params.pricing || ''
   const sortFilter = params.sort || ''
+  const bookmarkedFilter = params.bookmarked === 'true'
 
   // Get locale from cookie
   const cookieStore = await cookies()
@@ -278,6 +285,17 @@ export default async function HomePage({
         >
           {t.filters.openSource} <span className="text-xs opacity-60">({openSourceCount})</span>
         </a>
+        <BookmarksFilter 
+          locale={locale} 
+          activeFilters={{
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter,
+            q: query,
+            sort: sortFilter
+          }}
+        />
         <span className="text-gray-300">|</span>
         <span className="text-sm text-gray-500">{t.filters.pricing}</span>
         <a
@@ -428,7 +446,7 @@ export default async function HomePage({
           <p>{t.results.noTools} <a href="/" className="text-blue-500 hover:underline">{t.results.clearFilters}</a></p>
         </div>
       ) : (
-        <ClientCompare tools={displayTools} locale={locale} />
+        <ClientCompare tools={displayTools} locale={locale} bookmarkedFilter={bookmarkedFilter} />
       )}
 
       {/* Submit CTA */}
