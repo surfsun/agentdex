@@ -27,6 +27,19 @@ export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
   
   // Get recommendation reason for current identity
   const recommendationReason = identity ? getRecommendedReason(tool, identity, locale) : null
+  
+  // Get dynamic pick label based on identity
+  const getPickLabel = () => {
+    if (!identity) return null
+    const identityLabels: Record<Identity, string> = {
+      developer: t.identity.pickFor.developer,
+      founder: t.identity.pickFor.founder,
+      researcher: t.identity.pickFor.researcher,
+      pm: t.identity.pickFor.pm
+    }
+    return identityLabels[identity]
+  }
+  const pickLabel = getPickLabel()
 
   return (
     <a
@@ -64,10 +77,10 @@ export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
       </div>
 
       {/* Recommendation Reason */}
-      {recommendationReason && (
+      {recommendationReason && pickLabel && (
         <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">💡 {t.identity.pick}</span>
+            <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">💡 {pickLabel}</span>
           </div>
           <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">{recommendationReason}</p>
         </div>

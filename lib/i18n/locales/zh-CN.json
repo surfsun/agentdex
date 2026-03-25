@@ -23,7 +23,13 @@
     "researcher": "🔬 研究者",
     "pm": "📊 产品经理",
     "recommended": "为你推荐",
-    "pick": "开发者推荐"
+    "pick": "推荐",
+    "pickFor": {
+      "developer": "开发者推荐",
+      "founder": "创始人推荐",
+      "researcher": "研究者推荐",
+      "pm": "产品经理推荐"
+    }
   },
   "search": {
     "placeholder": "搜索工具...（输入即时筛选）",

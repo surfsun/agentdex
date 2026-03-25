@@ -23,7 +23,13 @@
     "researcher": "🔬 Researcher",
     "pm": "📊 PM",
     "recommended": "Recommended for you",
-    "pick": "Developer Pick"
+    "pick": "Pick",
+    "pickFor": {
+      "developer": "Developer Pick",
+      "founder": "Founder Pick",
+      "researcher": "Researcher Pick",
+      "pm": "PM Pick"
+    }
   },
   "search": {
     "placeholder": "Search tools... (type to filter instantly)",

@@ -60,6 +60,19 @@ export default function ClientToolCard({ tool, locale, identity, compareSelected
   const isNew = isNewTool(tool)
   const integrationInfo = getIntegrationLevelInfo(tool.integration_level, t)
   const recommendationReason = identity ? getRecommendedReason(tool, identity, locale) : null
+  
+  // Get dynamic pick label based on identity
+  const getPickLabel = () => {
+    if (!identity) return null
+    const identityLabels: Record<Identity, string> = {
+      developer: t.identity.pickFor.developer,
+      founder: t.identity.pickFor.founder,
+      researcher: t.identity.pickFor.researcher,
+      pm: t.identity.pickFor.pm
+    }
+    return identityLabels[identity]
+  }
+  const pickLabel = getPickLabel()
 
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-sm transition-all bg-white dark:bg-gray-800 relative group">
@@ -140,10 +153,10 @@ export default function ClientToolCard({ tool, locale, identity, compareSelected
         </div>
 
         {/* Recommendation Reason */}
-        {recommendationReason && (
+        {recommendationReason && pickLabel && (
           <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">💡 {t.identity.pick}</span>
+              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">💡 {pickLabel}</span>
             </div>
             <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">{recommendationReason}</p>
           </div>
