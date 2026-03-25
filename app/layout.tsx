@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
+import Providers from '@/components/Providers'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -74,6 +75,7 @@ export default async function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        <Providers>
         <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
             <a href="/" className="font-bold text-xl text-gray-900">
@@ -111,6 +113,7 @@ export default async function RootLayout({
           </p>
         </footer>
         <Analytics />
+        </Providers>
       </body>
     </html>
   )

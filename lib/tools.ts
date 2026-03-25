@@ -19,6 +19,7 @@ export type Tool = {
   verified: boolean
   submitted_by: string
   created_at: string
+  votes?: number  // Optional: number of upvotes
 }
 
 export const tools: Tool[] = toolsData as Tool[]

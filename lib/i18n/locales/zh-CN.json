@@ -32,6 +32,7 @@
     "clear": "✕ 清除",
     "sort": "排序：",
     "recentlyAdded": "🆕 最新上架",
+    "popular": "🔥 热门",
     "featured": "⭐ 精选",
     "all": "📋 全部"
   },
@@ -105,5 +106,10 @@
     "add": "添加到对比",
     "remove": "从对比中移除",
     "maxReached": "最多对比 4 个工具"
+  },
+  "votes": {
+    "add": "点赞推荐",
+    "remove": "取消点赞",
+    "upvoted": "已点赞"
   }
 }

@@ -3,6 +3,7 @@
 import { Tool, isNewTool } from '@/lib/tools'
 import { Locale, getTranslations } from '@/lib/i18n'
 import BookmarkButton from './BookmarkButton'
+import { useVotes } from '@/lib/VotesContext'
 
 interface ClientToolCardProps {
   tool: Tool
@@ -14,6 +15,9 @@ interface ClientToolCardProps {
 
 export default function ClientToolCard({ tool, locale, compareSelected, canAddToCompare = true, onToggleCompare }: ClientToolCardProps) {
   const t = getTranslations(locale)
+  const { isVoted, toggleVote, getVoteCount } = useVotes()
+  const hasVoted = isVoted(tool.id)
+  const voteCount = getVoteCount(tool.id, tool.votes || 0)
   
   const pricingColor = {
     free: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -59,7 +63,25 @@ export default function ClientToolCard({ tool, locale, compareSelected, canAddTo
       </div>
 
       {/* Bookmark Button */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Vote Button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            toggleVote(tool.id)
+          }}
+          className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all ${
+            hasVoted
+              ? 'bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-orange-50 dark:hover:bg-orange-900'
+          }`}
+          title={hasVoted ? t.votes.remove : t.votes.add}
+          aria-label={hasVoted ? t.votes.remove : t.votes.add}
+        >
+          <span>{hasVoted ? '🔥' : '👍'}</span>
+          <span>{voteCount}</span>
+        </button>
         <BookmarkButton toolId={tool.id} toolName={tool.name} />
       </div>
 

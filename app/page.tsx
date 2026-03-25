@@ -141,6 +141,16 @@ export default async function HomePage({
   // 应用排序
   if (sortFilter === 'recent') {
     displayTools = sortByRecentlyAdded(displayTools)
+  } else if (sortFilter === 'popular') {
+    // 热门排序：按投票数排序，如果没有投票数则按 featured 和 agent_friendly
+    displayTools.sort((a, b) => {
+      const votesA = a.votes || 0
+      const votesB = b.votes || 0
+      if (votesA !== votesB) return votesB - votesA
+      if (a.featured !== b.featured) return a.featured ? -1 : 1
+      if (a.agent_friendly !== b.agent_friendly) return a.agent_friendly ? -1 : 1
+      return 0
+    })
   } else {
     // 默认排序：featured 优先，然后按 agent_friendly
     displayTools.sort((a, b) => {
@@ -322,6 +332,23 @@ export default async function HomePage({
           }`}
         >
           {t.filters.recentlyAdded} <span className="text-xs opacity-60">({brandNewCount})</span>
+        </a>
+        <a
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined,
+            sort: sortFilter === 'popular' ? undefined : 'popular'
+          })}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            sortFilter === 'popular'
+              ? 'bg-orange-600 text-white border-orange-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-orange-400'
+          }`}
+        >
+          {t.filters.popular}
         </a>
         {activeFilterCount > 0 && (
           <a

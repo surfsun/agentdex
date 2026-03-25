@@ -32,6 +32,7 @@
     "clear": "✕ Clear",
     "sort": "Sort:",
     "recentlyAdded": "🆕 Recently Added",
+    "popular": "🔥 Popular",
     "featured": "⭐ Featured",
     "all": "📋 All"
   },
@@ -105,5 +106,10 @@
     "add": "Add to compare",
     "remove": "Remove from compare",
     "maxReached": "Maximum 4 tools can be compared"
+  },
+  "votes": {
+    "add": "Upvote this tool",
+    "remove": "Remove upvote",
+    "upvoted": "Upvoted"
   }
 }
