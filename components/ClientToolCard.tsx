@@ -1,6 +1,6 @@
 'use client'
 
-import { Tool, isNewTool } from '@/lib/tools'
+import { Tool, isNewTool, IntegrationLevel } from '@/lib/tools'
 import { Locale, getTranslations } from '@/lib/i18n'
 import BookmarkButton from './BookmarkButton'
 import { useVotes } from '@/lib/VotesContext'
@@ -11,6 +11,31 @@ interface ClientToolCardProps {
   compareSelected?: boolean
   canAddToCompare?: boolean
   onToggleCompare?: (toolId: string) => void
+}
+
+// Helper function to get integration level display info
+function getIntegrationLevelInfo(level: IntegrationLevel | undefined, t: any) {
+  if (!level) return null
+  
+  const config = {
+    quick_start: {
+      label: t.toolCard.quickStart,
+      color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+      hint: t.integration.quickStartHint
+    },
+    standard: {
+      label: t.toolCard.standard,
+      color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      hint: t.integration.standardHint
+    },
+    advanced: {
+      label: t.toolCard.advanced,
+      color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+      hint: t.integration.advancedHint
+    }
+  }
+  
+  return config[level]
 }
 
 export default function ClientToolCard({ tool, locale, compareSelected, canAddToCompare = true, onToggleCompare }: ClientToolCardProps) {
@@ -32,6 +57,7 @@ export default function ClientToolCard({ tool, locale, compareSelected, canAddTo
   }[tool.pricing]
 
   const isNew = isNewTool(tool)
+  const integrationInfo = getIntegrationLevelInfo(tool.integration_level, t)
 
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-sm transition-all bg-white dark:bg-gray-800 relative group">
@@ -125,10 +151,20 @@ export default function ClientToolCard({ tool, locale, compareSelected, canAddTo
 
         {/* Footer */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${pricingColor}`}>
               {pricingLabel}
             </span>
+            {/* Integration Level Badge */}
+            {integrationInfo && (
+              <span 
+                className={`text-xs px-2 py-0.5 rounded-full font-medium ${integrationInfo.color}`} 
+                title={integrationInfo.hint}
+              >
+                {integrationInfo.label}
+                {tool.quickstart_time && <span className="opacity-60 ml-1">~{tool.quickstart_time}</span>}
+              </span>
+            )}
             {tool.api_available && (
               <span className="text-xs bg-cyan-50 dark:bg-cyan-900 text-cyan-600 dark:text-cyan-300 px-2 py-0.5 rounded-full" title="API Available">
                 {t.toolCard.api}

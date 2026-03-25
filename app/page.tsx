@@ -16,6 +16,7 @@ interface SearchParams {
   pricing?: string
   sort?: string
   bookmarked?: string
+  integration_level?: string
 }
 
 // 动态生成 metadata，支持分类页面 SEO
@@ -72,6 +73,7 @@ function buildFilterUrl(params: {
   q?: string
   sort?: string
   bookmarked?: boolean
+  integration_level?: string
 }): string {
   const searchParams = new URLSearchParams()
   
@@ -96,6 +98,9 @@ function buildFilterUrl(params: {
   if (params.bookmarked) {
     searchParams.set('bookmarked', 'true')
   }
+  if (params.integration_level) {
+    searchParams.set('integration_level', params.integration_level)
+  }
   
   const queryString = searchParams.toString()
   return queryString ? `/?${queryString}` : '/'
@@ -114,6 +119,7 @@ export default async function HomePage({
   const pricingFilter = params.pricing || ''
   const sortFilter = params.sort || ''
   const bookmarkedFilter = params.bookmarked === 'true'
+  const integrationLevelFilter = params.integration_level || ''
 
   // Get locale from cookie
   const cookieStore = await cookies()
@@ -132,6 +138,9 @@ export default async function HomePage({
   }
   if (pricingFilter) {
     displayTools = displayTools.filter(t => t.pricing === pricingFilter)
+  }
+  if (integrationLevelFilter) {
+    displayTools = displayTools.filter(t => t.integration_level === integrationLevelFilter)
   }
   
   // 再应用搜索/分类
@@ -175,6 +184,11 @@ export default async function HomePage({
   const freeCount = tools.filter(t => t.pricing === 'free').length
   const freemiumCount = tools.filter(t => t.pricing === 'freemium').length
   const brandNewCount = getBrandNewCount()
+  
+  // Integration level counts
+  const quickStartCount = tools.filter(t => t.integration_level === 'quick_start').length
+  const standardCount = tools.filter(t => t.integration_level === 'standard').length
+  const advancedCount = tools.filter(t => t.integration_level === 'advanced').length
 
   // 生成 JSON-LD 结构化数据
   const jsonLd = {
@@ -290,7 +304,8 @@ export default async function HomePage({
             open_source: openSourceFilter,
             pricing: pricingFilter || undefined,
             q: query || undefined,
-            sort: sortFilter || undefined
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter || undefined
           })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             agentFriendlyFilter
@@ -307,7 +322,8 @@ export default async function HomePage({
             open_source: !openSourceFilter,
             pricing: pricingFilter || undefined,
             q: query || undefined,
-            sort: sortFilter || undefined
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter || undefined
           })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             openSourceFilter
@@ -337,7 +353,8 @@ export default async function HomePage({
             open_source: openSourceFilter,
             pricing: pricingFilter === 'free' ? undefined : 'free',
             q: query || undefined,
-            sort: sortFilter || undefined
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter || undefined
           })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             pricingFilter === 'free'
@@ -354,7 +371,8 @@ export default async function HomePage({
             open_source: openSourceFilter,
             pricing: pricingFilter === 'freemium' ? undefined : 'freemium',
             q: query || undefined,
-            sort: sortFilter || undefined
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter || undefined
           })}
           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
             pricingFilter === 'freemium'
@@ -363,6 +381,62 @@ export default async function HomePage({
           }`}
         >
           {t.filters.freemium} <span className="text-xs opacity-60">({freemiumCount})</span>
+        </a>
+        <span className="text-gray-300">|</span>
+        <span className="text-sm text-gray-500">{t.integration.label}</span>
+        <a
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined,
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter === 'quick_start' ? undefined : 'quick_start'
+          })}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            integrationLevelFilter === 'quick_start'
+              ? 'bg-green-600 text-white border-green-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-green-400'
+          }`}
+        >
+          {t.integration.quickStart} <span className="text-xs opacity-60">({quickStartCount})</span>
+        </a>
+        <a
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined,
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter === 'standard' ? undefined : 'standard'
+          })}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            integrationLevelFilter === 'standard'
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+          }`}
+        >
+          {t.integration.standard} <span className="text-xs opacity-60">({standardCount})</span>
+        </a>
+        <a
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined,
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter === 'advanced' ? undefined : 'advanced'
+          })}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            integrationLevelFilter === 'advanced'
+              ? 'bg-purple-600 text-white border-purple-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-purple-400'
+          }`}
+        >
+          {t.integration.advanced} <span className="text-xs opacity-60">({advancedCount})</span>
         </a>
         <span className="text-gray-300">|</span>
         <span className="text-sm text-gray-500">{t.filters.sort}</span>

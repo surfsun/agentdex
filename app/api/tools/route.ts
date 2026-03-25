@@ -10,6 +10,7 @@ export async function GET(request: Request) {
   const pricing = searchParams.get('pricing')
   const slugs = searchParams.get('slugs')
   const featured = searchParams.get('featured')
+  const integrationLevel = searchParams.get('integration_level')
   const limit = parseInt(searchParams.get('limit') || '100')
   const offset = parseInt(searchParams.get('offset') || '0')
 
@@ -61,6 +62,9 @@ export async function GET(request: Request) {
     }
     if (pricing) {
       query = query.eq('pricing', pricing)
+    }
+    if (integrationLevel) {
+      query = query.eq('integration_level', integrationLevel)
     }
 
     // 排序和分页
@@ -129,6 +133,9 @@ export async function GET(request: Request) {
     }
     if (pricing) {
       result = result.filter(t => t.pricing === pricing)
+    }
+    if (integrationLevel) {
+      result = result.filter(t => t.integration_level === integrationLevel)
     }
 
     const paginated = result.slice(offset, offset + limit)

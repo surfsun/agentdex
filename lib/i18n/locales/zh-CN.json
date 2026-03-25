@@ -58,7 +58,19 @@
     "featured": "⭐ 精选",
     "api": "🔌 API",
     "oss": "📦 开源",
-    "viewDetails": "查看详情 →"
+    "viewDetails": "查看详情 →",
+    "quickStart": "⚡ 快速上手",
+    "standard": "🔧 标准集成",
+    "advanced": "🚀 高级配置"
+  },
+  "integration": {
+    "label": "集成难度：",
+    "quickStart": "⚡ 快速上手",
+    "standard": "🔧 标准集成",
+    "advanced": "🚀 高级配置",
+    "quickStartHint": "约 5 分钟",
+    "standardHint": "约 30 分钟",
+    "advancedHint": "需要学习"
   },
   "cta": {
     "title": "知道应该收录的工具？",

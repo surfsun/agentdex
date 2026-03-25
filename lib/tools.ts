@@ -1,5 +1,7 @@
 import toolsData from '@/data/tools.json'
 
+export type IntegrationLevel = 'quick_start' | 'standard' | 'advanced'
+
 export type Tool = {
   id: string
   slug: string
@@ -20,6 +22,8 @@ export type Tool = {
   submitted_by: string
   created_at: string
   votes?: number  // Optional: number of upvotes
+  integration_level?: IntegrationLevel  // Quick Start / Standard / Advanced
+  quickstart_time?: string  // e.g., "5 min", "15 min"
 }
 
 export const tools: Tool[] = toolsData as Tool[]

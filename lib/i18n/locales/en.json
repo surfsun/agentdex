@@ -58,7 +58,19 @@
     "featured": "⭐ Featured",
     "api": "🔌 API",
     "oss": "📦 OSS",
-    "viewDetails": "View details →"
+    "viewDetails": "View details →",
+    "quickStart": "⚡ Quick Start",
+    "standard": "🔧 Standard",
+    "advanced": "🚀 Advanced"
+  },
+  "integration": {
+    "label": "Integration Level:",
+    "quickStart": "⚡ Quick Start",
+    "standard": "🔧 Standard",
+    "advanced": "🚀 Advanced",
+    "quickStartHint": "~5 min setup",
+    "standardHint": "~30 min setup",
+    "advancedHint": "Learning curve"
   },
   "cta": {
     "title": "Know a tool that should be here?",
