@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
 import { tools, categories, sortByRecentlyAdded, getBrandNewCount } from '@/lib/tools'
+import { scenarios } from '@/lib/scenarios'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import ClientSearch from '@/components/ClientSearch'
 import ClientCompare from '@/components/ClientCompare'
@@ -240,6 +242,36 @@ export default async function HomePage({
 
       {/* Search with Real-time Filter */}
       <ClientSearch currentQuery={query} locale={locale} />
+
+      {/* Scenarios Section */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <span>🎯</span>
+          {locale === 'zh-CN' ? '按场景探索' : 'Explore by Scenario'}
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {scenarios.map(scenario => {
+            const scenarioName = locale === 'zh-CN' && scenario.name_zh ? scenario.name_zh : scenario.name
+            const scenarioDesc = locale === 'zh-CN' && scenario.description_zh ? scenario.description_zh : scenario.description
+            
+            return (
+              <Link
+                key={scenario.id}
+                href={`/scenarios/${scenario.slug}`}
+                className="group p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all"
+              >
+                <div className="text-3xl mb-2">{scenario.icon}</div>
+                <h3 className="font-medium text-gray-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                  {scenarioName}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 hidden md:block">
+                  {scenarioDesc}
+                </p>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
 
       {/* Stats - 实时更新 */}
       <div className="flex gap-6 text-sm text-gray-400 mb-6">

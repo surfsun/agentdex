@@ -122,5 +122,19 @@
     "add": "Add to bookmarks",
     "remove": "Remove from bookmarks",
     "filter": "🔖 Bookmarked"
+  },
+  "scenarios": {
+    "title": "Explore by Scenario",
+    "subtitle": "Choose your use case to get recommended tool combinations",
+    "recommendedTools": "Recommended Tools",
+    "combinations": "Tool Combinations",
+    "quickStart": "Quick Start",
+    "otherScenarios": "Other Scenarios",
+    "priority": {
+      "essential": "⭐⭐⭐ Essential",
+      "common": "⭐⭐ Common",
+      "advanced": "⭐⭐ Advanced",
+      "optional": "⭐ Optional"
+    }
   }
 }

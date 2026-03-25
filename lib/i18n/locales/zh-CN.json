@@ -122,5 +122,19 @@
     "add": "添加到收藏",
     "remove": "从收藏中移除",
     "filter": "🔖 已收藏"
+  },
+  "scenarios": {
+    "title": "按场景探索",
+    "subtitle": "选择你的使用场景，获取推荐工具组合",
+    "recommendedTools": "推荐工具",
+    "combinations": "工具组合建议",
+    "quickStart": "快速开始",
+    "otherScenarios": "其他场景",
+    "priority": {
+      "essential": "⭐⭐⭐ 必备",
+      "common": "⭐⭐ 常用",
+      "advanced": "⭐⭐ 高级",
+      "optional": "⭐ 按需"
+    }
   }
 }

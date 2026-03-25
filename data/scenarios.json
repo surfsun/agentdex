@@ -1,0 +1,217 @@
+[
+  {
+    "id": "web-browsing",
+    "slug": "web-browsing",
+    "icon": "🌐",
+    "name": "Web Browsing Agent",
+    "name_zh": "网页浏览 Agent",
+    "description": "Agents that can access web pages, extract content, and perform actions",
+    "description_zh": "让 Agent 能够访问网页、提取内容、执行操作",
+    "tools": [
+      { "id": "jina-reader", "priority": "essential", "use_case": "Static page content extraction", "use_case_zh": "静态页面内容提取" },
+      { "id": "firecrawl", "priority": "common", "use_case": "Dynamic pages, full site crawling", "use_case_zh": "动态页面、整站爬取" },
+      { "id": "browserbase", "priority": "advanced", "use_case": "Interactive pages, login required", "use_case_zh": "可交互、可登录的页面" },
+      { "id": "apify", "priority": "optional", "use_case": "Pre-built scrapers for popular sites", "use_case_zh": "现成爬虫，常见网站" }
+    ],
+    "combinations": [
+      {
+        "name": "Basic",
+        "name_zh": "基础组合",
+        "tools": ["jina-reader"],
+        "description": "Static page content extraction - simplest setup",
+        "description_zh": "静态页面内容提取 - 最简单的配置"
+      },
+      {
+        "name": "Advanced",
+        "name_zh": "进阶组合",
+        "tools": ["jina-reader", "firecrawl"],
+        "description": "Dynamic pages + full site crawling",
+        "description_zh": "动态页面 + 整站爬取"
+      },
+      {
+        "name": "Complete",
+        "name_zh": "完整组合",
+        "tools": ["browserbase", "jina-reader"],
+        "description": "Interactive browsing with login support",
+        "description_zh": "可交互浏览，支持登录"
+      }
+    ],
+    "quick_start": "import requests\n\n# Using Jina Reader to fetch page content\nurl = \"https://example.com\"\nmarkdown = requests.get(f\"https://r.jina.ai/{url}\").text\nprint(markdown)",
+    "quick_start_language": "python"
+  },
+  {
+    "id": "memory-agent",
+    "slug": "memory-agent",
+    "icon": "💾",
+    "name": "Persistent Memory Agent",
+    "name_zh": "持久记忆 Agent",
+    "description": "Agents that remember user preferences, history, and context across sessions",
+    "description_zh": "让 Agent 跨会话记住用户偏好、历史决策和上下文",
+    "tools": [
+      { "id": "mem0", "priority": "essential", "use_case": "User preferences, long-term memory", "use_case_zh": "用户偏好、长期记忆" },
+      { "id": "zep", "priority": "essential", "use_case": "Knowledge graph, temporal memory", "use_case_zh": "知识图谱、时序记忆" },
+      { "id": "letta", "priority": "advanced", "use_case": "Self-editing memory, stateful agents", "use_case_zh": "自编辑记忆、有状态 Agent" }
+    ],
+    "combinations": [
+      {
+        "name": "Simple Memory",
+        "name_zh": "简单记忆",
+        "tools": ["mem0"],
+        "description": "Three-line integration, user preferences",
+        "description_zh": "三行代码集成，用户偏好"
+      },
+      {
+        "name": "Context-Aware",
+        "name_zh": "上下文感知",
+        "tools": ["zep"],
+        "description": "Knowledge graph with 200ms context retrieval",
+        "description_zh": "知识图谱，200ms 返回上下文"
+      },
+      {
+        "name": "Stateful Agent",
+        "name_zh": "有状态 Agent",
+        "tools": ["letta"],
+        "description": "Agent with self-editing memory blocks",
+        "description_zh": "Agent 拥有可自我编辑的记忆块"
+      }
+    ],
+    "quick_start": "from mem0 import Memory\n\nm = Memory()\n\n# Store a memory\nm.add(\"User likes dark mode\", user_id=\"user_123\")\n\n# Retrieve relevant memories\nmemories = m.search(\"user preferences\", user_id=\"user_123\")",
+    "quick_start_language": "python"
+  },
+  {
+    "id": "code-execution",
+    "slug": "code-execution",
+    "icon": "⚡",
+    "name": "Code Execution Agent",
+    "name_zh": "代码执行 Agent",
+    "description": "Agents that can run code, execute commands, and manipulate files safely",
+    "description_zh": "让 Agent 能够运行代码、执行命令、操作文件",
+    "tools": [
+      { "id": "e2b", "priority": "essential", "use_case": "Secure sandbox for Python/JS execution", "use_case_zh": "安全沙箱，运行 Python/JS" },
+      { "id": "modal", "priority": "common", "use_case": "Serverless cloud with GPU support", "use_case_zh": "无服务器云，支持 GPU" },
+      { "id": "daytona", "priority": "advanced", "use_case": "Full dev environment, repo cloning", "use_case_zh": "完整开发环境，克隆仓库" },
+      { "id": "inngest", "priority": "optional", "use_case": "Long-running workflows with durability", "use_case_zh": "长时间工作流，持久化" }
+    ],
+    "combinations": [
+      {
+        "name": "Quick Sandbox",
+        "name_zh": "快速沙箱",
+        "tools": ["e2b"],
+        "description": "Secure code execution in seconds",
+        "description_zh": "秒级安全代码执行"
+      },
+      {
+        "name": "Cloud Deployment",
+        "name_zh": "云端部署",
+        "tools": ["modal"],
+        "description": "Deploy agent as scalable cloud function",
+        "description_zh": "将 Agent 部署为可扩展云函数"
+      },
+      {
+        "name": "Dev Environment",
+        "name_zh": "开发环境",
+        "tools": ["daytona"],
+        "description": "Full IDE-like environment for agents",
+        "description_zh": "完整的 IDE 级环境"
+      }
+    ],
+    "quick_start": "from e2b import Sandbox\n\n# Create a secure sandbox\nsbx = Sandbox()\n\n# Run Python code\nexecution = sbx.run_code(\"print('Hello from Agent!')\")\nprint(execution.stdout)  # Hello from Agent!\n\nsbx.close()",
+    "quick_start_language": "python"
+  },
+  {
+    "id": "email-agent",
+    "slug": "email-agent",
+    "icon": "📧",
+    "name": "Email Agent",
+    "name_zh": "发送邮件 Agent",
+    "description": "Agents that can send and receive emails autonomously",
+    "description_zh": "让 Agent 能够自主收发邮件",
+    "tools": [
+      { "id": "agentmail", "priority": "essential", "use_case": "Dedicated email for agents, API-first", "use_case_zh": "Agent 专用邮箱，API 优先" },
+      { "id": "composio", "priority": "common", "use_case": "Gmail, Outlook integration", "use_case_zh": "Gmail、Outlook 集成" }
+    ],
+    "combinations": [
+      {
+        "name": "Native Email",
+        "name_zh": "原生邮件",
+        "tools": ["agentmail"],
+        "description": "Agent gets its own email address",
+        "description_zh": "Agent 获得专属邮箱地址"
+      },
+      {
+        "name": "Gmail/Outlook",
+        "name_zh": "Gmail/Outlook",
+        "tools": ["composio"],
+        "description": "Connect to existing email accounts",
+        "description_zh": "连接现有邮箱账户"
+      }
+    ],
+    "quick_start": "import requests\n\n# Send email via AgentMail\nresponse = requests.post(\n    \"https://api.agentmail.to/v1/send\",\n    headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n    json={\n        \"to\": \"user@example.com\",\n        \"subject\": \"Hello from Agent\",\n        \"body\": \"This is an automated message.\"\n    }\n)",
+    "quick_start_language": "python"
+  },
+  {
+    "id": "multi-agent",
+    "slug": "multi-agent",
+    "icon": "🤝",
+    "name": "Multi-Agent Collaboration",
+    "name_zh": "多 Agent 协作",
+    "description": "Multiple agents working together with defined roles and workflows",
+    "description_zh": "多个 Agent 协同工作，有明确角色和流程",
+    "tools": [
+      { "id": "crewai", "priority": "essential", "use_case": "Role-based multi-agent teams", "use_case_zh": "基于角色的多 Agent 团队" },
+      { "id": "autogen", "priority": "essential", "use_case": "Agent-to-agent conversations", "use_case_zh": "Agent 间对话协作" },
+      { "id": "langchain", "priority": "common", "use_case": "LangGraph for stateful workflows", "use_case_zh": "LangGraph 有状态工作流" },
+      { "id": "dify", "priority": "optional", "use_case": "Visual multi-agent builder", "use_case_zh": "可视化多 Agent 构建器" }
+    ],
+    "combinations": [
+      {
+        "name": "Role-Based Team",
+        "name_zh": "角色团队",
+        "tools": ["crewai"],
+        "description": "Researcher, Writer, Reviewer agents",
+        "description_zh": "研究员、作者、审核员 Agent"
+      },
+      {
+        "name": "Conversation-Based",
+        "name_zh": "对话协作",
+        "tools": ["autogen"],
+        "description": "Agents negotiate and solve problems together",
+        "description_zh": "Agent 互相协商解决问题"
+      }
+    ],
+    "quick_start": "from crewai import Agent, Task, Crew\n\nresearcher = Agent(role='Researcher', goal='Find information')\nwriter = Agent(role='Writer', goal='Write content')\n\ntask = Task(description='Write about AI agents', agent=writer)\ncrew = Crew(agents=[researcher, writer], tasks=[task])\nresult = crew.kickoff()",
+    "quick_start_language": "python"
+  },
+  {
+    "id": "social-agent",
+    "slug": "social-agent",
+    "icon": "💬",
+    "name": "Social Agent",
+    "name_zh": "社交 Agent",
+    "description": "Agents that can post, comment, and interact on social platforms",
+    "description_zh": "让 Agent 能够发帖、评论、在社交平台互动",
+    "tools": [
+      { "id": "moltbook", "priority": "essential", "use_case": "Agent-native social network", "use_case_zh": "Agent 原生社交网络" },
+      { "id": "composio", "priority": "common", "use_case": "Twitter, LinkedIn, Slack integration", "use_case_zh": "Twitter、LinkedIn、Slack 集成" },
+      { "id": "n8n", "priority": "optional", "use_case": "Workflow automation with triggers", "use_case_zh": "工作流自动化，触发器" }
+    ],
+    "combinations": [
+      {
+        "name": "Agent Social Network",
+        "name_zh": "Agent 社交网络",
+        "tools": ["moltbook"],
+        "description": "Agents post, comment, vote on their own platform",
+        "description_zh": "Agent 在专属平台发帖、评论、投票"
+      },
+      {
+        "name": "Human Platforms",
+        "name_zh": "人类平台",
+        "tools": ["composio"],
+        "description": "Post to Twitter, LinkedIn, Slack via API",
+        "description_zh": "通过 API 发到 Twitter、LinkedIn、Slack"
+      }
+    ],
+    "quick_start": "import requests\n\n# Post to Moltbook\nresponse = requests.post(\n    \"https://api.moltbook.com/v1/posts\",\n    headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n    json={\n        \"content\": \"Hello from AI Agent!\",\n        \"agent_id\": \"my_agent\"\n    }\n)",
+    "quick_start_language": "python"
+  }
+]
