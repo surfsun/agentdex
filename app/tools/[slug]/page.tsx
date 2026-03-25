@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { tools, getToolBySlug, categories } from '@/lib/tools'
+import AddToCompareButton from '@/components/AddToCompareButton'
 
 interface Params {
   slug: string
@@ -296,8 +297,8 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
         </div>
       </div>
 
-      {/* Links */}
-      <div className="flex flex-wrap gap-4 mb-8">
+      {/* Links & Compare */}
+      <div className="flex flex-wrap items-center gap-4 mb-8">
         <a
           href={tool.website}
           target="_blank"
@@ -316,7 +317,46 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
             GitHub →
           </a>
         )}
+        <AddToCompareButton tool={tool} />
       </div>
+
+      {/* Compare with similar tools */}
+      {(() => {
+        const similarTools = tools
+          .filter(t => t.category === tool.category && t.id !== tool.id)
+          .slice(0, 3)
+        
+        if (similarTools.length === 0) return null
+        
+        return (
+          <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                ⚖️ Compare with similar tools
+              </h3>
+              <a 
+                href={`/compare?tools=${tool.id}`}
+                className="text-sm text-blue-500 hover:text-blue-600"
+              >
+                View all →
+              </a>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {similarTools.map(t => (
+                <a
+                  key={t.id}
+                  href={`/compare?tools=${tool.id},${t.id}`}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:border-blue-300 dark:hover:border-blue-600 transition"
+                >
+                  <span className="font-medium text-gray-900 dark:text-white">{tool.name}</span>
+                  <span className="text-gray-400">vs</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{t.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Quick Start for Agents - 新增 */}
       {tool.api_available && (
