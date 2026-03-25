@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { tools, categories, sortByRecentlyAdded, getBrandNewCount, sortToolsByIdentity, Identity } from '@/lib/tools'
+import { tools, categories, sortByRecentlyAdded, getBrandNewCount, sortToolsByIdentity, Identity, getRecentUpdates, ToolUpdate } from '@/lib/tools'
 import { scenarios } from '@/lib/scenarios'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import ClientSearch from '@/components/ClientSearch'
@@ -323,6 +323,167 @@ export default async function HomePage({
           })}
         </div>
       </div>
+
+      {/* Tool Stacks Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <span>🧩</span>
+            {locale === 'zh-CN' ? '工具栈推荐' : 'Tool Stacks'}
+          </h2>
+          <Link
+            href="/stacks"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {locale === 'zh-CN' ? '查看全部 →' : 'View All →'}
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            href="/stacks/web-browsing-agent"
+            className="group p-5 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-xl hover:shadow-md transition-all"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">🌐</span>
+              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                {locale === 'zh-CN' ? '网页浏览 Agent' : 'Web Browsing Agent'}
+              </h3>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+              Browserbase + Mem0 + Langfuse
+            </p>
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <span>⏱️ 30-60 min</span>
+              <span>💰 $50-200/月</span>
+            </div>
+          </Link>
+          <Link
+            href="/stacks/email-agent"
+            className="group p-5 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border border-green-200 dark:border-green-800 rounded-xl hover:shadow-md transition-all"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">📧</span>
+              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">
+                {locale === 'zh-CN' ? '邮件 Agent' : 'Email Agent'}
+              </h3>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+              AgentMail + Mem0 + Langfuse
+            </p>
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <span>⏱️ 15-30 min</span>
+              <span>💰 $20-80/月</span>
+            </div>
+          </Link>
+          <Link
+            href="/stacks/code-execution-agent"
+            className="group p-5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl hover:shadow-md transition-all"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">⚡</span>
+              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                {locale === 'zh-CN' ? '代码执行 Agent' : 'Code Execution Agent'}
+              </h3>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+              E2B + Langfuse
+            </p>
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <span>⏱️ 20-40 min</span>
+              <span>💰 $30-100/月</span>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Recent Updates Section */}
+      {(() => {
+        const recentUpdates = getRecentUpdates(5)
+        if (recentUpdates.length === 0) return null
+        
+        return (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <span>📋</span>
+                {locale === 'zh-CN' ? '最近更新' : 'Recent Updates'}
+              </h2>
+              <a
+                href="/rss"
+                target="_blank"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              >
+                <span>RSS</span>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M5 3a1 1 0 000 2c5.523 0 10 4.477 10 10a1 1 0 102 0C17 8.373 11.627 3 5 3z" />
+                  <path d="M4 9a1 1 0 011-1 7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 1 1 0 01-1-1z" />
+                  <circle cx="5" cy="15" r="2" />
+                </svg>
+              </a>
+            </div>
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+              {recentUpdates.map((update, index) => {
+                const changeTypeIcons: Record<string, string> = {
+                  breaking: '💥',
+                  feature: '✨',
+                  fix: '🐛',
+                  deprecation: '⚠️',
+                  security: '🔒'
+                }
+                const latestChangeType = update.latestChange.changes[0]?.type || 'feature'
+                const changeIcon = changeTypeIcons[latestChangeType] || '📝'
+                const changeDesc = update.latestChange.changes[0]?.description || ''
+                const changeDescZh = update.latestChange.changes[0]?.description_zh
+                const displayDesc = locale === 'zh-CN' && changeDescZh ? changeDescZh : changeDesc
+                
+                // Calculate relative time
+                const changeDate = new Date(update.latestChange.date)
+                const now = new Date()
+                const diffMs = now.getTime() - changeDate.getTime()
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+                const relativeTime = diffDays === 0 
+                  ? (locale === 'zh-CN' ? '今天' : 'Today')
+                  : diffDays === 1 
+                    ? (locale === 'zh-CN' ? '昨天' : 'Yesterday')
+                    : diffDays < 7 
+                      ? `${diffDays} ${locale === 'zh-CN' ? '天前' : 'days ago'}`
+                      : changeDate.toLocaleDateString()
+                
+                return (
+                  <Link
+                    key={update.tool.id}
+                    href={`/tools/${update.tool.slug}`}
+                    className={`flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition ${
+                      index !== recentUpdates.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''
+                    }`}
+                  >
+                    <div className="flex-shrink-0 text-xl">{changeIcon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-gray-900 dark:text-white">{update.tool.name}</span>
+                        <span className="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+                          v{update.latestChange.version}
+                        </span>
+                        {update.latestChange.breaking && (
+                          <span className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded font-medium">
+                            Breaking
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+                        {displayDesc}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                      {relativeTime}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Stats - 实时更新 */}
       <div className="flex gap-6 text-sm text-gray-400 mb-6">

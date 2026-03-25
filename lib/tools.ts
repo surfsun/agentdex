@@ -185,3 +185,64 @@ export const identities: { id: Identity; label: string; label_zh: string; icon: 
   { id: 'researcher', label: 'Researcher', label_zh: '研究者', icon: '🔬' },
   { id: 'pm', label: 'Product Manager', label_zh: '产品经理', icon: '📊' },
 ]
+
+// Get tools with recent changelog updates
+export type ToolUpdate = {
+  tool: Tool
+  latestChange: ChangelogEntry
+}
+
+export function getRecentUpdates(limit: number = 5): ToolUpdate[] {
+  const updates: ToolUpdate[] = []
+  
+  for (const tool of tools) {
+    if (tool.changelog && tool.changelog.length > 0) {
+      // Get the latest changelog entry (first in array)
+      const latestChange = tool.changelog[0]
+      updates.push({
+        tool,
+        latestChange
+      })
+    }
+  }
+  
+  // Sort by changelog date (most recent first)
+  updates.sort((a, b) => {
+    const dateA = new Date(a.latestChange.date).getTime()
+    const dateB = new Date(b.latestChange.date).getTime()
+    return dateB - dateA
+  })
+  
+  return updates.slice(0, limit)
+}
+
+// Get changelog updates within last N days
+export function getRecentChangelogUpdates(days: number = 30): ToolUpdate[] {
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - days)
+  
+  const updates: ToolUpdate[] = []
+  
+  for (const tool of tools) {
+    if (tool.changelog && tool.changelog.length > 0) {
+      const latestChange = tool.changelog[0]
+      const changeDate = new Date(latestChange.date)
+      
+      if (changeDate > cutoffDate) {
+        updates.push({
+          tool,
+          latestChange
+        })
+      }
+    }
+  }
+  
+  // Sort by date
+  updates.sort((a, b) => {
+    const dateA = new Date(a.latestChange.date).getTime()
+    const dateB = new Date(b.latestChange.date).getTime()
+    return dateB - dateA
+  })
+  
+  return updates
+}
