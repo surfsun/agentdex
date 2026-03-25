@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { tools, categories } from '@/lib/tools'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
-import ToolCard from '@/components/ToolCard'
+import ClientToolCard from '@/components/ClientToolCard'
 import ClientSearch from '@/components/ClientSearch'
 
 interface SearchParams {
@@ -365,7 +365,7 @@ export default async function HomePage({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayTools.map(tool => (
-            <ToolCard key={tool.id} tool={tool} locale={locale} />
+            <ClientToolCard key={tool.id} tool={tool} locale={locale} />
           ))}
         </div>
       )}
