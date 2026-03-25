@@ -135,7 +135,11 @@
           }
         ]
       }
-    ]
+    ],
+    "github_stars": 26000,
+    "integration_complexity": "low",
+    "best_for": ["Memory persistence", "User context", "RAG pipelines"],
+    "best_for_zh": ["记忆持久化", "用户上下文", "RAG 管道"]
   },
   {
     "id": "zep",
@@ -147,6 +151,10 @@
     "github": "https://github.com/getzep/zep",
     "category": "memory",
     "tags": ["memory", "graph", "context", "open-source", "production-ready"],
+    "github_stars": 3200,
+    "integration_complexity": "low",
+    "best_for": ["Graph memory", "Context retrieval", "Production apps"],
+    "best_for_zh": ["图谱记忆", "上下文检索", "生产应用"],
     "pricing": "freemium",
     "price_detail": "开源可自托管，云端有免费套餐",
     "agent_friendly": true,
@@ -187,7 +195,11 @@
     "recommended_for": {
       "researcher": { "priority": 1, "reason": "Self-editing memory for advanced agent architectures", "reason_zh": "自编辑记忆适合高级 Agent 架构研究" },
       "developer": { "priority": 3, "reason": "Stateful agents with persistent identity", "reason_zh": "有状态 Agent 保持持久身份" }
-    }
+    },
+    "github_stars": 12000,
+    "integration_complexity": "medium",
+    "best_for": ["Stateful agents", "Self-editing memory", "Agent identity"],
+    "best_for_zh": ["有状态 Agent", "自编辑记忆", "Agent 身份"]
   },
   {
     "id": "jina-reader",
@@ -204,6 +216,10 @@
     "agent_friendly": true,
     "api_available": true,
     "open_source": true,
+    "github_stars": 8400,
+    "integration_complexity": "low",
+    "best_for": ["Web scraping", "Content extraction", "URL to Markdown"],
+    "best_for_zh": ["网页抓取", "内容提取", "URL 转 Markdown"],
     "featured": true,
     "verified": false,
     "submitted_by": "human",

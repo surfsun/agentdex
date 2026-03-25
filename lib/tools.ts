@@ -29,6 +29,8 @@ export type RecommendedFor = {
   }
 }
 
+export type IntegrationComplexity = 'low' | 'medium' | 'high'
+
 export type Tool = {
   id: string
   slug: string
@@ -55,6 +57,11 @@ export type Tool = {
   api_version?: string  // Current API version
   api_stability?: 'stable' | 'beta' | 'alpha'  // API stability level
   recommended_for?: RecommendedFor  // Identity-based recommendations
+  // Comparison fields
+  github_stars?: number  // GitHub stars count
+  integration_complexity?: IntegrationComplexity  // Integration difficulty
+  best_for?: string[]  // Use cases this tool is best for
+  best_for_zh?: string[]  // Chinese version of best_for
 }
 
 export const tools: Tool[] = toolsData as Tool[]
