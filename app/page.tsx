@@ -20,6 +20,7 @@ interface SearchParams {
   integration_level?: string
   identity?: string
   persona?: string
+  mcp?: string
 }
 
 // 动态生成 metadata，支持分类页面 SEO
@@ -79,6 +80,7 @@ function buildFilterUrl(params: {
   integration_level?: string
   identity?: string
   persona?: boolean
+  mcp?: boolean
 }): string {
   const searchParams = new URLSearchParams()
   
@@ -112,6 +114,9 @@ function buildFilterUrl(params: {
   if (params.persona) {
     searchParams.set('persona', 'true')
   }
+  if (params.mcp) {
+    searchParams.set('mcp', 'true')
+  }
   
   const queryString = searchParams.toString()
   return queryString ? `/?${queryString}` : '/'
@@ -133,6 +138,7 @@ export default async function HomePage({
   const integrationLevelFilter = params.integration_level || ''
   const identityParam = params.identity || ''
   const personaFilter = params.persona === 'true'
+  const mcpFilter = params.mcp === 'true'
 
   // Get locale from cookie
   const cookieStore = await cookies()
@@ -157,6 +163,9 @@ export default async function HomePage({
   }
   if (personaFilter) {
     displayTools = displayTools.filter(t => t.persona !== undefined)
+  }
+  if (mcpFilter) {
+    displayTools = displayTools.filter(t => t.mcp?.supported)
   }
   
   // 再应用搜索/分类
@@ -211,6 +220,9 @@ export default async function HomePage({
   
   // Persona-enabled count
   const personaCount = tools.filter(t => t.persona !== undefined).length
+  
+  // MCP-supported count
+  const mcpCount = tools.filter(t => t.mcp?.supported).length
 
   // 生成 JSON-LD 结构化数据
   const jsonLd = {
@@ -482,6 +494,26 @@ export default async function HomePage({
           }`}
         >
           🎭 Persona <span className="text-xs opacity-60">({personaCount})</span>
+        </a>
+        <a
+          href={buildFilterUrl({
+            category: activeCategory,
+            agent_friendly: agentFriendlyFilter,
+            open_source: openSourceFilter,
+            pricing: pricingFilter || undefined,
+            q: query || undefined,
+            sort: sortFilter || undefined,
+            integration_level: integrationLevelFilter || undefined,
+            persona: personaFilter,
+            mcp: !mcpFilter
+          })}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            mcpFilter
+              ? 'bg-indigo-600 text-white border-indigo-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'
+          }`}
+        >
+          🔌 MCP <span className="text-xs opacity-60">({mcpCount})</span>
         </a>
         <span className="text-gray-300">|</span>
         <span className="text-sm text-gray-500">{t.filters.sort}</span>

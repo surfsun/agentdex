@@ -121,6 +121,11 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
               🤖 Agent-friendly
             </span>
           )}
+          {tool.mcp?.supported && (
+            <span className="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full whitespace-nowrap">
+              🔌 MCP Compatible
+            </span>
+          )}
           {tool.featured && (
             <span className="text-sm bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
               ⭐ Featured
@@ -209,6 +214,58 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
               className="text-sm text-pink-600 hover:text-pink-800 font-medium"
             >
               → Explore Persona Agent Scenario
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* MCP Support */}
+      {tool.mcp?.supported && (
+        <div className="mb-8 bg-indigo-50 border border-indigo-200 rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-indigo-800 mb-4 flex items-center gap-2">
+            🔌 MCP (Model Context Protocol)
+          </h2>
+          <p className="text-sm text-indigo-700 mb-4">
+            This tool supports the Model Context Protocol, allowing seamless integration with Claude Desktop and other MCP-compatible clients.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+            <div className="bg-white p-3 rounded-lg border border-indigo-100">
+              <div className="text-xs text-indigo-500 mb-1">Server Type</div>
+              <div className="text-sm font-medium text-gray-900">{tool.mcp.server_type || 'stdio'}</div>
+            </div>
+            {tool.mcp.tools_count && (
+              <div className="bg-white p-3 rounded-lg border border-indigo-100">
+                <div className="text-xs text-indigo-500 mb-1">Tools Available</div>
+                <div className="text-sm font-medium text-gray-900">{tool.mcp.tools_count} tools</div>
+              </div>
+            )}
+            {tool.mcp.verified && (
+              <div className="bg-white p-3 rounded-lg border border-indigo-100">
+                <div className="text-xs text-indigo-500 mb-1">Status</div>
+                <div className="text-sm font-medium text-green-600">✓ Verified</div>
+              </div>
+            )}
+          </div>
+          {tool.mcp.installation && (
+            <div className="bg-indigo-900 rounded-lg p-4">
+              <div className="text-xs text-indigo-300 mb-2">Quick Install:</div>
+              <code className="text-sm text-indigo-100">{tool.mcp.installation}</code>
+            </div>
+          )}
+          <div className="mt-4 flex gap-4">
+            <a 
+              href="https://modelcontextprotocol.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              → MCP Documentation
+            </a>
+            <a 
+              href="/?mcp=true"
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              → Browse MCP Tools
             </a>
           </div>
         </div>

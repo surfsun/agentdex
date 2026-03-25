@@ -139,7 +139,14 @@
     "github_stars": 26000,
     "integration_complexity": "low",
     "best_for": ["Memory persistence", "User context", "RAG pipelines"],
-    "best_for_zh": ["记忆持久化", "用户上下文", "RAG 管道"]
+    "best_for_zh": ["记忆持久化", "用户上下文", "RAG 管道"],
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 10,
+      "installation": "npx @anthropic-ai/mcp-server-mem0",
+      "verified": true
+    }
   },
   {
     "id": "zep",
@@ -269,6 +276,13 @@
     "recommended_for": {
       "developer": { "priority": 2, "reason": "LLM-ready structured data output", "reason_zh": "输出 LLM 就绪的结构化数据" },
       "founder": { "priority": 3, "reason": "Extract data from competitor websites", "reason_zh": "从竞品网站提取数据" }
+    },
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 5,
+      "installation": "npx @anthropic-ai/mcp-server-firecrawl",
+      "verified": true
     }
   },
   {
@@ -296,6 +310,13 @@
       "developer": { "priority": 2, "reason": "Full browser control for complex interactions", "reason_zh": "完整浏览器控制，适合复杂交互" },
       "founder": { "priority": 2, "reason": "Automate web tasks like form filling", "reason_zh": "自动化网页任务如填表" },
       "pm": { "priority": 1, "reason": "Best for testing and automating web workflows", "reason_zh": "测试和自动化网页工作流的首选" }
+    },
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 8,
+      "installation": "npx @anthropic-ai/mcp-server-browserbase",
+      "verified": true
     }
   },
   {
@@ -322,6 +343,13 @@
     "recommended_for": {
       "founder": { "priority": 1, "reason": "2000+ ready-made scrapers, no coding needed", "reason_zh": "2000+ 现成爬虫，无需编码" },
       "pm": { "priority": 2, "reason": "Extract data from major platforms instantly", "reason_zh": "即时从主流平台提取数据" }
+    },
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 2000,
+      "installation": "npx @anthropic-ai/mcp-server-apify",
+      "verified": true
     }
   },
   {
@@ -387,7 +415,14 @@
           }
         ]
       }
-    ]
+    ],
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 5,
+      "installation": "npx @anthropic-ai/mcp-server-e2b",
+      "verified": true
+    }
   },
   {
     "id": "modal",
@@ -492,6 +527,13 @@
       "developer": { "priority": 2, "reason": "200+ integrations with one line of code", "reason_zh": "一行代码集成 200+ 应用" },
       "founder": { "priority": 1, "reason": "Instant integrations without development cost", "reason_zh": "零开发成本即时集成" },
       "pm": { "priority": 2, "reason": "Connect agents to existing tools quickly", "reason_zh": "快速连接 Agent 到现有工具" }
+    },
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 200,
+      "installation": "npx @anthropic-ai/mcp-server-composio",
+      "verified": true
     }
   },
   {

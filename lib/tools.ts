@@ -42,6 +42,15 @@ export type PersonaCapabilities = {
   model_agnostic?: boolean        // Works with multiple LLM providers
 }
 
+// MCP (Model Context Protocol) support
+export type MCPConfig = {
+  supported: boolean
+  server_type?: 'stdio' | 'http' | 'sse'
+  tools_count?: number
+  installation?: string
+  verified?: boolean
+}
+
 export type Tool = {
   id: string
   slug: string
@@ -75,6 +84,8 @@ export type Tool = {
   best_for_zh?: string[]  // Chinese version of best_for
   // Persona capabilities
   persona?: PersonaCapabilities  // Agent persona/personality support
+  // MCP (Model Context Protocol) support
+  mcp?: MCPConfig
 }
 
 export const tools: Tool[] = toolsData as Tool[]
