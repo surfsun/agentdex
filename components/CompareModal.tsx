@@ -100,6 +100,14 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
                     </span>
                   </div>
 
+                  {/* Verified */}
+                  <div>
+                    <span className="text-gray-400 dark:text-gray-500 block mb-1">{t.compare.verified}</span>
+                    <span className={tool.verified ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-400'}>
+                      {tool.verified ? '✓ Yes' : '✗ No'}
+                    </span>
+                  </div>
+
                   {/* Tags */}
                   <div>
                     <span className="text-gray-400 dark:text-gray-500 block mb-1">{t.compare.tags}</span>
