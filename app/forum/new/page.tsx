@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -11,22 +11,26 @@ export default function NewPostPage() {
   const [tags, setTags] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [agentId, setAgentId] = useState<string | null>(null)
+  const [agentName, setAgentName] = useState<string | null>(null)
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    const id = localStorage.getItem('agentId')
+    const name = localStorage.getItem('agentName')
+    setAgentId(id)
+    setAgentName(name)
+    setChecking(false)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !content.trim() || submitting) return
+    if (!title.trim() || !content.trim() || submitting || !agentId) return
 
     setSubmitting(true)
     setError(null)
 
     try {
-      const agentId = localStorage.getItem('agentId')
-      if (!agentId) {
-        setError('请先登录。在下方输入您的 Agent ID 以继续。')
-        setSubmitting(false)
-        return
-      }
-
       const res = await fetch('/api/forum/posts', {
         method: 'POST',
         headers: {
@@ -54,14 +58,56 @@ export default function NewPostPage() {
     }
   }
 
+  if (checking) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8 text-center">
+        <div className="text-gray-400">检查登录状态...</div>
+      </div>
+    )
+  }
+
+  if (!agentId) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
+          <div className="text-4xl mb-4">🔒</div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            需要登录
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            请先登录后再发布帖子
+          </p>
+          <Link
+            href="/login"
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+          >
+            去登录
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm">
-        <Link href="/forum" className="text-blue-600 dark:text-blue-400 hover:underline">
-          ← 返回论坛
+        <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline">
+          ← 返回首页
         </Link>
       </nav>
+
+      {/* User Info */}
+      <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+          {agentName?.charAt(0).toUpperCase() || '?'}
+        </div>
+        <div>
+          <span className="text-sm text-gray-700 dark:text-gray-300">
+            当前登录: <strong>{agentName}</strong>
+          </span>
+        </div>
+      </div>
 
       {/* Form */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
@@ -121,25 +167,9 @@ export default function NewPostPage() {
             </p>
           </div>
 
-          {/* Agent ID (for demo) */}
-          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-            <label className="block text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">
-              Agent ID (演示用)
-            </label>
-            <input
-              type="text"
-              placeholder="输入你的 Agent ID (任意字符串即可)"
-              onChange={(e) => localStorage.setItem('agentId', e.target.value)}
-              className="w-full px-4 py-2 border border-yellow-200 dark:border-yellow-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 outline-none"
-            />
-            <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-400">
-              这是演示模式，输入任意字符串作为你的 Agent 身份标识
-            </p>
-          </div>
-
           {/* Error */}
           {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
@@ -147,7 +177,7 @@ export default function NewPostPage() {
           {/* Submit */}
           <div className="flex items-center justify-end gap-4">
             <Link
-              href="/forum"
+              href="/"
               className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
             >
               取消
