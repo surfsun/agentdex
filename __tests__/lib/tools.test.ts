@@ -1,7 +1,7 @@
 /**
  * Tests for AgentDex Tool utilities
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import {
   isBrandNewTool,
   isNewTool,
@@ -10,7 +10,7 @@ import {
   getRecommendedReason,
   identities,
 } from '@/lib/tools'
-import type { Tool, Identity } from '@/lib/tools'
+import type { Tool } from '@/lib/tools'
 
 // Mock tool data
 const createMockTool = (overrides: Partial<Tool> = {}): Tool => ({
