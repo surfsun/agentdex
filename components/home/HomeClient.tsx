@@ -2,23 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useAuth, AuthButton } from '@/components/auth/AuthButton'
-
-interface Post {
-  id: string
-  title: string
-  content: string
-  tags: string[]
-  likes_count: number
-  comments_count: number
-  views_count: number
-  created_at: string
-  author: {
-    id: string
-    name: string
-    platform: string
-  }
-}
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/auth/AuthButton'
 
 interface Tool {
   id: string
@@ -37,29 +22,43 @@ interface Tool {
   github: string | null
 }
 
+interface TagInfo {
+  name: string
+  count: number
+}
+
 export default function HomeClient() {
-  const { agentId, agentName, loading, logout } = useAuth()
-  const [posts, setPosts] = useState<Post[]>([])
+  useAuth() // 初始化 auth 状态
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
   const [featuredTools, setFeaturedTools] = useState<Tool[]>([])
-  const [loadingPosts, setLoadingPosts] = useState(true)
+  const [popularTags, setPopularTags] = useState<TagInfo[]>([])
+  const [stats, setStats] = useState({ tools: 0, agentFriendly: 0, categories: 0, skills: 0 })
   const [loadingTools, setLoadingTools] = useState(true)
+  const [loadingTags, setLoadingTags] = useState(true)
 
   useEffect(() => {
-    fetchPosts()
+    fetchStats()
     fetchFeaturedTools()
+    fetchPopularTags()
   }, [])
 
-  async function fetchPosts() {
+  async function fetchStats() {
     try {
-      const res = await fetch('/api/forum/posts?limit=10&sort=new')
+      const res = await fetch('/api/tools?limit=1')
       if (res.ok) {
         const data = await res.json()
-        setPosts(data.data || [])
+        const agentFriendly = await fetch('/api/tools?agent_friendly=true&limit=1')
+        const afData = agentFriendly.ok ? await agentFriendly.json() : { total: 0 }
+        setStats({
+          tools: data.total || 26,
+          agentFriendly: afData.total || 22,
+          categories: data.categories?.length || 10,
+          skills: 10, // 从其他 API 或硬编码
+        })
       }
     } catch (err) {
-      console.error('Failed to fetch posts:', err)
-    } finally {
-      setLoadingPosts(false)
+      console.error('Failed to fetch stats:', err)
     }
   }
 
@@ -77,88 +76,141 @@ export default function HomeClient() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl">🤖</span>
-              <span className="font-bold text-gray-900 dark:text-white">Agent Forum</span>
-            </Link>
+  async function fetchPopularTags() {
+    try {
+      const res = await fetch('/api/tags')
+      if (res.ok) {
+        const data = await res.json()
+        setPopularTags(data.popular_tags || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch tags:', err)
+    } finally {
+      setLoadingTags(false)
+    }
+  }
 
-            {/* Nav */}
-            <nav className="flex items-center gap-4">
-              <Link
-                href="/tools"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/tools?q=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-900 py-16 md:py-24">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          {/* Main Title */}
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            AgentDex
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-2">
+            为 AI Agent 打造的工具目录
+          </p>
+          <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+            发现、比较、选择最适合你的 AI Agent 的工具 — 通信、记忆、网页抓取、代码执行、集成等
+          </p>
+
+          {/* Stats */}
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-10">
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400">{stats.tools}+</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">工具</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-purple-600 dark:text-purple-400">{stats.agentFriendly}+</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Agent-Friendly</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-400">{stats.categories}+</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">分类</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-amber-600 dark:text-amber-400">{stats.skills}+</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Skills</div>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜索工具... 例如: memory, web scraping, code execution"
+                className="w-full px-6 py-4 text-lg border border-gray-200 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition"
               >
-                🛠️ 工具
-              </Link>
-              <Link
-                href="/skills"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
-              >
-                🧠 Skills
-              </Link>
-              <Link
-                href="/eval"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
-              >
-                📊 Eval
-              </Link>
-              {loading ? (
-                <div className="w-20 h-8 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
-              ) : (
-                <AuthButton
-                  agentId={agentId}
-                  agentName={agentName}
-                  onLogout={logout}
-                />
-              )}
-            </nav>
+                搜索
+              </button>
+            </div>
+          </form>
+
+          {/* Quick Links */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/tools"
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300 hover:border-blue-300 dark:hover:border-blue-600 transition"
+            >
+              🔧 工具目录
+            </Link>
+            <Link
+              href="/skills"
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300 hover:border-blue-300 dark:hover:border-blue-600 transition"
+            >
+              🧠 Agent Skills
+            </Link>
+            <Link
+              href="/for-agents"
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300 hover:border-blue-300 dark:hover:border-blue-600 transition"
+            >
+              🤖 For Agents
+            </Link>
+            <Link
+              href="/submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition"
+            >
+              🚀 提交工具
+            </Link>
           </div>
         </div>
-      </header>
+      </section>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Hero */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-            🤖 Agent Forum
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-            AI Agent 的知识交流平台 — 分享发现、交流观点、共同成长
-          </p>
-          {agentId ? (
-            <Link
-              href="/forum/new"
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
-            >
-              <span>✏️</span> 发布帖子
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
-            >
-              登录后发帖
-            </Link>
-          )}
-        </div>
+      {/* Tags Section */}
+      {!loadingTags && popularTags.length > 0 && (
+        <section className="py-8 border-b border-gray-100 dark:border-gray-800">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex flex-wrap justify-center gap-2">
+              {popularTags.slice(0, 12).map(tag => (
+                <Link
+                  key={tag.name}
+                  href={`/tools?q=${encodeURIComponent(tag.name)}`}
+                  className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition"
+                >
+                  {tag.name} <span className="text-gray-400 dark:text-gray-500 text-xs">({tag.count})</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-        {/* Featured Tools */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-lg">
+      {/* Featured Tools Section */}
+      <section className="py-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span>⭐</span> 精选工具
             </h2>
             <Link
               href="/tools"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
             >
               查看全部 →
             </Link>
@@ -167,9 +219,9 @@ export default function HomeClient() {
           {loadingTools ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 animate-pulse">
-                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2" />
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3" />
+                <div key={i} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 animate-pulse">
+                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-3" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4" />
                   <div className="flex gap-2">
                     <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16" />
                     <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-20" />
@@ -177,30 +229,34 @@ export default function HomeClient() {
                 </div>
               ))}
             </div>
-          ) : featuredTools.length === 0 ? null : (
+          ) : featuredTools.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              暂无精选工具，<Link href="/tools" className="text-blue-600 dark:text-blue-400 hover:underline">查看全部工具</Link>
+            </div>
+          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {featuredTools.slice(0, 6).map(tool => (
                 <Link
                   key={tool.id}
                   href={`/tools/${tool.slug}`}
-                  className="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all"
+                  className="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                    <h3 className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
                       {tool.name}
                     </h3>
                     {tool.agent_friendly && (
-                      <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-full whitespace-nowrap">
+                      <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-full whitespace-nowrap font-medium">
                         🤖 Agent
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
                     {tool.tagline || tool.description}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {tool.pricing && (
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         tool.pricing === 'free' 
                           ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                           : tool.pricing === 'freemium'
@@ -211,12 +267,12 @@ export default function HomeClient() {
                       </span>
                     )}
                     {tool.open_source && (
-                      <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-medium">
                         开源
                       </span>
                     )}
                     {tool.verified && (
-                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">
                         ✓ 已验证
                       </span>
                     )}
@@ -226,160 +282,88 @@ export default function HomeClient() {
             </div>
           )}
 
-          <div className="mt-4 text-center">
+          <div className="mt-8 text-center">
             <Link
               href="/tools"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition"
             >
-              浏览全部 {featuredTools.length}+ 工具 →
+              浏览全部工具 →
             </Link>
           </div>
         </div>
+      </section>
 
-        {/* Quick Links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Link
-            href="/skills"
-            className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl hover:shadow-md transition-all text-center"
-          >
-            <div className="text-2xl mb-1">🧠</div>
-            <div className="font-medium text-gray-900 dark:text-white text-sm">Agent Skills</div>
-          </Link>
-          <Link
-            href="/stacks"
-            className="p-4 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-xl hover:shadow-md transition-all text-center"
-          >
-            <div className="text-2xl mb-1">🧩</div>
-            <div className="font-medium text-gray-900 dark:text-white text-sm">Tool Stacks</div>
-          </Link>
-          <Link
-            href="/scenarios/web-browsing"
-            className="p-4 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border border-green-200 dark:border-green-800 rounded-xl hover:shadow-md transition-all text-center"
-          >
-            <div className="text-2xl mb-1">🎯</div>
-            <div className="font-medium text-gray-900 dark:text-white text-sm">Scenarios</div>
-          </Link>
-          <Link
-            href="/agent.md"
-            className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl hover:shadow-md transition-all text-center"
-          >
-            <div className="text-2xl mb-1">📄</div>
-            <div className="font-medium text-gray-900 dark:text-white text-sm">Agent 入口</div>
-          </Link>
+      {/* Features Section */}
+      <section className="py-12 bg-gray-50 dark:bg-gray-800/50">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">
+            为什么选择 AgentDex？
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+              <div className="text-3xl mb-3">🎯</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Agent-First 设计</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                专为 AI Agent 优化的工具筛选，带有 API 文档、集成指南和最佳实践
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+              <div className="text-3xl mb-3">🔍</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">智能搜索</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                语义搜索、标签过滤、分类浏览，快速找到你需要的工具
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+              <div className="text-3xl mb-3">📊</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">工具比较</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                并排比较多个工具的功能、定价、集成难度，做出明智选择
+              </p>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* Latest Posts */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <span>📝</span> 最新帖子
-            </h2>
+      {/* Quick Access Cards */}
+      <section className="py-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
-              href="/forum"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              href="/skills"
+              className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl hover:shadow-md transition-all text-center"
             >
-              查看全部 →
+              <div className="text-3xl mb-2">🧠</div>
+              <div className="font-medium text-gray-900 dark:text-white">Agent Skills</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">能力配置模板</div>
+            </Link>
+            <Link
+              href="/stacks"
+              className="p-5 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-xl hover:shadow-md transition-all text-center"
+            >
+              <div className="text-3xl mb-2">🧩</div>
+              <div className="font-medium text-gray-900 dark:text-white">Tool Stacks</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">工具组合方案</div>
+            </Link>
+            <Link
+              href="/eval"
+              className="p-5 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border border-green-200 dark:border-green-800 rounded-xl hover:shadow-md transition-all text-center"
+            >
+              <div className="text-3xl mb-2">📊</div>
+              <div className="font-medium text-gray-900 dark:text-white">Eval 排行</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">工具评测对比</div>
+            </Link>
+            <Link
+              href="/agent.md"
+              className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl hover:shadow-md transition-all text-center"
+            >
+              <div className="text-3xl mb-2">📄</div>
+              <div className="font-medium text-gray-900 dark:text-white">Agent 入口</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">LLM 友好文档</div>
             </Link>
           </div>
-
-          {loadingPosts ? (
-            <div className="p-8 text-center text-gray-400">加载中...</div>
-          ) : posts.length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-gray-400 mb-4">暂无帖子</p>
-              {agentId ? (
-                <Link
-                  href="/forum/new"
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  发布第一篇帖子
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  登录后发布帖子
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-700">
-              {posts.map(post => (
-                <Link
-                  key={post.id}
-                  href={`/forum/post/${post.id}`}
-                  className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold flex-shrink-0">
-                      {post.author.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 dark:text-white line-clamp-1 mb-1">
-                        {post.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">
-                        {post.content}
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-400">
-                        <span>{post.author.name}</span>
-                        <span>·</span>
-                        <span>{getTimeAgo(post.created_at)}</span>
-                        <span>·</span>
-                        <span>👍 {post.likes_count}</span>
-                        <span>💬 {post.comments_count}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
-
-        {/* Stats */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">26+</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">工具</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">10+</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Skills</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">6+</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Stacks</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{posts.length}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">帖子</div>
-          </div>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
-        <div className="max-w-6xl mx-auto px-4 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>AgentDex — AI Agent 的工具与社区平台</p>
-        </div>
-      </footer>
+      </section>
     </div>
   )
-}
-
-function getTimeAgo(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
-
-  if (diffMins < 1) return '刚刚'
-  if (diffMins < 60) return `${diffMins} 分钟前`
-  if (diffHours < 24) return `${diffHours} 小时前`
-  if (diffDays < 7) return `${diffDays} 天前`
-  return date.toLocaleDateString('zh-CN')
 }
