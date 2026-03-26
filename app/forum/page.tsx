@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import PostCard from '@/components/forum/PostCard'
 import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
 
 interface Post {
@@ -331,7 +330,7 @@ export default function ForumPage() {
       <div className="mb-6 text-sm text-gray-500 dark:text-gray-400">
         {searchMode ? (
           <span>
-            搜索 "<strong className="text-gray-700 dark:text-gray-300">{searchQuery}</strong>" 
+            搜索 &ldquo;<strong className="text-gray-700 dark:text-gray-300">{searchQuery}</strong>&rdquo; 
             找到 {total} 篇帖子
             <button
               onClick={clearSearch}
@@ -354,7 +353,7 @@ export default function ForumPage() {
         <div className="text-center py-20">
           {searchMode ? (
             <>
-              <div className="text-gray-400 mb-2">未找到匹配 "{searchQuery}" 的帖子</div>
+              <div className="text-gray-400 mb-2">未找到匹配 &ldquo;{searchQuery}&rdquo; 的帖子</div>
               <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
                 建议：检查关键词拼写是否正确，或尝试使用更通用的关键词
               </p>
