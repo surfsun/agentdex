@@ -6,8 +6,9 @@ import { getToolBySlug, getAllTools, categories } from '@/lib/db'
 import { Tool } from '@/lib/tools'
 import { getStacksForTool, getDifficultyLabel, getDifficultyColor } from '@/lib/stacks'
 import { getSkillsForTool } from '@/lib/skills'
-import { Locale, getLocaleFromCookie } from '@/lib/i18n'
+import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import AddToCompareButton from '@/components/AddToCompareButton'
+import BookmarkButton from '@/components/BookmarkButton'
 import IntegrationTab from '@/components/IntegrationTab'
 import CostCalculator from '@/components/CostCalculator'
 
@@ -75,6 +76,9 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
 
   const category = categories.find(c => c.id === tool.category)
   
+  // Get translations
+  const t = getTranslations(locale)
+
   // Get stacks that contain this tool
   const toolStacks = getStacksForTool(tool.id)
 
@@ -136,6 +140,10 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
           <p className="text-xl text-gray-500 dark:text-gray-400">{tool.tagline}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
+          {/* Bookmark Button */}
+          <div className="flex items-center gap-2 mb-2">
+            <BookmarkButton toolId={tool.id} toolName={tool.name} />
+          </div>
           {tool.agent_friendly && (
             <span className="text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full whitespace-nowrap">
               🤖 Agent-friendly
@@ -387,6 +395,10 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
           </a>
         )}
         <AddToCompareButton tool={tool} />
+        {/* Bookmark Button - prominent style */}
+        <div className="border border-yellow-300 dark:border-yellow-700 rounded-lg px-3 py-1.5 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition">
+          <BookmarkButton toolId={tool.id} toolName={tool.name} />
+        </div>
       </div>
 
       {/* Compare with similar tools */}
