@@ -13,12 +13,10 @@ interface CostCalculatorProps {
 
 // Inner component with hooks at top level
 function CostCalculatorInner({
-  toolName,
   toolSlug,
-  pricing,
   pricingDetails,
   locale = 'en'
-}: CostCalculatorProps) {
+}: Omit<CostCalculatorProps, 'toolName' | 'pricing'>) {
   const [usageAmount, setUsageAmount] = useState<number>(100)
   const [selectedUnit, setSelectedUnit] = useState<string>(
     pricingDetails?.unit || 'requests'
@@ -306,9 +304,7 @@ export default function CostCalculator({
 
   return (
     <CostCalculatorInner
-      toolName={toolName}
       toolSlug={toolSlug}
-      pricing={pricing}
       pricingDetails={pricingDetails}
       locale={locale}
     />

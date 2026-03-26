@@ -16,13 +16,6 @@ const languageLabels: Record<string, { label: string; icon: string }> = {
   rust: { label: 'Rust', icon: '🦀' },
 }
 
-const stepLabels = {
-  install: { en: 'Install', zh: '安装' },
-  init: { en: 'Initialize', zh: '初始化' },
-  basic: { en: 'Basic Usage', zh: '基本用法' },
-  error_handling: { en: 'Error Handling', zh: '错误处理' },
-}
-
 export default function IntegrationTab({ toolName, integrationMinutes, codeExamples }: IntegrationTabProps) {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('python')
   const [copiedStep, setCopiedStep] = useState<string | null>(null)
