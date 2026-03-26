@@ -79,10 +79,10 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
   const toolStacks = getStacksForTool(tool.id)
 
   const pricingColor = {
-    free: 'bg-green-100 text-green-700',
-    freemium: 'bg-blue-100 text-blue-700',
-    paid: 'bg-orange-100 text-orange-700',
-  }[tool.pricing as 'free' | 'freemium' | 'paid'] || 'bg-gray-100 text-gray-700'
+    free: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    freemium: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    paid: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  }[tool.pricing as 'free' | 'freemium' | 'paid'] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
 
   // JSON-LD structured data for the tool
   const jsonLd = {
@@ -113,17 +113,17 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
       />
       <div className="max-w-4xl mx-auto px-4 py-10">
         {/* Breadcrumb */}
-        <nav className="text-sm text-gray-500 mb-6 flex items-center justify-between">
+        <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6 flex items-center justify-between">
           <div>
-            <a href="/" className="hover:text-gray-700">Home</a>
+            <a href="/" className="hover:text-gray-700 dark:hover:text-gray-300">Home</a>
             {' / '}
-            <a href={`/?category=${tool.category}`} className="hover:text-gray-700">{category?.label || tool.category}</a>
+            <a href={`/?category=${tool.category}`} className="hover:text-gray-700 dark:hover:text-gray-300">{category?.label || tool.category}</a>
             {' / '}
-            <span className="text-gray-900">{tool.name}</span>
+            <span className="text-gray-900 dark:text-white">{tool.name}</span>
           </div>
           <a
             href="/"
-            className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
+            className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm flex items-center gap-1"
           >
             ← Back to Home
           </a>
@@ -132,27 +132,27 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{tool.name}</h1>
-          <p className="text-xl text-gray-500">{tool.tagline}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{tool.name}</h1>
+          <p className="text-xl text-gray-500 dark:text-gray-400">{tool.tagline}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
           {tool.agent_friendly && (
-            <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full whitespace-nowrap">
+            <span className="text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full whitespace-nowrap">
               🤖 Agent-friendly
             </span>
           )}
           {tool.mcp?.supported && (
-            <span className="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full whitespace-nowrap">
+            <span className="text-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded-full whitespace-nowrap">
               🔌 MCP Compatible
             </span>
           )}
           {tool.featured && (
-            <span className="text-sm bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
+            <span className="text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-full">
               ⭐ Featured
             </span>
           )}
           {tool.verified && (
-            <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full">
+            <span className="text-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full">
               ✓ Verified
             </span>
           )}
@@ -161,66 +161,66 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
 
       {/* Quick Info */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="text-xs text-gray-500 mb-1">Pricing</div>
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Pricing</div>
           <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${pricingColor}`}>
             {tool.pricing}
           </span>
         </div>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="text-xs text-gray-500 mb-1">Category</div>
-          <span className="text-sm font-medium text-gray-900">{category?.label || tool.category}</span>
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Category</div>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">{category?.label || tool.category}</span>
         </div>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="text-xs text-gray-500 mb-1">API Available</div>
-          <span className="text-sm font-medium text-gray-900">{tool.api_available ? '✓ Yes' : '✗ No'}</span>
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">API Available</div>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">{tool.api_available ? '✓ Yes' : '✗ No'}</span>
         </div>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="text-xs text-gray-500 mb-1">Open Source</div>
-          <span className="text-sm font-medium text-gray-900">{tool.open_source ? '✓ Yes' : '✗ No'}</span>
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Open Source</div>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">{tool.open_source ? '✓ Yes' : '✗ No'}</span>
         </div>
       </div>
 
       {/* Persona Capabilities */}
       {tool.persona && (
-        <div className="mb-8 bg-pink-50 border border-pink-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-pink-800 mb-4 flex items-center gap-2">
+        <div className="mb-8 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-pink-800 dark:text-pink-300 mb-4 flex items-center gap-2">
             🎭 Persona Capabilities
           </h2>
-          <p className="text-sm text-pink-700 mb-4">
+          <p className="text-sm text-pink-700 dark:text-pink-400 mb-4">
             This tool supports Agent persona/personality features, allowing agents to maintain consistent identity and behavior.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {tool.persona.self_editing_memory && (
-              <div className="bg-white p-3 rounded-lg border border-pink-100">
-                <div className="text-xs text-pink-500 mb-1">Self-Editing Memory</div>
-                <div className="text-sm font-medium text-gray-900">✓ Agent can modify its own persona</div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-pink-100 dark:border-pink-900">
+                <div className="text-xs text-pink-500 dark:text-pink-400 mb-1">Self-Editing Memory</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">✓ Agent can modify its own persona</div>
               </div>
             )}
             {tool.persona.stateful_identity && (
-              <div className="bg-white p-3 rounded-lg border border-pink-100">
-                <div className="text-xs text-pink-500 mb-1">Stateful Identity</div>
-                <div className="text-sm font-medium text-gray-900">✓ Consistent across sessions</div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-pink-100 dark:border-pink-900">
+                <div className="text-xs text-pink-500 dark:text-pink-400 mb-1">Stateful Identity</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">✓ Consistent across sessions</div>
               </div>
             )}
             {tool.persona.model_agnostic && (
-              <div className="bg-white p-3 rounded-lg border border-pink-100">
-                <div className="text-xs text-pink-500 mb-1">Model Agnostic</div>
-                <div className="text-sm font-medium text-gray-900">✓ Works with multiple LLMs</div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-pink-100 dark:border-pink-900">
+                <div className="text-xs text-pink-500 dark:text-pink-400 mb-1">Model Agnostic</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">✓ Works with multiple LLMs</div>
               </div>
             )}
             {tool.persona.communication_style && (
-              <div className="bg-white p-3 rounded-lg border border-pink-100">
-                <div className="text-xs text-pink-500 mb-1">Communication Style</div>
-                <div className="text-sm font-medium text-gray-900">{tool.persona.communication_style}</div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-pink-100 dark:border-pink-900">
+                <div className="text-xs text-pink-500 dark:text-pink-400 mb-1">Communication Style</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">{tool.persona.communication_style}</div>
               </div>
             )}
             {tool.persona.personality_traits && Object.keys(tool.persona.personality_traits).length > 0 && (
-              <div className="bg-white p-3 rounded-lg border border-pink-100 col-span-2 md:col-span-1">
-                <div className="text-xs text-pink-500 mb-1">Personality Traits</div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-pink-100 dark:border-pink-900 col-span-2 md:col-span-1">
+                <div className="text-xs text-pink-500 dark:text-pink-400 mb-1">Personality Traits</div>
                 <div className="flex flex-wrap gap-1">
                   {Object.entries(tool.persona.personality_traits).map(([trait, value]) => (
-                    <span key={trait} className="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">
+                    <span key={trait} className="text-xs bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded-full">
                       {trait}: {value}
                     </span>
                   ))}
@@ -231,7 +231,7 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
           <div className="mt-4">
             <a 
               href="/scenarios/persona-agent"
-              className="text-sm text-pink-600 hover:text-pink-800 font-medium"
+              className="text-sm text-pink-600 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300 font-medium"
             >
               → Explore Persona Agent Scenario
             </a>
@@ -241,35 +241,35 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
 
       {/* MCP Support */}
       {tool.mcp?.supported && (
-        <div className="mb-8 bg-indigo-50 border border-indigo-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-indigo-800 mb-4 flex items-center gap-2">
+        <div className="mb-8 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-indigo-800 dark:text-indigo-300 mb-4 flex items-center gap-2">
             🔌 MCP (Model Context Protocol)
           </h2>
-          <p className="text-sm text-indigo-700 mb-4">
+          <p className="text-sm text-indigo-700 dark:text-indigo-400 mb-4">
             This tool supports the Model Context Protocol, allowing seamless integration with Claude Desktop and other MCP-compatible clients.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-            <div className="bg-white p-3 rounded-lg border border-indigo-100">
-              <div className="text-xs text-indigo-500 mb-1">Server Type</div>
-              <div className="text-sm font-medium text-gray-900">{tool.mcp.server_type || 'stdio'}</div>
+            <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900">
+              <div className="text-xs text-indigo-500 dark:text-indigo-400 mb-1">Server Type</div>
+              <div className="text-sm font-medium text-gray-900 dark:text-white">{tool.mcp.server_type || 'stdio'}</div>
             </div>
             {tool.mcp.tools_count && (
-              <div className="bg-white p-3 rounded-lg border border-indigo-100">
-                <div className="text-xs text-indigo-500 mb-1">Tools Available</div>
-                <div className="text-sm font-medium text-gray-900">{tool.mcp.tools_count} tools</div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900">
+                <div className="text-xs text-indigo-500 dark:text-indigo-400 mb-1">Tools Available</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">{tool.mcp.tools_count} tools</div>
               </div>
             )}
             {tool.mcp.verified && (
-              <div className="bg-white p-3 rounded-lg border border-indigo-100">
-                <div className="text-xs text-indigo-500 mb-1">Status</div>
-                <div className="text-sm font-medium text-green-600">✓ Verified</div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900">
+                <div className="text-xs text-indigo-500 dark:text-indigo-400 mb-1">Status</div>
+                <div className="text-sm font-medium text-green-600 dark:text-green-400">✓ Verified</div>
               </div>
             )}
           </div>
           {tool.mcp.installation && (
-            <div className="bg-indigo-900 rounded-lg p-4">
-              <div className="text-xs text-indigo-300 mb-2">Quick Install:</div>
-              <code className="text-sm text-indigo-100">{tool.mcp.installation}</code>
+            <div className="bg-indigo-900 dark:bg-indigo-950 rounded-lg p-4">
+              <div className="text-xs text-indigo-300 dark:text-indigo-400 mb-2">Quick Install:</div>
+              <code className="text-sm text-indigo-100 dark:text-indigo-200">{tool.mcp.installation}</code>
             </div>
           )}
           <div className="mt-4 flex gap-4">
@@ -277,13 +277,13 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
               href="https://modelcontextprotocol.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+              className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
             >
               → MCP Documentation
             </a>
             <a 
               href="/?mcp=true"
-              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+              className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
             >
               → Browse MCP Tools
             </a>
@@ -398,22 +398,22 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
 
       {/* Description */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
-        <p className="text-gray-600 leading-relaxed">{tool.description}</p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Description</h2>
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
         {tool.price_detail && (
-          <p className="text-sm text-gray-500 mt-2">💰 {tool.price_detail}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">💰 {tool.price_detail}</p>
         )}
       </div>
 
       {/* Tags */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Tags</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Tags</h2>
         <div className="flex flex-wrap gap-2">
           {tool.tags.map(tag => (
             <a 
               key={tag} 
               href={`/?q=${encodeURIComponent(tag)}`}
-              className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full hover:bg-gray-200 transition"
+              className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition"
             >
               {tag}
             </a>
@@ -428,7 +428,7 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
             href={tool.website ?? undefined}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition"
           >
             Visit Website →
           </a>
@@ -438,7 +438,7 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
             href={tool.github ?? undefined}
             target="_blank"
             rel="noopener noreferrer"
-            className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition"
+            className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
             GitHub →
           </a>
@@ -500,15 +500,15 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
 
       {/* Quick Start for Agents - 新增 */}
       {tool.api_available && (
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-8">
-          <h3 className="text-lg font-semibold text-purple-900 mb-4 flex items-center gap-2">
+        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-6 mb-8">
+          <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-300 mb-4 flex items-center gap-2">
             🤖 Quick Start for Agents
           </h3>
           <div className="space-y-4">
             {/* AgentDex API */}
             <div>
-              <div className="text-xs text-purple-600 font-mono mb-1"># Get tool info via AgentDex API</div>
-              <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
+              <div className="text-xs text-purple-600 dark:text-purple-400 font-mono mb-1"># Get tool info via AgentDex API</div>
+              <code className="block bg-purple-900 dark:bg-purple-950 text-purple-100 dark:text-purple-200 p-3 rounded text-sm overflow-x-auto">
                 curl https://www.agentdex.top/api/tools/{tool.slug}
               </code>
             </div>
@@ -516,8 +516,8 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
             {/* 根据工具类型显示不同的使用示例 */}
             {tool.category === 'memory' && (
               <div>
-                <div className="text-xs text-purple-600 font-mono mb-1"># Python quick start (Mem0 example)</div>
-                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from mem0 import Memory
+                <div className="text-xs text-purple-600 dark:text-purple-400 font-mono mb-1"># Python quick start (Mem0 example)</div>
+                <code className="block bg-purple-900 dark:bg-purple-950 text-purple-100 dark:text-purple-200 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from mem0 import Memory
 
 m = Memory()
 m.add("User prefers dark mode", user_id="user_123")
@@ -527,8 +527,8 @@ memories = m.search("preferences", user_id="user_123")`}</code>
             
             {tool.category === 'web' && tool.slug === 'jina-reader' && (
               <div>
-                <div className="text-xs text-purple-600 font-mono mb-1"># Convert any URL to markdown</div>
-                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
+                <div className="text-xs text-purple-600 dark:text-purple-400 font-mono mb-1"># Convert any URL to markdown</div>
+                <code className="block bg-purple-900 dark:bg-purple-950 text-purple-100 dark:text-purple-200 p-3 rounded text-sm overflow-x-auto">
                   curl https://r.jina.ai/https://example.com
                 </code>
               </div>
@@ -536,8 +536,8 @@ memories = m.search("preferences", user_id="user_123")`}</code>
             
             {tool.category === 'web' && tool.slug === 'firecrawl' && (
               <div>
-                <div className="text-xs text-purple-600 font-mono mb-1"># Crawl a website (Firecrawl)</div>
-                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`curl -X POST https://api.firecrawl.dev/v1/crawl \\
+                <div className="text-xs text-purple-600 dark:text-purple-400 font-mono mb-1"># Crawl a website (Firecrawl)</div>
+                <code className="block bg-purple-900 dark:bg-purple-950 text-purple-100 dark:text-purple-200 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`curl -X POST https://api.firecrawl.dev/v1/crawl \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://example.com"}'`}</code>
@@ -546,8 +546,8 @@ memories = m.search("preferences", user_id="user_123")`}</code>
             
             {tool.category === 'execution' && tool.slug === 'e2b' && (
               <div>
-                <div className="text-xs text-purple-600 font-mono mb-1"># Execute Python code in sandbox</div>
-                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from e2b_code_interpreter import Sandbox
+                <div className="text-xs text-purple-600 dark:text-purple-400 font-mono mb-1"># Execute Python code in sandbox</div>
+                <code className="block bg-purple-900 dark:bg-purple-950 text-purple-100 dark:text-purple-200 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from e2b_code_interpreter import Sandbox
 
 with Sandbox() as sandbox:
     execution = sandbox.run_code("print('Hello!')")
@@ -557,8 +557,8 @@ with Sandbox() as sandbox:
             
             {tool.category === 'framework' && tool.slug === 'langchain' && (
               <div>
-                <div className="text-xs text-purple-600 font-mono mb-1"># Build a simple agent with LangChain</div>
-                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from langchain.agents import initialize_agent
+                <div className="text-xs text-purple-600 dark:text-purple-400 font-mono mb-1"># Build a simple agent with LangChain</div>
+                <code className="block bg-purple-900 dark:bg-purple-950 text-purple-100 dark:text-purple-200 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">{`from langchain.agents import initialize_agent
 from langchain.tools import Tool
 
 tools = [Tool(name="calc", func=lambda x: eval(x))]
@@ -569,8 +569,8 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
             {/* 通用网站链接 */}
             {tool.website && !['jina-reader', 'firecrawl', 'e2b', 'langchain', 'mem0'].includes(tool.slug) && (
               <div>
-                <div className="text-xs text-purple-600 font-mono mb-1"># Tool website</div>
-                <code className="block bg-purple-900 text-purple-100 p-3 rounded text-sm overflow-x-auto">
+                <div className="text-xs text-purple-600 dark:text-purple-400 font-mono mb-1"># Tool website</div>
+                <code className="block bg-purple-900 dark:bg-purple-950 text-purple-100 dark:text-purple-200 p-3 rounded text-sm overflow-x-auto">
                   {tool.website}
                 </code>
               </div>
@@ -578,9 +578,9 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
             
             {/* 官方文档链接 */}
             {tool.github && (
-              <div className="pt-2 border-t border-purple-200">
-                <span className="text-xs text-purple-600">📚 Docs: </span>
-                <a href={tool.github} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-700 hover:text-purple-900 underline">
+              <div className="pt-2 border-t border-purple-200 dark:border-purple-700">
+                <span className="text-xs text-purple-600 dark:text-purple-400">📚 Docs: </span>
+                <a href={tool.github} target="_blank" rel="noopener noreferrer" className="text-xs text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-purple-200 underline">
                   {tool.github}
                 </a>
               </div>
@@ -814,7 +814,7 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
 
       {/* Related Tools - 同类工具 */}
       <div className="mt-12">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Other tools in {category?.label || tool.category}</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Other tools in {category?.label || tool.category}</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
           {allTools
             .filter(t => t.category === tool.category && t.id !== tool.id)
@@ -823,10 +823,10 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
               <a
                 key={t.id}
                 href={`/tools/${t.slug}`}
-                className="flex-shrink-0 border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition min-w-[200px]"
+                className="flex-shrink-0 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition min-w-[200px] bg-white dark:bg-gray-800"
               >
-                <div className="font-medium text-gray-900">{t.name}</div>
-                <div className="text-sm text-gray-500 mt-1 line-clamp-1">{t.tagline}</div>
+                <div className="font-medium text-gray-900 dark:text-white">{t.name}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{t.tagline}</div>
               </a>
             ))}
         </div>
@@ -849,17 +849,17 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
 
         return (
           <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Similar tools you might like</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Similar tools you might like</h2>
             <div className="flex gap-4 overflow-x-auto pb-2">
               {alternatives.map(t => (
                 <a
                   key={t.id}
                   href={`/tools/${t.slug}`}
-                  className="flex-shrink-0 border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition min-w-[200px]"
+                  className="flex-shrink-0 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition min-w-[200px] bg-white dark:bg-gray-800"
                 >
-                  <div className="font-medium text-gray-900">{t.name}</div>
-                  <div className="text-sm text-gray-500 mt-1 line-clamp-1">{t.tagline}</div>
-                  <div className="text-xs text-blue-500 mt-2">{categories.find(c => c.id === t.category)?.label || t.category}</div>
+                  <div className="font-medium text-gray-900 dark:text-white">{t.name}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{t.tagline}</div>
+                  <div className="text-xs text-blue-500 dark:text-blue-400 mt-2">{categories.find(c => c.id === t.category)?.label || t.category}</div>
                 </a>
               ))}
             </div>
