@@ -7,6 +7,7 @@ import { Tool } from '@/lib/tools'
 import { getStacksForTool, getDifficultyLabel, getDifficultyColor } from '@/lib/stacks'
 import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AddToCompareButton from '@/components/AddToCompareButton'
+import IntegrationTab from '@/components/IntegrationTab'
 
 interface Params {
   slug: string
@@ -284,6 +285,35 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
             >
               → Browse MCP Tools
             </a>
+          </div>
+        </div>
+      )}
+
+      {/* Integration Examples */}
+      {(tool.code_examples && Object.keys(tool.code_examples).length > 0) && (
+        <div className="mb-8 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              ⚡ Integration Guide
+            </h2>
+            {tool.integration_minutes && (
+              <span className="text-sm bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full">
+                ⏱️ ~{tool.integration_minutes} min
+              </span>
+            )}
+          </div>
+          <IntegrationTab
+            toolName={tool.name}
+            integrationMinutes={tool.integration_minutes}
+            codeExamples={tool.code_examples}
+          />
+          <div className="mt-6 pt-4 border-t border-emerald-200 dark:border-emerald-800">
+            <p className="text-sm text-emerald-700 dark:text-emerald-300">
+              💡 Get these examples via API:{' '}
+              <code className="text-xs bg-emerald-100 dark:bg-emerald-900 px-2 py-1 rounded">
+                curl https://www.agentdex.top/api/tools/{tool.slug}/integration
+              </code>
+            </p>
           </div>
         </div>
       )}

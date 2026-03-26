@@ -54,6 +54,23 @@ export type MCPConfig = {
   verified?: boolean
 }
 
+// Code example for integration
+export type CodeExample = {
+  install: string      // Installation command
+  init: string         // Initialization code
+  basic: string        // Basic usage example
+  error_handling?: string  // Error handling example
+  env_vars?: string[]  // Required environment variables
+}
+
+// Integration code examples for multiple languages
+export type CodeExamples = {
+  python?: CodeExample
+  typescript?: CodeExample
+  go?: CodeExample
+  rust?: CodeExample
+}
+
 // 前端使用的工具类型（合并了数据库类型和额外字段）
 export type Tool = {
   id: string
@@ -90,6 +107,9 @@ export type Tool = {
   persona?: PersonaCapabilities  // Agent persona/personality support
   // MCP (Model Context Protocol) support
   mcp?: MCPConfig
+  // Integration code examples
+  integration_minutes?: number  // Estimated integration time in minutes
+  code_examples?: CodeExamples  // Multi-language code examples
   // Database fields
   status?: string
   view_count?: number
