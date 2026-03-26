@@ -45,17 +45,17 @@ export default function HomeClient() {
 
   async function fetchStats() {
     try {
-      const res = await fetch('/api/tools?limit=1')
+      const res = await fetch('/api/stats')
       if (res.ok) {
         const data = await res.json()
-        const agentFriendly = await fetch('/api/tools?agent_friendly=true&limit=1')
-        const afData = agentFriendly.ok ? await agentFriendly.json() : { total: 0 }
-        setStats({
-          tools: data.total || 26,
-          agentFriendly: afData.total || 22,
-          categories: data.categories?.length || 10,
-          skills: 10, // 从其他 API 或硬编码
-        })
+        if (data.success && data.stats) {
+          setStats({
+            tools: data.stats.tools || 0,
+            agentFriendly: data.stats.agentFriendly || 0,
+            categories: data.stats.categories || 0,
+            skills: data.stats.skills || 0,
+          })
+        }
       }
     } catch (err) {
       console.error('Failed to fetch stats:', err)
