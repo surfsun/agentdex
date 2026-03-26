@@ -8,7 +8,11 @@
     "website": "https://www.moltbook.com",
     "github": "",
     "category": "social",
-    "tags": ["social", "community", "api-first"],
+    "tags": [
+      "social",
+      "community",
+      "api-first"
+    ],
     "pricing": "free",
     "price_detail": "免费",
     "agent_friendly": true,
@@ -21,8 +25,16 @@
     "integration_level": "quick_start",
     "quickstart_time": "1 min",
     "recommended_for": {
-      "developer": { "priority": 3, "reason": "Simple API, quick integration for agent social features", "reason_zh": "简单 API，快速集成 Agent 社交功能" },
-      "researcher": { "priority": 2, "reason": "Study agent-to-agent communication patterns", "reason_zh": "研究 Agent 间通信模式的理想平台" }
+      "developer": {
+        "priority": 3,
+        "reason": "Simple API, quick integration for agent social features",
+        "reason_zh": "简单 API，快速集成 Agent 社交功能"
+      },
+      "researcher": {
+        "priority": 2,
+        "reason": "Study agent-to-agent communication patterns",
+        "reason_zh": "研究 Agent 间通信模式的理想平台"
+      }
     }
   },
   {
@@ -34,7 +46,11 @@
     "website": "https://agentmail.to",
     "github": "",
     "category": "communication",
-    "tags": ["email", "communication", "api-first"],
+    "tags": [
+      "email",
+      "communication",
+      "api-first"
+    ],
     "pricing": "freemium",
     "price_detail": "免费套餐可用，付费套餐解锁更多功能",
     "agent_friendly": true,
@@ -47,9 +63,21 @@
     "integration_level": "quick_start",
     "quickstart_time": "5 min",
     "recommended_for": {
-      "developer": { "priority": 1, "reason": "Clean API, essential for agent communication", "reason_zh": "干净的 API，Agent 通信必备" },
-      "founder": { "priority": 2, "reason": "Enable agents to handle customer emails autonomously", "reason_zh": "让 Agent 自主处理客户邮件" },
-      "pm": { "priority": 2, "reason": "Automate email workflows without human intervention", "reason_zh": "无需人工介入的邮件自动化" }
+      "developer": {
+        "priority": 1,
+        "reason": "Clean API, essential for agent communication",
+        "reason_zh": "干净的 API，Agent 通信必备"
+      },
+      "founder": {
+        "priority": 2,
+        "reason": "Enable agents to handle customer emails autonomously",
+        "reason_zh": "让 Agent 自主处理客户邮件"
+      },
+      "pm": {
+        "priority": 2,
+        "reason": "Automate email workflows without human intervention",
+        "reason_zh": "无需人工介入的邮件自动化"
+      }
     }
   },
   {
@@ -61,7 +89,11 @@
     "website": "https://mem0.ai",
     "github": "https://github.com/mem0ai/mem0",
     "category": "memory",
-    "tags": ["memory", "persistence", "open-source"],
+    "tags": [
+      "memory",
+      "persistence",
+      "open-source"
+    ],
     "pricing": "freemium",
     "price_detail": "开源可自托管，云端有免费额度",
     "agent_friendly": true,
@@ -76,10 +108,26 @@
     "api_version": "2.0.0",
     "api_stability": "stable",
     "recommended_for": {
-      "developer": { "priority": 1, "reason": "Most popular memory solution, excellent SDK support", "reason_zh": "最流行的记忆方案，SDK 支持完善" },
-      "founder": { "priority": 1, "reason": "Essential for personalized user experiences", "reason_zh": "个性化用户体验必备" },
-      "researcher": { "priority": 2, "reason": "Graph memory for studying agent cognition", "reason_zh": "图谱记忆适合研究 Agent 认知" },
-      "pm": { "priority": 1, "reason": "Enables persistent user context across sessions", "reason_zh": "实现跨会话的持久用户上下文" }
+      "developer": {
+        "priority": 1,
+        "reason": "Most popular memory solution, excellent SDK support",
+        "reason_zh": "最流行的记忆方案，SDK 支持完善"
+      },
+      "founder": {
+        "priority": 1,
+        "reason": "Essential for personalized user experiences",
+        "reason_zh": "个性化用户体验必备"
+      },
+      "researcher": {
+        "priority": 2,
+        "reason": "Graph memory for studying agent cognition",
+        "reason_zh": "图谱记忆适合研究 Agent 认知"
+      },
+      "pm": {
+        "priority": 1,
+        "reason": "Enables persistent user context across sessions",
+        "reason_zh": "实现跨会话的持久用户上下文"
+      }
     },
     "changelog": [
       {
@@ -138,8 +186,16 @@
     ],
     "github_stars": 26000,
     "integration_complexity": "low",
-    "best_for": ["Memory persistence", "User context", "RAG pipelines"],
-    "best_for_zh": ["记忆持久化", "用户上下文", "RAG 管道"],
+    "best_for": [
+      "Memory persistence",
+      "User context",
+      "RAG pipelines"
+    ],
+    "best_for_zh": [
+      "记忆持久化",
+      "用户上下文",
+      "RAG 管道"
+    ],
     "mcp": {
       "supported": true,
       "server_type": "stdio",
@@ -157,11 +213,25 @@
     "website": "https://getzep.com",
     "github": "https://github.com/getzep/zep",
     "category": "memory",
-    "tags": ["memory", "graph", "context", "open-source", "production-ready"],
+    "tags": [
+      "memory",
+      "graph",
+      "context",
+      "open-source",
+      "production-ready"
+    ],
     "github_stars": 3200,
     "integration_complexity": "low",
-    "best_for": ["Graph memory", "Context retrieval", "Production apps"],
-    "best_for_zh": ["图谱记忆", "上下文检索", "生产应用"],
+    "best_for": [
+      "Graph memory",
+      "Context retrieval",
+      "Production apps"
+    ],
+    "best_for_zh": [
+      "图谱记忆",
+      "上下文检索",
+      "生产应用"
+    ],
     "pricing": "freemium",
     "price_detail": "开源可自托管，云端有免费套餐",
     "agent_friendly": true,
@@ -174,15 +244,26 @@
     "integration_level": "quick_start",
     "quickstart_time": "5 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Fast context retrieval, great for production", "reason_zh": "快速上下文检索，适合生产环境" },
-      "researcher": { "priority": 1, "reason": "Graph-based memory for complex relationships", "reason_zh": "基于图谱的记忆适合复杂关系研究" }
+      "developer": {
+        "priority": 2,
+        "reason": "Fast context retrieval, great for production",
+        "reason_zh": "快速上下文检索，适合生产环境"
+      },
+      "researcher": {
+        "priority": 1,
+        "reason": "Graph-based memory for complex relationships",
+        "reason_zh": "基于图谱的记忆适合复杂关系研究"
+      }
     },
     "persona": {
       "self_editing_memory": true,
       "stateful_identity": true,
       "model_agnostic": true,
       "communication_style": "Context-aware, data-driven",
-      "personality_traits": { "analytical": 0.9, "consistent": 0.8 }
+      "personality_traits": {
+        "analytical": 0.9,
+        "consistent": 0.8
+      }
     }
   },
   {
@@ -194,7 +275,13 @@
     "website": "https://letta.com",
     "github": "https://github.com/letta-ai/letta",
     "category": "memory",
-    "tags": ["memory", "stateful", "open-source", "api-first", "persistent"],
+    "tags": [
+      "memory",
+      "stateful",
+      "open-source",
+      "api-first",
+      "persistent"
+    ],
     "pricing": "freemium",
     "price_detail": "开源可自托管，云端 API 有免费额度",
     "agent_friendly": true,
@@ -207,19 +294,38 @@
     "integration_level": "standard",
     "quickstart_time": "15 min",
     "recommended_for": {
-      "researcher": { "priority": 1, "reason": "Self-editing memory for advanced agent architectures", "reason_zh": "自编辑记忆适合高级 Agent 架构研究" },
-      "developer": { "priority": 3, "reason": "Stateful agents with persistent identity", "reason_zh": "有状态 Agent 保持持久身份" }
+      "researcher": {
+        "priority": 1,
+        "reason": "Self-editing memory for advanced agent architectures",
+        "reason_zh": "自编辑记忆适合高级 Agent 架构研究"
+      },
+      "developer": {
+        "priority": 3,
+        "reason": "Stateful agents with persistent identity",
+        "reason_zh": "有状态 Agent 保持持久身份"
+      }
     },
     "github_stars": 12000,
     "integration_complexity": "medium",
-    "best_for": ["Stateful agents", "Self-editing memory", "Agent identity"],
-    "best_for_zh": ["有状态 Agent", "自编辑记忆", "Agent 身份"],
+    "best_for": [
+      "Stateful agents",
+      "Self-editing memory",
+      "Agent identity"
+    ],
+    "best_for_zh": [
+      "有状态 Agent",
+      "自编辑记忆",
+      "Agent 身份"
+    ],
     "persona": {
       "self_editing_memory": true,
       "stateful_identity": true,
       "model_agnostic": true,
       "communication_style": "Context-aware, adaptive",
-      "personality_traits": { "analytical": 0.8, "empathetic": 0.6 }
+      "personality_traits": {
+        "analytical": 0.8,
+        "empathetic": 0.6
+      }
     }
   },
   {
@@ -231,7 +337,12 @@
     "website": "https://jina.ai/reader",
     "github": "https://github.com/jina-ai/reader",
     "category": "web",
-    "tags": ["scraping", "markdown", "web", "free"],
+    "tags": [
+      "scraping",
+      "markdown",
+      "web",
+      "free"
+    ],
     "pricing": "freemium",
     "price_detail": "基础免费，高频调用需付费",
     "agent_friendly": true,
@@ -239,8 +350,16 @@
     "open_source": true,
     "github_stars": 8400,
     "integration_complexity": "low",
-    "best_for": ["Web scraping", "Content extraction", "URL to Markdown"],
-    "best_for_zh": ["网页抓取", "内容提取", "URL 转 Markdown"],
+    "best_for": [
+      "Web scraping",
+      "Content extraction",
+      "URL to Markdown"
+    ],
+    "best_for_zh": [
+      "网页抓取",
+      "内容提取",
+      "URL 转 Markdown"
+    ],
     "featured": true,
     "verified": false,
     "submitted_by": "human",
@@ -248,8 +367,16 @@
     "integration_level": "quick_start",
     "quickstart_time": "1 min",
     "recommended_for": {
-      "developer": { "priority": 1, "reason": "Simplest way to get clean content from URLs", "reason_zh": "获取干净网页内容的最简单方式" },
-      "pm": { "priority": 2, "reason": "Extract content from any webpage instantly", "reason_zh": "即时从任何网页提取内容" }
+      "developer": {
+        "priority": 1,
+        "reason": "Simplest way to get clean content from URLs",
+        "reason_zh": "获取干净网页内容的最简单方式"
+      },
+      "pm": {
+        "priority": 2,
+        "reason": "Extract content from any webpage instantly",
+        "reason_zh": "即时从任何网页提取内容"
+      }
     }
   },
   {
@@ -261,7 +388,12 @@
     "website": "https://firecrawl.dev",
     "github": "https://github.com/mendableai/firecrawl",
     "category": "web",
-    "tags": ["scraping", "web", "llm", "open-source"],
+    "tags": [
+      "scraping",
+      "web",
+      "llm",
+      "open-source"
+    ],
     "pricing": "freemium",
     "price_detail": "免费 500 次/月，付费套餐 $16/月起",
     "agent_friendly": true,
@@ -274,8 +406,16 @@
     "integration_level": "quick_start",
     "quickstart_time": "5 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "LLM-ready structured data output", "reason_zh": "输出 LLM 就绪的结构化数据" },
-      "founder": { "priority": 3, "reason": "Extract data from competitor websites", "reason_zh": "从竞品网站提取数据" }
+      "developer": {
+        "priority": 2,
+        "reason": "LLM-ready structured data output",
+        "reason_zh": "输出 LLM 就绪的结构化数据"
+      },
+      "founder": {
+        "priority": 3,
+        "reason": "Extract data from competitor websites",
+        "reason_zh": "从竞品网站提取数据"
+      }
     },
     "mcp": {
       "supported": true,
@@ -294,7 +434,13 @@
     "website": "https://browserbase.com",
     "github": "",
     "category": "web",
-    "tags": ["browser", "automation", "scraping", "javascript", "x402"],
+    "tags": [
+      "browser",
+      "automation",
+      "scraping",
+      "javascript",
+      "x402"
+    ],
     "pricing": "freemium",
     "price_detail": "免费套餐，Developer $20/月，Startup $99/月",
     "agent_friendly": true,
@@ -307,9 +453,21 @@
     "integration_level": "standard",
     "quickstart_time": "10 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Full browser control for complex interactions", "reason_zh": "完整浏览器控制，适合复杂交互" },
-      "founder": { "priority": 2, "reason": "Automate web tasks like form filling", "reason_zh": "自动化网页任务如填表" },
-      "pm": { "priority": 1, "reason": "Best for testing and automating web workflows", "reason_zh": "测试和自动化网页工作流的首选" }
+      "developer": {
+        "priority": 2,
+        "reason": "Full browser control for complex interactions",
+        "reason_zh": "完整浏览器控制，适合复杂交互"
+      },
+      "founder": {
+        "priority": 2,
+        "reason": "Automate web tasks like form filling",
+        "reason_zh": "自动化网页任务如填表"
+      },
+      "pm": {
+        "priority": 1,
+        "reason": "Best for testing and automating web workflows",
+        "reason_zh": "测试和自动化网页工作流的首选"
+      }
     },
     "mcp": {
       "supported": true,
@@ -328,7 +486,12 @@
     "website": "https://apify.com",
     "github": "https://github.com/apify/apify-sdk-js",
     "category": "web",
-    "tags": ["scraping", "automation", "actors", "data-extraction"],
+    "tags": [
+      "scraping",
+      "automation",
+      "actors",
+      "data-extraction"
+    ],
     "pricing": "freemium",
     "price_detail": "每月 $5 免费额度，付费 $49/月起",
     "agent_friendly": true,
@@ -341,8 +504,16 @@
     "integration_level": "standard",
     "quickstart_time": "15 min",
     "recommended_for": {
-      "founder": { "priority": 1, "reason": "2000+ ready-made scrapers, no coding needed", "reason_zh": "2000+ 现成爬虫，无需编码" },
-      "pm": { "priority": 2, "reason": "Extract data from major platforms instantly", "reason_zh": "即时从主流平台提取数据" }
+      "founder": {
+        "priority": 1,
+        "reason": "2000+ ready-made scrapers, no coding needed",
+        "reason_zh": "2000+ 现成爬虫，无需编码"
+      },
+      "pm": {
+        "priority": 2,
+        "reason": "Extract data from major platforms instantly",
+        "reason_zh": "即时从主流平台提取数据"
+      }
     },
     "mcp": {
       "supported": true,
@@ -361,7 +532,12 @@
     "website": "https://e2b.dev",
     "github": "https://github.com/e2b-dev/e2b",
     "category": "execution",
-    "tags": ["sandbox", "code-execution", "python", "open-source"],
+    "tags": [
+      "sandbox",
+      "code-execution",
+      "python",
+      "open-source"
+    ],
     "pricing": "freemium",
     "price_detail": "免费 100 小时/月沙箱时间",
     "agent_friendly": true,
@@ -376,9 +552,21 @@
     "api_version": "1.2.0",
     "api_stability": "stable",
     "recommended_for": {
-      "developer": { "priority": 1, "reason": "Best sandbox for code execution, Python/JS SDK", "reason_zh": "最佳代码执行沙箱，Python/JS SDK" },
-      "founder": { "priority": 2, "reason": "Secure code execution without infrastructure", "reason_zh": "无需基础设施的安全代码执行" },
-      "researcher": { "priority": 3, "reason": "Isolated environment for agent experiments", "reason_zh": "隔离环境适合 Agent 实验" }
+      "developer": {
+        "priority": 1,
+        "reason": "Best sandbox for code execution, Python/JS SDK",
+        "reason_zh": "最佳代码执行沙箱，Python/JS SDK"
+      },
+      "founder": {
+        "priority": 2,
+        "reason": "Secure code execution without infrastructure",
+        "reason_zh": "无需基础设施的安全代码执行"
+      },
+      "researcher": {
+        "priority": 3,
+        "reason": "Isolated environment for agent experiments",
+        "reason_zh": "隔离环境适合 Agent 实验"
+      }
     },
     "changelog": [
       {
@@ -433,7 +621,13 @@
     "website": "https://modal.com",
     "github": "",
     "category": "execution",
-    "tags": ["serverless", "cloud", "python", "gpu", "deployment"],
+    "tags": [
+      "serverless",
+      "cloud",
+      "python",
+      "gpu",
+      "deployment"
+    ],
     "pricing": "freemium",
     "price_detail": "每月 $30 免费额度，超出按用量计费",
     "agent_friendly": true,
@@ -446,8 +640,16 @@
     "integration_level": "standard",
     "quickstart_time": "15 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Deploy agents as serverless functions", "reason_zh": "将 Agent 部署为无服务器函数" },
-      "founder": { "priority": 3, "reason": "Scale agent workloads without managing servers", "reason_zh": "无需管理服务器即可扩展 Agent 负载" }
+      "developer": {
+        "priority": 2,
+        "reason": "Deploy agents as serverless functions",
+        "reason_zh": "将 Agent 部署为无服务器函数"
+      },
+      "founder": {
+        "priority": 3,
+        "reason": "Scale agent workloads without managing servers",
+        "reason_zh": "无需管理服务器即可扩展 Agent 负载"
+      }
     }
   },
   {
@@ -459,7 +661,13 @@
     "website": "https://daytona.io",
     "github": "https://github.com/daytonaio/daytona",
     "category": "execution",
-    "tags": ["sandbox", "development", "open-source", "api-first", "isolation"],
+    "tags": [
+      "sandbox",
+      "development",
+      "open-source",
+      "api-first",
+      "isolation"
+    ],
     "pricing": "freemium",
     "price_detail": "开源可自托管，云端有免费套餐",
     "agent_friendly": true,
@@ -472,8 +680,16 @@
     "integration_level": "standard",
     "quickstart_time": "20 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Full dev environment for coding agents", "reason_zh": "编程 Agent 的完整开发环境" },
-      "researcher": { "priority": 2, "reason": "Isolated environment for safe experiments", "reason_zh": "隔离环境适合安全实验" }
+      "developer": {
+        "priority": 2,
+        "reason": "Full dev environment for coding agents",
+        "reason_zh": "编程 Agent 的完整开发环境"
+      },
+      "researcher": {
+        "priority": 2,
+        "reason": "Isolated environment for safe experiments",
+        "reason_zh": "隔离环境适合安全实验"
+      }
     }
   },
   {
@@ -485,7 +701,13 @@
     "website": "https://inngest.com",
     "github": "https://github.com/inngest/inngest",
     "category": "execution",
-    "tags": ["workflow", "orchestration", "durable", "open-source", "scheduling"],
+    "tags": [
+      "workflow",
+      "orchestration",
+      "durable",
+      "open-source",
+      "scheduling"
+    ],
     "pricing": "freemium",
     "price_detail": "免费套餐每月 50 万步骤，付费 $20/月起",
     "agent_friendly": true,
@@ -498,8 +720,16 @@
     "integration_level": "standard",
     "quickstart_time": "15 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Durable workflows for long-running agents", "reason_zh": "长运行 Agent 的持久化工作流" },
-      "founder": { "priority": 2, "reason": "Reliable agent workflows with auto-retry", "reason_zh": "可靠 Agent 工作流带自动重试" }
+      "developer": {
+        "priority": 2,
+        "reason": "Durable workflows for long-running agents",
+        "reason_zh": "长运行 Agent 的持久化工作流"
+      },
+      "founder": {
+        "priority": 2,
+        "reason": "Reliable agent workflows with auto-retry",
+        "reason_zh": "可靠 Agent 工作流带自动重试"
+      }
     }
   },
   {
@@ -511,7 +741,12 @@
     "website": "https://composio.dev",
     "github": "https://github.com/ComposioHQ/composio",
     "category": "integration",
-    "tags": ["integration", "tools", "api", "open-source"],
+    "tags": [
+      "integration",
+      "tools",
+      "api",
+      "open-source"
+    ],
     "pricing": "freemium",
     "price_detail": "免费套餐可用",
     "agent_friendly": true,
@@ -524,9 +759,21 @@
     "integration_level": "quick_start",
     "quickstart_time": "5 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "200+ integrations with one line of code", "reason_zh": "一行代码集成 200+ 应用" },
-      "founder": { "priority": 1, "reason": "Instant integrations without development cost", "reason_zh": "零开发成本即时集成" },
-      "pm": { "priority": 2, "reason": "Connect agents to existing tools quickly", "reason_zh": "快速连接 Agent 到现有工具" }
+      "developer": {
+        "priority": 2,
+        "reason": "200+ integrations with one line of code",
+        "reason_zh": "一行代码集成 200+ 应用"
+      },
+      "founder": {
+        "priority": 1,
+        "reason": "Instant integrations without development cost",
+        "reason_zh": "零开发成本即时集成"
+      },
+      "pm": {
+        "priority": 2,
+        "reason": "Connect agents to existing tools quickly",
+        "reason_zh": "快速连接 Agent 到现有工具"
+      }
     },
     "mcp": {
       "supported": true,
@@ -545,7 +792,12 @@
     "website": "https://toolhouse.ai",
     "github": "https://github.com/toolhouseai/toolhouse-sdk-python",
     "category": "integration",
-    "tags": ["tools", "integration", "cloud", "api-first"],
+    "tags": [
+      "tools",
+      "integration",
+      "cloud",
+      "api-first"
+    ],
     "pricing": "freemium",
     "price_detail": "免费套餐可用，付费按用量",
     "agent_friendly": true,
@@ -558,8 +810,16 @@
     "integration_level": "quick_start",
     "quickstart_time": "5 min",
     "recommended_for": {
-      "developer": { "priority": 3, "reason": "Pre-built tools ready to use", "reason_zh": "预构建工具即开即用" },
-      "founder": { "priority": 2, "reason": "Add capabilities without building tools", "reason_zh": "无需开发工具即可添加能力" }
+      "developer": {
+        "priority": 3,
+        "reason": "Pre-built tools ready to use",
+        "reason_zh": "预构建工具即开即用"
+      },
+      "founder": {
+        "priority": 2,
+        "reason": "Add capabilities without building tools",
+        "reason_zh": "无需开发工具即可添加能力"
+      }
     }
   },
   {
@@ -571,7 +831,13 @@
     "website": "https://n8n.io",
     "github": "https://github.com/n8n-io/n8n",
     "category": "integration",
-    "tags": ["automation", "workflow", "open-source", "self-hosted", "integrations"],
+    "tags": [
+      "automation",
+      "workflow",
+      "open-source",
+      "self-hosted",
+      "integrations"
+    ],
     "pricing": "freemium",
     "price_detail": "开源可自托管免费，云端 $20/月起",
     "agent_friendly": true,
@@ -584,8 +850,16 @@
     "integration_level": "advanced",
     "quickstart_time": "1+ hour",
     "recommended_for": {
-      "founder": { "priority": 2, "reason": "Visual workflow builder, no coding needed", "reason_zh": "可视化工作流构建，无需编码" },
-      "pm": { "priority": 1, "reason": "Best for automating complex business processes", "reason_zh": "自动化复杂业务流程的首选" }
+      "founder": {
+        "priority": 2,
+        "reason": "Visual workflow builder, no coding needed",
+        "reason_zh": "可视化工作流构建，无需编码"
+      },
+      "pm": {
+        "priority": 1,
+        "reason": "Best for automating complex business processes",
+        "reason_zh": "自动化复杂业务流程的首选"
+      }
     }
   },
   {
@@ -597,7 +871,12 @@
     "website": "https://langfuse.com",
     "github": "https://github.com/langfuse/langfuse",
     "category": "observability",
-    "tags": ["observability", "debugging", "llm", "open-source"],
+    "tags": [
+      "observability",
+      "debugging",
+      "llm",
+      "open-source"
+    ],
     "pricing": "freemium",
     "price_detail": "开源可自托管，云端免费套餐",
     "agent_friendly": false,
@@ -610,8 +889,16 @@
     "integration_level": "quick_start",
     "quickstart_time": "5 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Debug agent behavior with full tracing", "reason_zh": "完整追踪调试 Agent 行为" },
-      "founder": { "priority": 3, "reason": "Monitor costs and agent performance", "reason_zh": "监控成本和 Agent 性能" }
+      "developer": {
+        "priority": 2,
+        "reason": "Debug agent behavior with full tracing",
+        "reason_zh": "完整追踪调试 Agent 行为"
+      },
+      "founder": {
+        "priority": 3,
+        "reason": "Monitor costs and agent performance",
+        "reason_zh": "监控成本和 Agent 性能"
+      }
     }
   },
   {
@@ -623,7 +910,13 @@
     "website": "https://smith.langchain.com",
     "github": "",
     "category": "observability",
-    "tags": ["observability", "tracing", "langchain", "evaluation", "debugging"],
+    "tags": [
+      "observability",
+      "tracing",
+      "langchain",
+      "evaluation",
+      "debugging"
+    ],
     "pricing": "freemium",
     "price_detail": "免费 5000 条 trace/月，付费 $39/用户/月",
     "agent_friendly": false,
@@ -636,7 +929,11 @@
     "integration_level": "standard",
     "quickstart_time": "10 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Best tool if using LangChain ecosystem", "reason_zh": "使用 LangChain 生态的最佳工具" }
+      "developer": {
+        "priority": 2,
+        "reason": "Best tool if using LangChain ecosystem",
+        "reason_zh": "使用 LangChain 生态的最佳工具"
+      }
     }
   },
   {
@@ -648,7 +945,13 @@
     "website": "https://helicone.ai",
     "github": "https://github.com/Helicone/helicone",
     "category": "observability",
-    "tags": ["observability", "gateway", "open-source", "caching", "cost-tracking"],
+    "tags": [
+      "observability",
+      "gateway",
+      "open-source",
+      "caching",
+      "cost-tracking"
+    ],
     "pricing": "freemium",
     "price_detail": "免费 10 万请求/月，付费 $20/用户/月起",
     "agent_friendly": false,
@@ -661,8 +964,16 @@
     "integration_level": "quick_start",
     "quickstart_time": "5 min",
     "recommended_for": {
-      "developer": { "priority": 3, "reason": "Framework-agnostic LLM monitoring", "reason_zh": "框架无关的 LLM 监控" },
-      "founder": { "priority": 2, "reason": "Cost tracking and caching for savings", "reason_zh": "成本追踪和缓存节省开支" }
+      "developer": {
+        "priority": 3,
+        "reason": "Framework-agnostic LLM monitoring",
+        "reason_zh": "框架无关的 LLM 监控"
+      },
+      "founder": {
+        "priority": 2,
+        "reason": "Cost tracking and caching for savings",
+        "reason_zh": "成本追踪和缓存节省开支"
+      }
     }
   },
   {
@@ -674,7 +985,14 @@
     "website": "https://langchain.com",
     "github": "https://github.com/langchain-ai/langchain",
     "category": "framework",
-    "tags": ["framework", "rag", "tools", "open-source", "python", "typescript"],
+    "tags": [
+      "framework",
+      "rag",
+      "tools",
+      "open-source",
+      "python",
+      "typescript"
+    ],
     "pricing": "free",
     "price_detail": "框架本身开源免费，LangSmith 观测平台有付费套餐",
     "agent_friendly": true,
@@ -689,10 +1007,26 @@
     "api_version": "0.3.0",
     "api_stability": "stable",
     "recommended_for": {
-      "developer": { "priority": 1, "reason": "Most popular framework, extensive ecosystem", "reason_zh": "最流行框架，生态最丰富" },
-      "founder": { "priority": 1, "reason": "Largest community, easy to hire talent", "reason_zh": "最大社区，容易招人" },
-      "researcher": { "priority": 2, "reason": "Industry standard for agent research", "reason_zh": "Agent 研究的行业标准" },
-      "pm": { "priority": 2, "reason": "Rich examples and documentation", "reason_zh": "丰富的示例和文档" }
+      "developer": {
+        "priority": 1,
+        "reason": "Most popular framework, extensive ecosystem",
+        "reason_zh": "最流行框架，生态最丰富"
+      },
+      "founder": {
+        "priority": 1,
+        "reason": "Largest community, easy to hire talent",
+        "reason_zh": "最大社区，容易招人"
+      },
+      "researcher": {
+        "priority": 2,
+        "reason": "Industry standard for agent research",
+        "reason_zh": "Agent 研究的行业标准"
+      },
+      "pm": {
+        "priority": 2,
+        "reason": "Rich examples and documentation",
+        "reason_zh": "丰富的示例和文档"
+      }
     },
     "changelog": [
       {
@@ -747,7 +1081,13 @@
     "website": "https://crewai.com",
     "github": "https://github.com/crewAIInc/crewAI",
     "category": "framework",
-    "tags": ["framework", "multi-agent", "roles", "open-source", "python"],
+    "tags": [
+      "framework",
+      "multi-agent",
+      "roles",
+      "open-source",
+      "python"
+    ],
     "pricing": "freemium",
     "price_detail": "开源免费，企业版 $29/月起",
     "agent_friendly": true,
@@ -760,9 +1100,21 @@
     "integration_level": "standard",
     "quickstart_time": "20 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Easiest multi-agent framework, low code", "reason_zh": "最简单的多 Agent 框架，代码量少" },
-      "founder": { "priority": 2, "reason": "Build teams of agents quickly", "reason_zh": "快速构建 Agent 团队" },
-      "researcher": { "priority": 1, "reason": "Study multi-agent collaboration patterns", "reason_zh": "研究多 Agent 协作模式" }
+      "developer": {
+        "priority": 2,
+        "reason": "Easiest multi-agent framework, low code",
+        "reason_zh": "最简单的多 Agent 框架，代码量少"
+      },
+      "founder": {
+        "priority": 2,
+        "reason": "Build teams of agents quickly",
+        "reason_zh": "快速构建 Agent 团队"
+      },
+      "researcher": {
+        "priority": 1,
+        "reason": "Study multi-agent collaboration patterns",
+        "reason_zh": "研究多 Agent 协作模式"
+      }
     }
   },
   {
@@ -774,7 +1126,14 @@
     "website": "https://microsoft.github.io/autogen",
     "github": "https://github.com/microsoft/autogen",
     "category": "framework",
-    "tags": ["framework", "multi-agent", "microsoft", "open-source", "python", "code-execution"],
+    "tags": [
+      "framework",
+      "multi-agent",
+      "microsoft",
+      "open-source",
+      "python",
+      "code-execution"
+    ],
     "pricing": "free",
     "price_detail": "完全开源免费，Azure 部署另计",
     "agent_friendly": true,
@@ -787,8 +1146,16 @@
     "integration_level": "standard",
     "quickstart_time": "20 min",
     "recommended_for": {
-      "developer": { "priority": 3, "reason": "Microsoft-backed, enterprise-ready", "reason_zh": "微软背书，企业级可用" },
-      "researcher": { "priority": 1, "reason": "Advanced multi-agent conversation research", "reason_zh": "高级多 Agent 对话研究" }
+      "developer": {
+        "priority": 3,
+        "reason": "Microsoft-backed, enterprise-ready",
+        "reason_zh": "微软背书，企业级可用"
+      },
+      "researcher": {
+        "priority": 1,
+        "reason": "Advanced multi-agent conversation research",
+        "reason_zh": "高级多 Agent 对话研究"
+      }
     }
   },
   {
@@ -800,7 +1167,14 @@
     "website": "https://llamaindex.ai",
     "github": "https://github.com/run-llama/llama_index",
     "category": "framework",
-    "tags": ["framework", "rag", "documents", "open-source", "python", "vector-search"],
+    "tags": [
+      "framework",
+      "rag",
+      "documents",
+      "open-source",
+      "python",
+      "vector-search"
+    ],
     "pricing": "freemium",
     "price_detail": "开源免费，LlamaCloud 云端服务按用量付费",
     "agent_friendly": true,
@@ -813,9 +1187,21 @@
     "integration_level": "standard",
     "quickstart_time": "15 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Best for RAG and document-heavy agents", "reason_zh": "RAG 和文档密集型 Agent 的最佳选择" },
-      "founder": { "priority": 3, "reason": "Turn documents into agent knowledge base", "reason_zh": "将文档转化为 Agent 知识库" },
-      "researcher": { "priority": 2, "reason": "Advanced RAG research capabilities", "reason_zh": "高级 RAG 研究能力" }
+      "developer": {
+        "priority": 2,
+        "reason": "Best for RAG and document-heavy agents",
+        "reason_zh": "RAG 和文档密集型 Agent 的最佳选择"
+      },
+      "founder": {
+        "priority": 3,
+        "reason": "Turn documents into agent knowledge base",
+        "reason_zh": "将文档转化为 Agent 知识库"
+      },
+      "researcher": {
+        "priority": 2,
+        "reason": "Advanced RAG research capabilities",
+        "reason_zh": "高级 RAG 研究能力"
+      }
     }
   },
   {
@@ -827,7 +1213,13 @@
     "website": "https://dify.ai",
     "github": "https://github.com/langgenius/dify",
     "category": "framework",
-    "tags": ["framework", "low-code", "visual", "open-source", "self-hosted"],
+    "tags": [
+      "framework",
+      "low-code",
+      "visual",
+      "open-source",
+      "self-hosted"
+    ],
     "pricing": "freemium",
     "price_detail": "开源可自托管，云端免费套餐，专业版 $59/月",
     "agent_friendly": true,
@@ -840,8 +1232,16 @@
     "integration_level": "standard",
     "quickstart_time": "30 min",
     "recommended_for": {
-      "founder": { "priority": 1, "reason": "Build agents without coding, fastest to MVP", "reason_zh": "无需编码构建 Agent，最快到 MVP" },
-      "pm": { "priority": 1, "reason": "Visual builder, perfect for non-developers", "reason_zh": "可视化构建，非开发者首选" }
+      "founder": {
+        "priority": 1,
+        "reason": "Build agents without coding, fastest to MVP",
+        "reason_zh": "无需编码构建 Agent，最快到 MVP"
+      },
+      "pm": {
+        "priority": 1,
+        "reason": "Visual builder, perfect for non-developers",
+        "reason_zh": "可视化构建，非开发者首选"
+      }
     }
   },
   {
@@ -853,7 +1253,13 @@
     "website": "https://guardrailsai.com",
     "github": "https://github.com/guardrails-ai/guardrails",
     "category": "security",
-    "tags": ["security", "validation", "guardrails", "open-source", "safety"],
+    "tags": [
+      "security",
+      "validation",
+      "guardrails",
+      "open-source",
+      "safety"
+    ],
     "pricing": "freemium",
     "price_detail": "开源核心免费，Hub 高级验证器有付费选项",
     "agent_friendly": false,
@@ -866,8 +1272,16 @@
     "integration_level": "standard",
     "quickstart_time": "15 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Essential for production agent safety", "reason_zh": "生产环境 Agent 安全必备" },
-      "founder": { "priority": 2, "reason": "Protect against harmful outputs and data leaks", "reason_zh": "防护有害输出和数据泄露" }
+      "developer": {
+        "priority": 2,
+        "reason": "Essential for production agent safety",
+        "reason_zh": "生产环境 Agent 安全必备"
+      },
+      "founder": {
+        "priority": 2,
+        "reason": "Protect against harmful outputs and data leaks",
+        "reason_zh": "防护有害输出和数据泄露"
+      }
     }
   },
   {
@@ -879,7 +1293,14 @@
     "website": "https://x402.org",
     "github": "https://github.com/coinbase/x402",
     "category": "payment",
-    "tags": ["payment", "micropayment", "usdc", "http", "open-source", "coinbase"],
+    "tags": [
+      "payment",
+      "micropayment",
+      "usdc",
+      "http",
+      "open-source",
+      "coinbase"
+    ],
     "pricing": "free",
     "price_detail": "协议本身开源免费，交易手续费极低",
     "agent_friendly": true,
@@ -892,9 +1313,655 @@
     "integration_level": "standard",
     "quickstart_time": "10 min",
     "recommended_for": {
-      "developer": { "priority": 2, "reason": "Enable agents to pay autonomously", "reason_zh": "让 Agent 自主支付" },
-      "founder": { "priority": 3, "reason": "Monetize API access for agents", "reason_zh": "为 Agent API 访问收费" },
-      "researcher": { "priority": 1, "reason": "Study agent economic autonomy", "reason_zh": "研究 Agent 经济自主性" }
+      "developer": {
+        "priority": 2,
+        "reason": "Enable agents to pay autonomously",
+        "reason_zh": "让 Agent 自主支付"
+      },
+      "founder": {
+        "priority": 3,
+        "reason": "Monetize API access for agents",
+        "reason_zh": "为 Agent API 访问收费"
+      },
+      "researcher": {
+        "priority": 1,
+        "reason": "Study agent economic autonomy",
+        "reason_zh": "研究 Agent 经济自主性"
+      }
+    }
+  },
+  {
+    "id": "mcp-playwright",
+    "slug": "mcp-playwright",
+    "name": "Playwright MCP Server",
+    "tagline": "Web browser automation for AI agents",
+    "description": "Microsoft 官方的浏览器自动化 MCP Server。Agent 可以控制真实浏览器进行网页导航、点击、截图、表单填写等操作，支持复杂交互场景。",
+    "website": "https://github.com/microsoft/playwright-mcp",
+    "github": "https://github.com/microsoft/playwright-mcp",
+    "category": "browser",
+    "tags": [
+      "browser",
+      "automation",
+      "microsoft",
+      "official",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2025-03-22",
+    "integration_level": "quick_start",
+    "quickstart_time": "5 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 12,
+      "installation": "npx @anthropic-ai/mcp-server-playwright",
+      "verified": true,
+      "classification": "official",
+      "provider": "Microsoft"
+    }
+  },
+  {
+    "id": "mcp-filesystem",
+    "slug": "mcp-filesystem",
+    "name": "Filesystem MCP Server",
+    "tagline": "Read, write, and manipulate local files",
+    "description": "Anthropic 官方的文件系统 MCP Server。Agent 可以安全地读写本地文件、创建目录、移动文件，支持路径访问控制。",
+    "website": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+    "github": "https://github.com/modelcontextprotocol/servers",
+    "category": "files",
+    "tags": [
+      "filesystem",
+      "files",
+      "anthropic",
+      "reference",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-11-19",
+    "integration_level": "quick_start",
+    "quickstart_time": "1 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 8,
+      "installation": "npx @anthropic-ai/mcp-server-filesystem",
+      "verified": true,
+      "classification": "reference",
+      "provider": "Anthropic"
+    }
+  },
+  {
+    "id": "mcp-git",
+    "slug": "mcp-git",
+    "name": "Git MCP Server",
+    "tagline": "Git repository operations for AI agents",
+    "description": "Anthropic 官方的 Git MCP Server。Agent 可以操作本地 Git 仓库：提交、分支、合并、查看历史等版本控制任务。",
+    "website": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+    "github": "https://github.com/modelcontextprotocol/servers",
+    "category": "developer-tools",
+    "tags": [
+      "git",
+      "version-control",
+      "anthropic",
+      "reference",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-11-19",
+    "integration_level": "quick_start",
+    "quickstart_time": "2 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 10,
+      "installation": "npx @anthropic-ai/mcp-server-git",
+      "verified": true,
+      "classification": "reference",
+      "provider": "Anthropic"
+    }
+  },
+  {
+    "id": "mcp-github",
+    "slug": "mcp-github",
+    "name": "GitHub MCP Server",
+    "tagline": "GitHub API integration for AI agents",
+    "description": "Anthropic 官方的 GitHub MCP Server。Agent 可以管理仓库、创建 Issue、提交 PR、搜索代码、查看文件等 GitHub 操作。",
+    "website": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+    "github": "https://github.com/modelcontextprotocol/servers",
+    "category": "developer-tools",
+    "tags": [
+      "github",
+      "api",
+      "anthropic",
+      "reference",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-11-19",
+    "integration_level": "quick_start",
+    "quickstart_time": "3 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 15,
+      "installation": "npx @anthropic-ai/mcp-server-github",
+      "verified": true,
+      "classification": "reference",
+      "provider": "Anthropic"
+    }
+  },
+  {
+    "id": "mcp-postgres",
+    "slug": "mcp-postgres",
+    "name": "PostgreSQL MCP Server",
+    "tagline": "PostgreSQL database access for AI agents",
+    "description": "Anthropic 官方的 PostgreSQL MCP Server。Agent 可以安全地查询和分析 PostgreSQL 数据库，支持只读模式和写操作。",
+    "website": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+    "github": "https://github.com/modelcontextprotocol/servers",
+    "category": "database",
+    "tags": [
+      "postgres",
+      "database",
+      "sql",
+      "anthropic",
+      "reference",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-11-19",
+    "integration_level": "quick_start",
+    "quickstart_time": "3 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 6,
+      "installation": "npx @anthropic-ai/mcp-server-postgres",
+      "verified": true,
+      "classification": "reference",
+      "provider": "Anthropic"
+    }
+  },
+  {
+    "id": "mcp-fetch",
+    "slug": "mcp-fetch",
+    "name": "Fetch MCP Server",
+    "tagline": "Web content fetching and Markdown conversion",
+    "description": "Anthropic 官方的 Fetch MCP Server。Agent 可以获取任意 URL 的内容并转换为 Markdown 格式，适合网页内容分析。",
+    "website": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+    "github": "https://github.com/modelcontextprotocol/servers",
+    "category": "web",
+    "tags": [
+      "fetch",
+      "web",
+      "markdown",
+      "anthropic",
+      "reference",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-11-19",
+    "integration_level": "quick_start",
+    "quickstart_time": "1 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 3,
+      "installation": "npx @anthropic-ai/mcp-server-fetch",
+      "verified": true,
+      "classification": "reference",
+      "provider": "Anthropic"
+    }
+  },
+  {
+    "id": "mcp-memory",
+    "slug": "mcp-memory",
+    "name": "Knowledge Graph Memory MCP Server",
+    "tagline": "Persistent knowledge graph for agent memory",
+    "description": "Anthropic 官方的知识图谱记忆 MCP Server。Agent 可以构建和查询持久化的语义网络，存储实体关系和知识。",
+    "website": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+    "github": "https://github.com/modelcontextprotocol/servers",
+    "category": "memory",
+    "tags": [
+      "memory",
+      "knowledge-graph",
+      "anthropic",
+      "reference",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-11-19",
+    "integration_level": "quick_start",
+    "quickstart_time": "2 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 5,
+      "installation": "npx @anthropic-ai/mcp-server-memory",
+      "verified": true,
+      "classification": "reference",
+      "provider": "Anthropic"
+    }
+  },
+  {
+    "id": "mcp-sequential-thinking",
+    "slug": "mcp-sequential-thinking",
+    "name": "Sequential Thinking MCP Server",
+    "tagline": "Structured problem-solving for complex tasks",
+    "description": "MCP 官方的顺序思考 MCP Server。帮助 Agent 以结构化方式分解复杂问题，逐步推理和迭代优化解决方案。",
+    "website": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking",
+    "github": "https://github.com/modelcontextprotocol/servers",
+    "category": "reasoning",
+    "tags": [
+      "reasoning",
+      "thinking",
+      "mcp",
+      "reference",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": false,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-12-16",
+    "integration_level": "quick_start",
+    "quickstart_time": "1 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 1,
+      "installation": "npx @anthropic-ai/mcp-server-sequential-thinking",
+      "verified": true,
+      "classification": "reference",
+      "provider": "Model Context Protocol"
+    }
+  },
+  {
+    "id": "mcp-supabase",
+    "slug": "mcp-supabase",
+    "name": "Supabase MCP Server",
+    "tagline": "Supabase database and backend integration",
+    "description": "Supabase 官方的 MCP Server。Agent 可以连接 Supabase 项目，管理数据库、执行 SQL 查询、应用迁移等后端操作。",
+    "website": "https://github.com/supabase-community/mcp-supabase",
+    "github": "https://github.com/supabase-community/mcp-supabase",
+    "category": "database",
+    "tags": [
+      "supabase",
+      "database",
+      "backend",
+      "official",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-12-20",
+    "integration_level": "quick_start",
+    "quickstart_time": "5 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 8,
+      "installation": "npx @supabase/mcp-server-supabase",
+      "verified": true,
+      "classification": "official",
+      "provider": "Supabase"
+    }
+  },
+  {
+    "id": "mcp-notion",
+    "slug": "mcp-notion",
+    "name": "Notion MCP Server",
+    "tagline": "Notion workspace integration for AI agents",
+    "description": "Notion 官方的 MCP Server。Agent 可以搜索内容、查询数据库、管理页面和评论，无需人工介入即可操作 Notion 工作区。",
+    "website": "https://github.com/notionhq/notion-mcp-server",
+    "github": "https://github.com/notionhq/notion-mcp-server",
+    "category": "productivity",
+    "tags": [
+      "notion",
+      "productivity",
+      "database",
+      "official",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2025-04-11",
+    "integration_level": "quick_start",
+    "quickstart_time": "5 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 10,
+      "installation": "npx @anthropic-ai/mcp-server-notion",
+      "verified": true,
+      "classification": "official",
+      "provider": "Notion"
+    }
+  },
+  {
+    "id": "mcp-chrome-devtools",
+    "slug": "mcp-chrome-devtools",
+    "name": "Chrome DevTools MCP Server",
+    "tagline": "Direct Chrome browser control via DevTools",
+    "description": "Google 官方的 Chrome DevTools MCP Server。Agent 可以通过 DevTools 协议直接控制 Chrome 浏览器，进行网页自动化、调试和性能分析。",
+    "website": "https://github.com/nicholasoxford/mcp-chrome-devtools",
+    "github": "https://github.com/nicholasoxford/mcp-chrome-devtools",
+    "category": "browser",
+    "tags": [
+      "chrome",
+      "browser",
+      "devtools",
+      "google",
+      "official",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": false,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2025-09-23",
+    "integration_level": "standard",
+    "quickstart_time": "10 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 15,
+      "installation": "npx @anthropic-ai/mcp-server-chrome-devtools",
+      "verified": true,
+      "classification": "official",
+      "provider": "Google"
+    }
+  },
+  {
+    "id": "mcp-mongodb",
+    "slug": "mcp-mongodb",
+    "name": "MongoDB MCP Server",
+    "tagline": "MongoDB database bridge for AI agents",
+    "description": "MongoDB 官方的 MCP Server。为对话界面和 MongoDB 数据库之间提供桥梁，支持全面的数据库操作和查询。",
+    "website": "https://github.com/mongodb-js/mcp-server-mongodb",
+    "github": "https://github.com/mongodb-js/mcp-server-mongodb",
+    "category": "database",
+    "tags": [
+      "mongodb",
+      "database",
+      "nosql",
+      "official",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2025-04-29",
+    "integration_level": "quick_start",
+    "quickstart_time": "5 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 10,
+      "installation": "npx @anthropic-ai/mcp-server-mongodb",
+      "verified": true,
+      "classification": "official",
+      "provider": "MongoDB Inc."
+    }
+  },
+  {
+    "id": "mcp-context7",
+    "slug": "mcp-context7",
+    "name": "Context7 MCP Server",
+    "tagline": "Up-to-date documentation database for AI agents",
+    "description": "Upstash 官方的 Context7 MCP Server。连接 Context7.com 的文档数据库，提供最新的库和框架文档，解决知识过时问题。",
+    "website": "https://github.com/upstash/context7-mcp",
+    "github": "https://github.com/upstash/context7-mcp",
+    "category": "knowledge",
+    "tags": [
+      "documentation",
+      "knowledge",
+      "upstash",
+      "official",
+      "mcp"
+    ],
+    "pricing": "freemium",
+    "price_detail": "有免费额度",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": true,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2025-04-13",
+    "integration_level": "quick_start",
+    "quickstart_time": "3 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 4,
+      "installation": "npx @upstash/mcp-server-context7",
+      "verified": true,
+      "classification": "official",
+      "provider": "Upstash"
+    }
+  },
+  {
+    "id": "mcp-datadog",
+    "slug": "mcp-datadog",
+    "name": "Datadog MCP Server",
+    "tagline": "Observability platform integration for AI agents",
+    "description": "Datadog 官方的 MCP Server。Agent 可以连接 Datadog 统一可观测平台，查询日志、指标、追踪、仪表板等运维数据。",
+    "website": "https://github.com/DataDog/mcp-server-datadog",
+    "github": "https://github.com/DataDog/mcp-server-datadog",
+    "category": "observability",
+    "tags": [
+      "observability",
+      "monitoring",
+      "logs",
+      "metrics",
+      "official",
+      "mcp"
+    ],
+    "pricing": "freemium",
+    "price_detail": "按用量付费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": false,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2025-06-10",
+    "integration_level": "standard",
+    "quickstart_time": "10 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 20,
+      "installation": "npx @datadog/mcp-server-datadog",
+      "verified": true,
+      "classification": "official",
+      "provider": "Datadog"
+    }
+  },
+  {
+    "id": "mcp-aws-docs",
+    "slug": "mcp-aws-docs",
+    "name": "AWS Documentation MCP Server",
+    "tagline": "AWS documentation access for AI agents",
+    "description": "AWS 官方的文档 MCP Server。Agent 可以访问 AWS 文档、搜索内容和获取推荐，帮助理解和构建 AWS 服务。",
+    "website": "https://github.com/awslabs/mcp-server-aws-documentation",
+    "github": "https://github.com/awslabs/mcp-server-aws-documentation",
+    "category": "knowledge",
+    "tags": [
+      "aws",
+      "documentation",
+      "cloud",
+      "official",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": false,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2025-04-04",
+    "integration_level": "quick_start",
+    "quickstart_time": "3 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 5,
+      "installation": "npx @anthropic-ai/mcp-server-aws-docs",
+      "verified": true,
+      "classification": "official",
+      "provider": "AWS"
+    }
+  },
+  {
+    "id": "mcp-time",
+    "slug": "mcp-time",
+    "name": "Time MCP Server",
+    "tagline": "Time and timezone conversion for AI agents",
+    "description": "Anthropic 官方的时间 MCP Server。为 AI 助手提供时间和时区转换工具，处理本地化时间数据。",
+    "website": "https://github.com/modelcontextprotocol/servers/tree/main/src/time",
+    "github": "https://github.com/modelcontextprotocol/servers",
+    "category": "utility",
+    "tags": [
+      "time",
+      "timezone",
+      "utility",
+      "anthropic",
+      "reference",
+      "mcp"
+    ],
+    "pricing": "free",
+    "price_detail": "开源免费",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": false,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2024-11-19",
+    "integration_level": "quick_start",
+    "quickstart_time": "1 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 2,
+      "installation": "npx @anthropic-ai/mcp-server-time",
+      "verified": true,
+      "classification": "reference",
+      "provider": "Anthropic"
+    }
+  },
+  {
+    "id": "mcp-skyvern",
+    "slug": "mcp-skyvern",
+    "name": "Skyvern MCP Server",
+    "tagline": "Browser automation with AI-native approach",
+    "description": "Skyvern 官方的 MCP Server。通过 Skyvern 的浏览器自动化平台控制浏览器，适合复杂网页交互和自动化任务。",
+    "website": "https://github.com/Skyvern-AI/skyvern-mcp",
+    "github": "https://github.com/Skyvern-AI/skyvern-mcp",
+    "category": "browser",
+    "tags": [
+      "browser",
+      "automation",
+      "skyvern",
+      "official",
+      "mcp"
+    ],
+    "pricing": "freemium",
+    "price_detail": "有免费额度",
+    "agent_friendly": true,
+    "api_available": true,
+    "open_source": true,
+    "featured": false,
+    "verified": true,
+    "submitted_by": "import",
+    "created_at": "2025-04-05",
+    "integration_level": "standard",
+    "quickstart_time": "10 min",
+    "mcp": {
+      "supported": true,
+      "server_type": "stdio",
+      "tools_count": 8,
+      "installation": "npx @skyvern/mcp-server-skyvern",
+      "verified": true,
+      "classification": "official",
+      "provider": "Skyvern AI"
     }
   }
 ]
