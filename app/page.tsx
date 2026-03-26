@@ -840,17 +840,23 @@ export default async function HomePage({
       )}
 
       {/* Submit CTA */}
-      <div className="mt-16 bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">
+      <div className="mt-16 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
           {t.cta.title}
         </h2>
-        <p className="text-gray-500 text-sm mb-4">
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
           {t.cta.subtitle}
         </p>
-        <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-3 flex-wrap">
+          <Link
+            href="/submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+          >
+            🚀 {locale === 'zh-CN' ? '提交工具' : 'Submit a Tool'}
+          </Link>
           <Link
             href="/for-agents"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+            className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
           >
             {t.cta.submitApi}
           </Link>
@@ -858,7 +864,7 @@ export default async function HomePage({
             href="https://github.com/surfsun/agentdex/issues/new"
             target="_blank"
             rel="noopener noreferrer"
-            className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition"
+            className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
           >
             {t.cta.submitGithub}
           </a>
