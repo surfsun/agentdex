@@ -284,6 +284,71 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
         </div>
       )}
 
+      {/* Usage Analytics Card */}
+      {(tool.github_stars || tool.open_source || tool.api_available) && (
+        <div className="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            📊 Usage Analytics
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {tool.github_stars && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-blue-100 dark:border-blue-900">
+                <div className="text-xs text-blue-500 dark:text-blue-400 mb-1">GitHub Stars</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {tool.github_stars >= 1000 
+                    ? `${(tool.github_stars / 1000).toFixed(1)}k` 
+                    : tool.github_stars}
+                </div>
+                <div className="text-xs text-green-500 mt-1">⬆️ Growing</div>
+              </div>
+            )}
+            {tool.github && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-blue-100 dark:border-blue-900">
+                <div className="text-xs text-blue-500 dark:text-blue-400 mb-1">Open Source</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {tool.open_source ? '✓ Yes' : '✗ No'}
+                </div>
+                {tool.open_source && (
+                  <a 
+                    href={tool.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-500 hover:underline mt-1 block"
+                  >
+                    View on GitHub →
+                  </a>
+                )}
+              </div>
+            )}
+            {tool.api_available && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-blue-100 dark:border-blue-900">
+                <div className="text-xs text-blue-500 dark:text-blue-400 mb-1">API Available</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                  ✓ Yes
+                </div>
+                <div className="text-xs text-purple-500 mt-1">🤖 Agent-ready</div>
+              </div>
+            )}
+            {tool.integration_level && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-blue-100 dark:border-blue-900">
+                <div className="text-xs text-blue-500 dark:text-blue-400 mb-1">Integration</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
+                  {tool.integration_level.replace('_', ' ')}
+                </div>
+                {tool.quickstart_time && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    ⏱️ {tool.quickstart_time}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+            💡 More analytics (views, usage stats, voting) coming soon
+          </div>
+        </div>
+      )}
+
       {/* Description */}
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
