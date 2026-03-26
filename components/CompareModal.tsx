@@ -59,12 +59,91 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
     return info[complexity] || { label: complexity, color: 'text-gray-400' }
   }
 
+  // Helper to get integration level label
+  const getIntegrationLevelInfo = (level: string | undefined) => {
+    if (!level) return { label: '-', color: 'text-gray-400' }
+    const info: Record<string, { label: string; color: string; time: string }> = {
+      quick_start: { 
+        label: locale === 'zh-CN' ? '快速入门' : 'Quick Start', 
+        color: 'text-green-600 dark:text-green-400',
+        time: '~5 min'
+      },
+      standard: { 
+        label: locale === 'zh-CN' ? '标准' : 'Standard', 
+        color: 'text-yellow-600 dark:text-yellow-400',
+        time: '~15 min'
+      },
+      advanced: { 
+        label: locale === 'zh-CN' ? '高级' : 'Advanced', 
+        color: 'text-red-600 dark:text-red-400',
+        time: '~30 min'
+      },
+    }
+    return info[level] || { label: level, color: 'text-gray-400', time: '-' }
+  }
+
   // Find best value for GitHub stars
   const maxStars = Math.max(...tools.map(t => t.github_stars || 0))
   
   // Find best complexity (lowest is best)
   const complexityOrder = { low: 1, medium: 2, high: 3 }
   const minComplexity = Math.min(...tools.map(t => complexityOrder[t.integration_complexity || 'high']))
+
+  // Generate smart recommendations based on comparison
+  const generateRecommendations = () => {
+    const recommendations: { condition: string; recommended: string; reason: string }[] = []
+    
+    // Find best for each scenario
+    const agentFriendlyTools = tools.filter(t => t.agent_friendly)
+    const openSourceTools = tools.filter(t => t.open_source)
+    const freeTools = tools.filter(t => t.pricing === 'free')
+    const quickStartTools = tools.filter(t => t.integration_level === 'quick_start')
+    const mcpTools = tools.filter(t => t.mcp?.supported)
+    
+    if (agentFriendlyTools.length > 0 && agentFriendlyTools.length < tools.length) {
+      recommendations.push({
+        condition: locale === 'zh-CN' ? '需要 Agent 友好' : 'Need Agent-friendly',
+        recommended: agentFriendlyTools[0].name,
+        reason: locale === 'zh-CN' ? '专为 Agent 优化' : 'Optimized for agents'
+      })
+    }
+    
+    if (openSourceTools.length > 0 && openSourceTools.length < tools.length) {
+      recommendations.push({
+        condition: locale === 'zh-CN' ? '需要自托管' : 'Need self-hosted',
+        recommended: openSourceTools[0].name,
+        reason: locale === 'zh-CN' ? '开源可自托管' : 'Open source, self-hostable'
+      })
+    }
+    
+    if (freeTools.length > 0 && freeTools.length < tools.length) {
+      recommendations.push({
+        condition: locale === 'zh-CN' ? '预算有限' : 'Budget constrained',
+        recommended: freeTools[0].name,
+        reason: locale === 'zh-CN' ? '完全免费' : 'Completely free'
+      })
+    }
+    
+    if (quickStartTools.length > 0 && quickStartTools.length < tools.length) {
+      recommendations.push({
+        condition: locale === 'zh-CN' ? '快速验证想法' : 'Quick prototype',
+        recommended: quickStartTools[0].name,
+        reason: locale === 'zh-CN' ? '5分钟快速集成' : '5-min quick start'
+      })
+    }
+    
+    if (mcpTools.length > 0 && mcpTools.length < tools.length) {
+      recommendations.push({
+        condition: locale === 'zh-CN' ? 'MCP 协议支持' : 'MCP protocol',
+        recommended: mcpTools[0].name,
+        reason: locale === 'zh-CN' ? '支持 MCP 标准' : 'MCP standard support'
+      })
+    }
+    
+    return recommendations.slice(0, 4) // Limit to 4 recommendations
+  }
+  
+  const recommendations = generateRecommendations()
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -164,6 +243,27 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
                       </span>
                     </div>
 
+                    {/* MCP Support - New */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 dark:text-gray-500">
+                        {locale === 'zh-CN' ? 'MCP 支持' : 'MCP Support'}
+                      </span>
+                      <span className={tool.mcp?.supported ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-400'}>
+                        {tool.mcp?.supported ? `✓ Yes${tool.mcp.tools_count ? ` (${tool.mcp.tools_count} tools)` : ''}` : '✗ No'}
+                      </span>
+                    </div>
+
+                    {/* Integration Level - New */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 dark:text-gray-500">
+                        {locale === 'zh-CN' ? '入门难度' : 'Getting Started'}
+                      </span>
+                      <span className={`font-medium ${tool.integration_level === 'quick_start' ? 'text-green-600 dark:text-green-400' : tool.integration_level === 'standard' ? 'text-yellow-600 dark:text-yellow-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                        {getIntegrationLevelInfo(tool.integration_level).label}
+                        {tool.quickstart_time && <span className="text-gray-400 ml-1">({tool.quickstart_time})</span>}
+                      </span>
+                    </div>
+
                     {/* Best For - New */}
                     {(tool.best_for || tool.best_for_zh) && (
                       <div>
@@ -251,6 +351,26 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
               </div>
             </div>
           </div>
+
+          {/* Smart Recommendations - New */}
+          {recommendations.length > 0 && (
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <span>💡</span>
+                {locale === 'zh-CN' ? '智能推荐' : 'Smart Recommendations'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {recommendations.map((rec, index) => (
+                  <div key={index} className="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">{rec.condition}</span>
+                    <span className="mx-1">→</span>
+                    <span className="font-medium text-blue-600 dark:text-blue-400">{rec.recommended}</span>
+                    <span className="text-gray-400 dark:text-gray-500 text-xs ml-auto">{rec.reason}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
