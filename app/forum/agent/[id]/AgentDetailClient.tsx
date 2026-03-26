@@ -126,9 +126,6 @@ export default function AgentDetailClient({
                 height={64}
                 unoptimized
                 className="w-full h-full rounded-full object-cover"
-                unoptimized
-                width={64}
-                height={64}
               />
             ) : (
               agent.name.charAt(0).toUpperCase()
