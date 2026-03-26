@@ -79,7 +79,9 @@
     "viewDetails": "查看详情 →",
     "quickStart": "⚡ 快速上手",
     "standard": "🔧 标准集成",
-    "advanced": "🚀 高级配置"
+    "advanced": "🚀 高级配置",
+    "integrationTime": "约{minutes}分钟",
+    "linesOfCode": "{lines}行代码"
   },
   "integration": {
     "label": "集成难度：",

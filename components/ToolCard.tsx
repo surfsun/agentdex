@@ -108,6 +108,28 @@ export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
         ))}
       </div>
 
+      {/* Integration Time Badge */}
+      {tool.integration_minutes && (
+        <div className="mb-3 flex items-center gap-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+            ⏱️ {locale === 'zh-CN' ? '约' : '~'}{tool.integration_minutes} {locale === 'zh-CN' ? '分钟' : 'min'}
+          </span>
+          {tool.integration_level && (
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              tool.integration_level === 'quick_start' 
+                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                : tool.integration_level === 'standard'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+            }`}>
+              {tool.integration_level === 'quick_start' && (locale === 'zh-CN' ? '⚡ 快速上手' : '⚡ Quick Start')}
+              {tool.integration_level === 'standard' && (locale === 'zh-CN' ? '🔧 标准集成' : '🔧 Standard')}
+              {tool.integration_level === 'advanced' && (locale === 'zh-CN' ? '🚀 高级配置' : '🚀 Advanced')}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Footer */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

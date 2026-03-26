@@ -26,6 +26,10 @@ export type Tool = {
   view_count: number
   created_at: string
   updated_at: string
+  // Integration fields
+  integration_level: 'quick_start' | 'standard' | 'advanced' | null
+  integration_minutes: number | null
+  code_examples: Record<string, unknown> | null
 }
 
 // Eval 会话表类型

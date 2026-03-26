@@ -79,7 +79,9 @@
     "viewDetails": "View details →",
     "quickStart": "⚡ Quick Start",
     "standard": "🔧 Standard",
-    "advanced": "🚀 Advanced"
+    "advanced": "🚀 Advanced",
+    "integrationTime": "~{minutes} min",
+    "linesOfCode": "{lines} lines"
   },
   "integration": {
     "label": "Integration Level:",
