@@ -7,7 +7,8 @@
     "forAgents": "For Agents",
     "eval": "评测",
     "api": "API",
-    "github": "GitHub"
+    "github": "GitHub",
+    "submit": "提交工具"
   },
   "hero": {
     "title": "为 AI Agent 打造的工具目录",
