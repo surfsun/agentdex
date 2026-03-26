@@ -100,7 +100,6 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
     const openSourceTools = tools.filter(t => t.open_source)
     const freeTools = tools.filter(t => t.pricing === 'free')
     const quickStartTools = tools.filter(t => t.integration_level === 'quick_start')
-    const mcpTools = tools.filter(t => t.mcp?.supported)
     
     if (agentFriendlyTools.length > 0 && agentFriendlyTools.length < tools.length) {
       recommendations.push({
@@ -131,14 +130,6 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
         condition: locale === 'zh-CN' ? '快速验证想法' : 'Quick prototype',
         recommended: quickStartTools[0].name,
         reason: locale === 'zh-CN' ? '5分钟快速集成' : '5-min quick start'
-      })
-    }
-    
-    if (mcpTools.length > 0 && mcpTools.length < tools.length) {
-      recommendations.push({
-        condition: locale === 'zh-CN' ? 'MCP 协议支持' : 'MCP protocol',
-        recommended: mcpTools[0].name,
-        reason: locale === 'zh-CN' ? '支持 MCP 标准' : 'MCP standard support'
       })
     }
     
@@ -242,16 +233,6 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
                       <span className="text-gray-400 dark:text-gray-500">{t.compare.apiAvailable}</span>
                       <span className={tool.api_available ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-400'}>
                         {tool.api_available ? '✓ Yes' : '✗ No'}
-                      </span>
-                    </div>
-
-                    {/* MCP Support - New */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 dark:text-gray-500">
-                        {locale === 'zh-CN' ? 'MCP 支持' : 'MCP Support'}
-                      </span>
-                      <span className={tool.mcp?.supported ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-400'}>
-                        {tool.mcp?.supported ? `✓ Yes${tool.mcp.tools_count ? ` (${tool.mcp.tools_count} tools)` : ''}` : '✗ No'}
                       </span>
                     </div>
 

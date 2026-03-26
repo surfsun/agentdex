@@ -48,15 +48,6 @@ export type PersonaCapabilities = {
   model_agnostic?: boolean        // Works with multiple LLM providers
 }
 
-// MCP (Model Context Protocol) support
-export type MCPConfig = {
-  supported: boolean
-  server_type?: 'stdio' | 'http' | 'sse'
-  tools_count?: number
-  installation?: string
-  verified?: boolean
-}
-
 // Code example for integration
 export type CodeExample = {
   install: string      // Installation command
@@ -155,8 +146,6 @@ export type Tool = {
   best_for_zh?: string[]  // Chinese version of best_for
   // Persona capabilities
   persona?: PersonaCapabilities  // Agent persona/personality support
-  // MCP (Model Context Protocol) support
-  mcp?: MCPConfig
   // Integration code examples
   integration_minutes?: number  // Estimated integration time in minutes
   code_examples?: CodeExamples  // Multi-language code examples

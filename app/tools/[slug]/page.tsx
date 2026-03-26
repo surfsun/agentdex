@@ -141,11 +141,6 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
               🤖 Agent-friendly
             </span>
           )}
-          {tool.mcp?.supported && (
-            <span className="text-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded-full whitespace-nowrap">
-              🔌 MCP Compatible
-            </span>
-          )}
           {tool.featured && (
             <span className="text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-full">
               ⭐ Featured
@@ -234,58 +229,6 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
               className="text-sm text-pink-600 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300 font-medium"
             >
               → Explore Persona Agent Scenario
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* MCP Support */}
-      {tool.mcp?.supported && (
-        <div className="mb-8 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-indigo-800 dark:text-indigo-300 mb-4 flex items-center gap-2">
-            🔌 MCP (Model Context Protocol)
-          </h2>
-          <p className="text-sm text-indigo-700 dark:text-indigo-400 mb-4">
-            This tool supports the Model Context Protocol, allowing seamless integration with Claude Desktop and other MCP-compatible clients.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-            <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900">
-              <div className="text-xs text-indigo-500 dark:text-indigo-400 mb-1">Server Type</div>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">{tool.mcp.server_type || 'stdio'}</div>
-            </div>
-            {tool.mcp.tools_count && (
-              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900">
-                <div className="text-xs text-indigo-500 dark:text-indigo-400 mb-1">Tools Available</div>
-                <div className="text-sm font-medium text-gray-900 dark:text-white">{tool.mcp.tools_count} tools</div>
-              </div>
-            )}
-            {tool.mcp.verified && (
-              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900">
-                <div className="text-xs text-indigo-500 dark:text-indigo-400 mb-1">Status</div>
-                <div className="text-sm font-medium text-green-600 dark:text-green-400">✓ Verified</div>
-              </div>
-            )}
-          </div>
-          {tool.mcp.installation && (
-            <div className="bg-indigo-900 dark:bg-indigo-950 rounded-lg p-4">
-              <div className="text-xs text-indigo-300 dark:text-indigo-400 mb-2">Quick Install:</div>
-              <code className="text-sm text-indigo-100 dark:text-indigo-200">{tool.mcp.installation}</code>
-            </div>
-          )}
-          <div className="mt-4 flex gap-4">
-            <a 
-              href="https://modelcontextprotocol.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
-            >
-              → MCP Documentation
-            </a>
-            <Link 
-              href="/?mcp=true"
-              className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
-            >
-              → Browse MCP Tools
             </Link>
           </div>
         </div>

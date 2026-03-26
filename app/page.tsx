@@ -20,7 +20,6 @@ interface SearchParams {
   integration_level?: string
   identity?: string
   persona?: string
-  mcp?: string
 }
 
 // 动态生成 metadata，支持分类页面 SEO
@@ -82,7 +81,6 @@ function buildFilterUrl(params: {
   integration_level?: string
   identity?: string
   persona?: boolean
-  mcp?: boolean
 }): string {
   const searchParams = new URLSearchParams()
   
@@ -116,9 +114,6 @@ function buildFilterUrl(params: {
   if (params.persona) {
     searchParams.set('persona', 'true')
   }
-  if (params.mcp) {
-    searchParams.set('mcp', 'true')
-  }
   
   const queryString = searchParams.toString()
   return queryString ? `/?${queryString}` : '/'
@@ -140,7 +135,6 @@ export default async function HomePage({
   const integrationLevelFilter = params.integration_level || ''
   const identityParam = params.identity || ''
   const personaFilter = params.persona === 'true'
-  const mcpFilter = params.mcp === 'true'
 
   // Get locale from cookie
   const cookieStore = await cookies()
@@ -167,9 +161,6 @@ export default async function HomePage({
   }
   if (personaFilter) {
     displayTools = displayTools.filter(t => t.persona !== undefined)
-  }
-  if (mcpFilter) {
-    displayTools = displayTools.filter(t => t.mcp?.supported)
   }
   
   // 再应用搜索/分类
@@ -224,9 +215,6 @@ export default async function HomePage({
   
   // Persona-enabled count
   const personaCount = tools.filter(t => t.persona !== undefined).length
-  
-  // MCP-supported count
-  const mcpCount = tools.filter(t => t.mcp?.supported).length
 
   // 生成 JSON-LD 结构化数据
   const jsonLd = {
@@ -335,38 +323,6 @@ export default async function HomePage({
             {t.hero.viewAllScenarios} →
           </Link>
         </div>
-      </div>
-
-      {/* MCP Server Directory Entry */}
-      <div className="mb-10">
-        <Link
-          href="/mcp-servers"
-          className="group block bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-blue-900/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-6 hover:shadow-lg transition-all"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-4xl">🔌</div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
-                  {locale === 'zh-CN' ? 'MCP Server 目录' : 'MCP Server Directory'}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {locale === 'zh-CN' 
-                    ? '探索为 Claude、Cursor、Windsurf 等平台优化的 MCP Server' 
-                    : 'Explore MCP servers optimized for Claude, Cursor, Windsurf and more'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/50 px-3 py-1 rounded-full">
-                {mcpCount}+ servers
-              </span>
-              <span className="text-indigo-500 dark:text-indigo-400 group-hover:translate-x-1 transition-transform">
-                →
-              </span>
-            </div>
-          </div>
-        </Link>
       </div>
 
       {/* Skills Directory Entry */}
@@ -765,26 +721,6 @@ export default async function HomePage({
           }`}
         >
           🎭 Persona <span className="text-xs opacity-60">({personaCount})</span>
-        </a>
-        <a
-          href={buildFilterUrl({
-            category: activeCategory,
-            agent_friendly: agentFriendlyFilter,
-            open_source: openSourceFilter,
-            pricing: pricingFilter || undefined,
-            q: query || undefined,
-            sort: sortFilter || undefined,
-            integration_level: integrationLevelFilter || undefined,
-            persona: personaFilter,
-            mcp: !mcpFilter
-          })}
-          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-            mcpFilter
-              ? 'bg-indigo-600 text-white border-indigo-600'
-              : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'
-          }`}
-        >
-          🔌 MCP <span className="text-xs opacity-60">({mcpCount})</span>
         </a>
         <span className="text-gray-300">|</span>
         <span className="text-sm text-gray-500">{t.filters.sort}</span>
