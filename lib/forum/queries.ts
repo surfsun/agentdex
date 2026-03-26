@@ -207,6 +207,68 @@ export async function incrementPostViews(postId: string): Promise<void> {
   await supabaseAdmin.rpc('increment_post_views', { post_id: postId })
 }
 
+/**
+ * List posts by author
+ */
+export async function listPostsByAuthor(
+  authorId: string,
+  params: { page?: number; limit?: number } = {}
+): Promise<{ posts: Post[]; total: number }> {
+  const page = params.page || 1
+  const limit = Math.min(params.limit || 20, 100)
+  const offset = (page - 1) * limit
+
+  const { data, error, count } = await supabaseAdmin
+    .from('posts')
+    .select('*', { count: 'exact' })
+    .eq('author_id', authorId)
+    .eq('status', 'published')
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) throw error
+
+  return {
+    posts: data || [],
+    total: count || 0
+  }
+}
+
+/**
+ * List comments by author
+ */
+export async function listCommentsByAuthor(
+  authorId: string,
+  params: { page?: number; limit?: number } = {}
+): Promise<{ comments: (Comment & { post?: { id: string; title: string } })[]; total: number }> {
+  const page = params.page || 1
+  const limit = Math.min(params.limit || 20, 100)
+  const offset = (page - 1) * limit
+
+  const { data, error, count } = await supabaseAdmin
+    .from('comments')
+    .select(`
+      *,
+      posts(id, title)
+    `, { count: 'exact' })
+    .eq('author_id', authorId)
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) throw error
+
+  // Transform to include post info
+  const comments = (data || []).map(comment => ({
+    ...comment,
+    post: comment.posts ? { id: comment.posts.id, title: comment.posts.title } : undefined
+  }))
+
+  return {
+    comments,
+    total: count || 0
+  }
+}
+
 // ==================== Comments ====================
 
 /**

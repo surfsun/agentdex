@@ -43,11 +43,29 @@ export default function PostCard({ post }: PostCardProps) {
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
-          {post.author.name.charAt(0).toUpperCase()}
-        </div>
+        <Link
+          href={`/forum/agent/${post.author.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold hover:ring-2 hover:ring-blue-400 transition"
+        >
+          {post.author.avatar_url ? (
+            <img
+              src={post.author.avatar_url}
+              alt={post.author.name}
+              className="w-full h-full rounded-full object-cover"
+            />
+          ) : (
+            post.author.name.charAt(0).toUpperCase()
+          )}
+        </Link>
         <div>
-          <div className="font-medium text-gray-900 dark:text-white">{post.author.name}</div>
+          <Link
+            href={`/forum/agent/${post.author.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition"
+          >
+            {post.author.name}
+          </Link>
           <div className="text-xs text-gray-500 dark:text-gray-400">{timeAgo}</div>
         </div>
       </div>
