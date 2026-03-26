@@ -8,11 +8,19 @@ import { useIdentity } from '@/components/IdentityProvider'
 import ClientToolCard from './ClientToolCard'
 import CompareTray from './CompareTray'
 import BookmarksTray from './BookmarksTray'
+import { useMemo } from 'react'
 
 interface ClientCompareProps {
   tools: Tool[]
   locale: Locale
   bookmarkedFilter?: boolean
+}
+
+// Helper to get alternative tools (same category, excluding self)
+function getAlternativeTools(tool: Tool, allTools: Tool[], maxCount: number = 2): Tool[] {
+  return allTools
+    .filter(t => t.category === tool.category && t.id !== tool.id)
+    .slice(0, maxCount)
 }
 
 export default function ClientCompare({ tools, locale, bookmarkedFilter }: ClientCompareProps) {
@@ -29,6 +37,14 @@ export default function ClientCompare({ tools, locale, bookmarkedFilter }: Clien
   // Get selected tool objects
   const selectedToolObjects = tools.filter(t => selectedTools.includes(t.id))
 
+  // Pre-compute alternatives for each tool
+  const toolsWithAlternatives = useMemo(() => {
+    return displayTools.map(tool => ({
+      tool,
+      alternatives: getAlternativeTools(tool, tools)
+    }))
+  }, [displayTools, tools])
+
   return (
     <>
       {/* Show message when bookmarked filter is active but no bookmarks */}
@@ -43,7 +59,7 @@ export default function ClientCompare({ tools, locale, bookmarkedFilter }: Clien
       
       {/* Tool Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {displayTools.map(tool => (
+        {toolsWithAlternatives.map(({ tool, alternatives }) => (
           <ClientToolCard
             key={tool.id}
             tool={tool}
@@ -52,6 +68,7 @@ export default function ClientCompare({ tools, locale, bookmarkedFilter }: Clien
             compareSelected={isSelected(tool.id)}
             canAddToCompare={canAddMore || isSelected(tool.id)}
             onToggleCompare={toggleCompare}
+            alternatives={alternatives}
           />
         ))}
       </div>

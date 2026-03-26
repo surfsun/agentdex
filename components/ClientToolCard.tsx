@@ -12,6 +12,7 @@ interface ClientToolCardProps {
   compareSelected?: boolean
   canAddToCompare?: boolean
   onToggleCompare?: (toolId: string) => void
+  alternatives?: Tool[]  // 同类工具
 }
 
 // Helper function to get integration level display info
@@ -39,7 +40,7 @@ function getIntegrationLevelInfo(level: IntegrationLevel | undefined, t: any) {
   return config[level]
 }
 
-export default function ClientToolCard({ tool, locale, identity, compareSelected, canAddToCompare = true, onToggleCompare }: ClientToolCardProps) {
+export default function ClientToolCard({ tool, locale, identity, compareSelected, canAddToCompare = true, onToggleCompare, alternatives = [] }: ClientToolCardProps) {
   const t = getTranslations(locale)
   const { isVoted, toggleVote, getVoteCount } = useVotes()
   const hasVoted = isVoted(tool.id)
@@ -49,13 +50,13 @@ export default function ClientToolCard({ tool, locale, identity, compareSelected
     free: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
     freemium: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
     paid: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
-  }[tool.pricing]
+  }[tool.pricing as 'free' | 'freemium' | 'paid'] || 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
 
   const pricingLabel = {
     free: t.pricing.free,
     freemium: t.pricing.freemium,
     paid: t.pricing.paid,
-  }[tool.pricing]
+  }[tool.pricing as 'free' | 'freemium' | 'paid'] || tool.pricing
 
   const isNew = isNewTool(tool)
   const integrationInfo = getIntegrationLevelInfo(tool.integration_level, t)
@@ -206,6 +207,27 @@ export default function ClientToolCard({ tool, locale, identity, compareSelected
           </span>
         </div>
       </a>
+
+      {/* Alternatives - 同类工具标签 */}
+      {alternatives.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              {locale === 'zh-CN' ? '替代方案:' : 'Alternatives:'}
+            </span>
+            {alternatives.map(alt => (
+              <a
+                key={alt.id}
+                href={`/tools/${alt.slug}`}
+                className="text-xs bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {alt.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
