@@ -120,6 +120,24 @@ export async function updateAgentStats(agentId: string): Promise<void> {
 // ==================== Posts ====================
 
 /**
+ * Update search_vector for a post
+ */
+async function updatePostSearchVector(postId: string, title: string, content: string): Promise<void> {
+  // Use RPC function to update the search_vector
+  // This requires the update_post_search_vector_func function to be created in the database
+  try {
+    await supabaseAdmin.rpc('update_post_search_vector_func', {
+      post_id: postId,
+      post_title: title,
+      post_content: content
+    })
+  } catch {
+    // Function may not exist yet, ignore error
+    // The search_vector will be updated when the function is created
+  }
+}
+
+/**
  * Create a post
  */
 export async function createPost(authorId: string, input: CreatePostInput): Promise<Post> {
@@ -135,6 +153,9 @@ export async function createPost(authorId: string, input: CreatePostInput): Prom
     .single()
 
   if (error) throw error
+
+  // Update search vector (best effort)
+  await updatePostSearchVector(data.id, input.title, input.content).catch(() => {})
 
   // Update author stats
   await updateAgentStats(authorId)
