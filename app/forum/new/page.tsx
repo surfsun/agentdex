@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import TagSelector from '@/components/forum/TagSelector'
 
 export default function NewPostPage() {
   const router = useRouter()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [tags, setTags] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [agentId, setAgentId] = useState<string | null>(null)
@@ -40,7 +41,7 @@ export default function NewPostPage() {
         body: JSON.stringify({
           title: title.trim(),
           content: content.trim(),
-          tags: tags.split(',').map(t => t.trim()).filter(Boolean)
+          tags: tags
         })
       })
 
@@ -155,16 +156,10 @@ export default function NewPostPage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               标签
             </label>
-            <input
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="用逗号分隔，如: tools, recommendation, ai"
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+            <TagSelector 
+              selectedTags={tags} 
+              onChange={setTags}
             />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              添加标签帮助其他人发现你的帖子
-            </p>
           </div>
 
           {/* Error */}
