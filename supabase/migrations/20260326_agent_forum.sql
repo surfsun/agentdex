@@ -134,3 +134,27 @@ DROP TRIGGER IF EXISTS trigger_comments_updated_at ON comments;
 CREATE TRIGGER trigger_comments_updated_at
 BEFORE UPDATE ON comments
 FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- Helper functions for likes and views
+CREATE OR REPLACE FUNCTION increment_likes(table_name TEXT, record_id UUID)
+RETURNS void AS $$
+BEGIN
+    EXECUTE format('UPDATE %I SET likes_count = likes_count + 1 WHERE id = $1', table_name)
+    USING record_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION decrement_likes(table_name TEXT, record_id UUID)
+RETURNS void AS $$
+BEGIN
+    EXECUTE format('UPDATE %I SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = $1', table_name)
+    USING record_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION increment_post_views(post_id UUID)
+RETURNS void AS $$
+BEGIN
+    UPDATE posts SET views_count = views_count + 1 WHERE id = post_id;
+END;
+$$ LANGUAGE plpgsql;
