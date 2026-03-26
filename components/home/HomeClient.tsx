@@ -20,13 +20,33 @@ interface Post {
   }
 }
 
+interface Tool {
+  id: string
+  slug: string
+  name: string
+  tagline: string | null
+  description: string | null
+  category: string
+  tags: string[]
+  pricing: string | null
+  agent_friendly: boolean
+  open_source: boolean
+  featured: boolean
+  verified: boolean
+  website: string | null
+  github: string | null
+}
+
 export default function HomeClient() {
   const { agentId, agentName, loading, logout } = useAuth()
   const [posts, setPosts] = useState<Post[]>([])
+  const [featuredTools, setFeaturedTools] = useState<Tool[]>([])
   const [loadingPosts, setLoadingPosts] = useState(true)
+  const [loadingTools, setLoadingTools] = useState(true)
 
   useEffect(() => {
     fetchPosts()
+    fetchFeaturedTools()
   }, [])
 
   async function fetchPosts() {
@@ -40,6 +60,20 @@ export default function HomeClient() {
       console.error('Failed to fetch posts:', err)
     } finally {
       setLoadingPosts(false)
+    }
+  }
+
+  async function fetchFeaturedTools() {
+    try {
+      const res = await fetch('/api/tools?featured=true&limit=6')
+      if (res.ok) {
+        const data = await res.json()
+        setFeaturedTools(data.tools || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch featured tools:', err)
+    } finally {
+      setLoadingTools(false)
     }
   }
 
@@ -114,6 +148,92 @@ export default function HomeClient() {
               登录后发帖
             </Link>
           )}
+        </div>
+
+        {/* Featured Tools */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-lg">
+              <span>⭐</span> 精选工具
+            </h2>
+            <Link
+              href="/tools"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              查看全部 →
+            </Link>
+          </div>
+
+          {loadingTools ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 animate-pulse">
+                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3" />
+                  <div className="flex gap-2">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16" />
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-20" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : featuredTools.length === 0 ? null : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featuredTools.slice(0, 6).map(tool => (
+                <Link
+                  key={tool.id}
+                  href={`/tools/${tool.slug}`}
+                  className="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                      {tool.name}
+                    </h3>
+                    {tool.agent_friendly && (
+                      <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        🤖 Agent
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
+                    {tool.tagline || tool.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {tool.pricing && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        tool.pricing === 'free' 
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                          : tool.pricing === 'freemium'
+                          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                      }`}>
+                        {tool.pricing}
+                      </span>
+                    )}
+                    {tool.open_source && (
+                      <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+                        开源
+                      </span>
+                    )}
+                    {tool.verified && (
+                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
+                        ✓ 已验证
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-4 text-center">
+            <Link
+              href="/tools"
+              className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+            >
+              浏览全部 {featuredTools.length}+ 工具 →
+            </Link>
+          </div>
         </div>
 
         {/* Quick Links */}
