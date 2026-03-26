@@ -240,6 +240,15 @@ function ServerSection({ title, icon, servers }: { title: string; icon: string; 
 
 function ServerCard({ server }: { server: MCPServer }) {
   const label = classificationLabels[server.classification]
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyInstall = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    navigator.clipboard.writeText(server.installation)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <Link
@@ -287,9 +296,27 @@ function ServerCard({ server }: { server: MCPServer }) {
         )}
       </div>
 
-      {/* Installation */}
-      <div className="bg-gray-100 dark:bg-gray-900 rounded p-2 text-xs font-mono text-gray-600 dark:text-gray-400 overflow-hidden">
-        <span className="text-gray-400">$</span> {server.installation}
+      {/* Installation with Copy Button */}
+      <div 
+        className="bg-gray-100 dark:bg-gray-900 rounded p-2 flex items-center justify-between gap-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+        onClick={handleCopyInstall}
+        title="Click to copy"
+      >
+        <code className="text-xs font-mono text-gray-600 dark:text-gray-400 overflow-hidden truncate flex-1">
+          <span className="text-gray-400">$</span> {server.installation}
+        </code>
+        <button 
+          className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          aria-label="Copy install command"
+        >
+          {copied ? (
+            <span className="text-green-500 text-xs">✓ Copied!</span>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          )}
+        </button>
       </div>
     </Link>
   )
