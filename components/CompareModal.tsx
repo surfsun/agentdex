@@ -13,7 +13,8 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
   const t = getTranslations(locale)
 
   // Helper to get pricing label
-  const getPricingLabel = (pricing: string) => {
+  const getPricingLabel = (pricing: string | null) => {
+    if (!pricing) return '-'
     const labels: Record<string, string> = {
       free: t.pricing.free,
       freemium: t.pricing.freemium,
@@ -23,7 +24,8 @@ export default function CompareModal({ tools, locale, onClose }: CompareModalPro
   }
 
   // Helper to get pricing color
-  const getPricingColor = (pricing: string) => {
+  const getPricingColor = (pricing: string | null) => {
+    if (!pricing) return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
     const colors: Record<string, string> = {
       free: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
       freemium: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',

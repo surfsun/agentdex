@@ -1,7 +1,8 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { tools, categories, sortByRecentlyAdded, getBrandNewCount, sortToolsByIdentity, Identity, getRecentUpdates, ToolUpdate } from '@/lib/tools'
+import { getAllTools, categories } from '@/lib/db'
+import { sortByRecentlyAdded, getBrandNewCount, sortToolsByIdentity, Identity, getRecentUpdates, ToolUpdate, Tool } from '@/lib/tools'
 import { scenarios } from '@/lib/scenarios'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import ClientSearch from '@/components/ClientSearch'
@@ -41,6 +42,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   // 分类页面
   if (category && category !== 'all') {
     const cat = categories.find(c => c.id === category)
+    // 从数据库获取工具数量
+    const tools = await getAllTools()
     const toolCount = tools.filter(t => t.category === category).length
     return {
       title: `${cat?.label || category} Tools — AgentDex`,
@@ -146,6 +149,8 @@ export default async function HomePage({
   const locale: Locale = getLocaleFromCookie(localeCookie)
   const t = getTranslations(locale)
 
+  // 从数据库获取所有工具
+  const tools: Tool[] = await getAllTools()
   let displayTools = tools
   
   // 先应用筛选（可组合）
@@ -173,8 +178,8 @@ export default async function HomePage({
     // 搜索时忽略分类筛选
     displayTools = displayTools.filter(t =>
       t.name.toLowerCase().includes(query.toLowerCase()) ||
-      t.tagline.toLowerCase().includes(query.toLowerCase()) ||
-      t.description.toLowerCase().includes(query.toLowerCase()) ||
+      (t.tagline?.toLowerCase().includes(query.toLowerCase()) ?? false) ||
+      (t.description?.toLowerCase().includes(query.toLowerCase()) ?? false) ||
       t.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
     )
   } else if (activeCategory !== 'all') {
@@ -211,7 +216,7 @@ export default async function HomePage({
   const openSourceCount = tools.filter(t => t.open_source).length
   const freeCount = tools.filter(t => t.pricing === 'free').length
   const freemiumCount = tools.filter(t => t.pricing === 'freemium').length
-  const brandNewCount = getBrandNewCount()
+  const brandNewCount = getBrandNewCount(tools)
   
   // Integration level counts
   const quickStartCount = tools.filter(t => t.integration_level === 'quick_start').length
@@ -262,40 +267,82 @@ export default async function HomePage({
 
       {/* Hero */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-3">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
           {t.hero.title}
         </h1>
-        <p className="text-lg text-gray-500 mb-2">
+        <p className="text-lg text-gray-500 dark:text-gray-400 mb-2">
           {t.hero.subtitle}
         </p>
-        <p className="text-sm text-blue-600 font-mono mb-3">
+        <p className="text-sm text-blue-600 dark:text-blue-400 font-mono mb-3">
           {t.hero.apiHint}
         </p>
         {/* Agent 入口 */}
         <div className="flex justify-center gap-3">
           <a
             href="/agent.md"
-            className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-purple-200 transition"
+            className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 transition"
           >
             {t.hero.agentRead}
           </a>
           <a
             href="/for-agents"
-            className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
+            className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition"
           >
             {t.hero.apiReference}
           </a>
         </div>
       </div>
 
-      {/* Identity Selector - I am a... */}
-      <IdentitySection locale={locale} />
+      {/* Scenario Cards - Hero Section */}
+      <div className="mb-10">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {t.hero.scenariosTitle}
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400">
+            {t.hero.scenariosSubtitle}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {scenarios.slice(0, 6).map(scenario => {
+            const scenarioName = locale === 'zh-CN' && scenario.name_zh ? scenario.name_zh : scenario.name
+            const toolCount = scenario.tools?.length || 0
+            
+            return (
+              <Link
+                key={scenario.id}
+                href={`/scenarios/${scenario.slug}`}
+                className="group relative p-5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-lg transition-all overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-bl-full opacity-50 group-hover:opacity-100 transition-opacity" />
+                <div className="relative">
+                  <div className="text-4xl mb-3">{scenario.icon}</div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                    {scenarioName}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {toolCount} {locale === 'zh-CN' ? '个工具' : 'tools'}
+                  </p>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+        <div className="text-center mt-4">
+          <Link
+            href="/scenarios/web-browsing"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {t.hero.viewAllScenarios} →
+          </Link>
+        </div>
+      </div>
 
       {/* Search with Real-time Filter */}
       <ClientSearch currentQuery={query} locale={locale} />
 
-      {/* Scenarios Section */}
-      <div className="mb-8">
+      {/* Scenarios Section - 简化版 */}
+      <div className="mb-8 hidden">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <span>🎯</span>
           {locale === 'zh-CN' ? '按场景探索' : 'Explore by Scenario'}
@@ -398,7 +445,7 @@ export default async function HomePage({
 
       {/* Recent Updates Section */}
       {(() => {
-        const recentUpdates = getRecentUpdates(5)
+        const recentUpdates = getRecentUpdates(tools, 5)
         if (recentUpdates.length === 0) return null
         
         return (

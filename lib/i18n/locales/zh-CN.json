@@ -14,7 +14,10 @@
     "subtitle": "发现专为 AI Agent 设计的基础设施工具 — 不是从人类工具改造而来。",
     "apiHint": "GET https://www.agentdex.top/api/tools — 机器可读，Agent 友好",
     "agentRead": "🤖 Agent？阅读 /agent.md",
-    "apiReference": "📖 API 文档"
+    "apiReference": "📖 API 文档",
+    "scenariosTitle": "你在构建什么类型的 Agent？",
+    "scenariosSubtitle": "选择一个场景，发现合适的工具",
+    "viewAllScenarios": "查看全部场景"
   },
   "identity": {
     "label": "我是...",

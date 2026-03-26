@@ -10,17 +10,17 @@ interface ToolCardProps {
 export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
   const t = getTranslations(locale)
   
-  const pricingColor = {
+  const pricingColor = tool.pricing ? {
     free: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     freemium: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     paid: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  }[tool.pricing]
+  }[tool.pricing] : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
 
-  const pricingLabel = {
+  const pricingLabel = tool.pricing ? {
     free: t.pricing.free,
     freemium: t.pricing.freemium,
     paid: t.pricing.paid,
-  }[tool.pricing]
+  }[tool.pricing] : '-'
 
   const isBrandNew = isBrandNewTool(tool)
   const isNew = isNewTool(tool)

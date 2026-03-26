@@ -2,7 +2,8 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { tools, getToolBySlug, categories } from '@/lib/tools'
+import { getToolBySlug, getAllTools, categories } from '@/lib/db'
+import { Tool } from '@/lib/tools'
 import { getStacksForTool, getDifficultyLabel, getDifficultyColor } from '@/lib/stacks'
 import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AddToCompareButton from '@/components/AddToCompareButton'
@@ -11,13 +12,13 @@ interface Params {
   slug: string
 }
 
-export async function generateStaticParams() {
-  return tools.map(tool => ({ slug: tool.slug }))
-}
+// 使用动态渲染，不再静态生成
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
-  const tool = getToolBySlug(slug)
+  const tool = await getToolBySlug(slug)
   
   if (!tool) {
     return { title: 'Tool not found' }
@@ -28,8 +29,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     description: tool.description,
     keywords: [...tool.tags, 'AI agent', 'agent tool', tool.category].join(', '),
     openGraph: {
-      title: `${tool.name} — ${tool.tagline}`,
-      description: tool.description,
+      title: `${tool.name} — ${tool.tagline || ''}`,
+      description: tool.description || '',
       url: `https://www.agentdex.top/tools/${tool.slug}`,
       siteName: 'AgentDex',
       type: 'article',
@@ -44,8 +45,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${tool.name} — ${tool.tagline}`,
-      description: tool.description,
+      title: `${tool.name} — ${tool.tagline || ''}`,
+      description: tool.description || '',
     },
     alternates: {
       canonical: `https://www.agentdex.top/tools/${tool.slug}`,
@@ -55,11 +56,14 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function ToolPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
-  const tool = getToolBySlug(slug)
+  const tool = await getToolBySlug(slug)
 
   if (!tool) {
     notFound()
   }
+
+  // 获取所有工具（用于相关工具推荐）
+  const allTools: Tool[] = await getAllTools()
 
   // Get locale from cookie
   const cookieStore = await cookies()
@@ -75,7 +79,7 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
     free: 'bg-green-100 text-green-700',
     freemium: 'bg-blue-100 text-blue-700',
     paid: 'bg-orange-100 text-orange-700',
-  }[tool.pricing]
+  }[tool.pricing as 'free' | 'freemium' | 'paid'] || 'bg-gray-100 text-gray-700'
 
   // JSON-LD structured data for the tool
   const jsonLd = {
@@ -376,17 +380,19 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
 
       {/* Links & Compare */}
       <div className="flex flex-wrap items-center gap-4 mb-8">
-        <a
-          href={tool.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
-        >
-          Visit Website →
-        </a>
+        {tool.website && (
+          <a
+            href={tool.website ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+          >
+            Visit Website →
+          </a>
+        )}
         {tool.github && (
           <a
-            href={tool.github}
+            href={tool.github ?? undefined}
             target="_blank"
             rel="noopener noreferrer"
             className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition"
@@ -399,7 +405,7 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
 
       {/* Compare with similar tools */}
       {(() => {
-        const similarTools = tools
+        const similarTools = allTools
           .filter(t => t.category === tool.category && t.id !== tool.id)
           .slice(0, 3)
         
@@ -693,7 +699,7 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
       <div className="mt-12">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Other tools in {category?.label || tool.category}</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
-          {tools
+          {allTools
             .filter(t => t.category === tool.category && t.id !== tool.id)
             .slice(0, 4)
             .map(t => (
@@ -712,7 +718,7 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
       {/* Alternatives - 替代工具推荐（基于标签相似度） */}
       {(() => {
         // 找到标签相似的工具（排除同分类，因为上面已经显示了）
-        const alternatives = tools
+        const alternatives = allTools
           .filter(t => t.id !== tool.id && t.category !== tool.category)
           .map(t => ({
             ...t,
