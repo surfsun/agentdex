@@ -5,33 +5,35 @@ import { useState, useEffect, useCallback } from 'react'
 const COMPARE_KEY = 'agentdex_compare'
 const MAX_COMPARE = 4
 
-export function useCompare() {
-  const [selectedTools, setSelectedTools] = useState<string[]>([])
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  // Parse tools from URL parameter
-  const parseToolsFromUrl = useCallback((): string[] | null => {
-    if (typeof window === 'undefined') return null
+// Helper to get initial tools from URL or localStorage
+function getInitialTools(): string[] {
+  if (typeof window === 'undefined') return []
+  
+  try {
+    // First check URL parameters (for shared links)
     const params = new URLSearchParams(window.location.search)
     const toolsParam = params.get('compare')
     if (toolsParam) {
       const tools = toolsParam.split(',').filter(t => t).slice(0, MAX_COMPARE)
-      return tools.length > 0 ? tools : null
+      if (tools.length > 0) {
+        return tools
+      }
     }
-    return null
-  }, [])
+    
+    // Fall back to localStorage
+    const saved = localStorage.getItem(COMPARE_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (e) {
+    console.error('Failed to load compare:', e)
+  }
+  
+  return []
+}
 
-  // Update URL with current selection (without reload)
-  const updateUrl = useCallback((tools: string[]) => {
-    if (typeof window === 'undefined') return
-    const url = new URL(window.location.href)
-    if (tools.length > 0) {
-      url.searchParams.set('compare', tools.join(','))
-    } else {
-      url.searchParams.delete('compare')
-    }
-    window.history.replaceState({}, '', url.toString())
-  }, [])
+export function useCompare() {
+  const [selectedTools, setSelectedTools] = useState<string[]>(getInitialTools)
 
   // Generate shareable URL
   const getShareUrl = useCallback((tools?: string[]): string => {
@@ -44,30 +46,25 @@ export function useCompare() {
     return url.toString()
   }, [selectedTools])
 
-  // Load from localStorage or URL
+  // Clean up URL and sync to localStorage on mount
   useEffect(() => {
     try {
-      // First check URL parameters (for shared links)
-      const urlTools = parseToolsFromUrl()
-      if (urlTools && urlTools.length > 0) {
-        setSelectedTools(urlTools)
-        localStorage.setItem(COMPARE_KEY, JSON.stringify(urlTools))
-        // Clean up URL parameter after loading
+      // Clean up URL parameter after loading
+      const params = new URLSearchParams(window.location.search)
+      if (params.has('compare')) {
         const cleanUrl = new URL(window.location.href)
         cleanUrl.searchParams.delete('compare')
         window.history.replaceState({}, '', cleanUrl.toString())
-      } else {
-        // Fall back to localStorage
-        const saved = localStorage.getItem(COMPARE_KEY)
-        if (saved) {
-          setSelectedTools(JSON.parse(saved))
-        }
+      }
+      
+      // Sync initial tools to localStorage
+      if (selectedTools.length > 0) {
+        localStorage.setItem(COMPARE_KEY, JSON.stringify(selectedTools))
       }
     } catch (e) {
-      console.error('Failed to load compare:', e)
+      console.error('Failed to clean up URL:', e)
     }
-    setIsLoaded(true)
-  }, [parseToolsFromUrl])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save to localStorage
   const saveCompare = useCallback((tools: string[]) => {
@@ -120,7 +117,7 @@ export function useCompare() {
 
   return {
     selectedTools,
-    isLoaded,
+    isLoaded: typeof window !== 'undefined',
     addToCompare,
     removeFromCompare,
     toggleCompare,

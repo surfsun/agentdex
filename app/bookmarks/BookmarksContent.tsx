@@ -1,8 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { useBookmarks } from '@/lib/useBookmarks'
 import { Tool } from '@/lib/tools'
-import { Locale, getTranslations } from '@/lib/i18n'
+import { Locale } from '@/lib/i18n'
 import ClientToolCard from '@/components/ClientToolCard'
 
 interface BookmarksContentProps {
@@ -12,7 +13,6 @@ interface BookmarksContentProps {
 
 export default function BookmarksContent({ locale, tools }: BookmarksContentProps) {
   const { bookmarks, isLoaded, clearBookmarks } = useBookmarks()
-  const t = getTranslations(locale)
 
   if (!isLoaded) {
     return (
@@ -38,12 +38,12 @@ export default function BookmarksContent({ locale, tools }: BookmarksContentProp
             ? '浏览工具列表，点击收藏按钮保存你感兴趣的工具'
             : 'Browse tools and click the bookmark button to save your favorites'}
         </p>
-        <a
+        <Link
           href="/"
           className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >
           {locale === 'zh-CN' ? '浏览工具' : 'Browse Tools'}
-        </a>
+        </Link>
       </div>
     )
   }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useIdentity } from '@/components/IdentityProvider'
-import { identities, Identity } from '@/lib/tools'
+import { identities } from '@/lib/tools'
 import { Locale, getTranslations } from '@/lib/i18n'
 
 export default function IdentitySection({ locale }: { locale: Locale }) {

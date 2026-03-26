@@ -37,7 +37,7 @@ async function seed() {
     updated_at: new Date().toISOString()
   }))
 
-  const { data, error } = await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from('tools')
     .upsert(tools, { onConflict: 'slug' })
 

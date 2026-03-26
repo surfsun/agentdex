@@ -1,6 +1,7 @@
 'use client'
 
-import { Tool, Identity } from '@/lib/tools'
+import Link from 'next/link'
+import { Tool } from '@/lib/tools'
 import { Locale, getTranslations } from '@/lib/i18n'
 import { useCompare } from '@/lib/useCompare'
 import { useBookmarks } from '@/lib/useBookmarks'
@@ -51,9 +52,9 @@ export default function ClientCompare({ tools, locale, bookmarkedFilter }: Clien
       {bookmarkedFilter && bookmarksLoaded && displayTools.length === 0 && (
         <div className="text-center py-10 text-gray-500 dark:text-gray-400">
           <p>{t.bookmarks.empty}</p>
-          <a href="/" className="text-blue-500 hover:underline mt-2 inline-block">
+          <Link href="/" className="text-blue-500 hover:underline mt-2 inline-block">
             {locale === 'zh-CN' ? '浏览所有工具' : 'Browse all tools'}
-          </a>
+          </Link>
         </div>
       )}
       

@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { stacks, getDifficultyLabel, getDifficultyColor } from '@/lib/stacks'
-import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
+import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 
 export const metadata: Metadata = {
   title: 'Tool Stacks — AgentDex',

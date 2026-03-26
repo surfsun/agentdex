@@ -1,25 +1,27 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 const BOOKMARKS_KEY = 'agentdex_bookmarks'
 
-export function useBookmarks() {
-  const [bookmarks, setBookmarks] = useState<string[]>([])
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  // 从 localStorage 加载收藏
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(BOOKMARKS_KEY)
-      if (saved) {
-        setBookmarks(JSON.parse(saved))
-      }
-    } catch (e) {
-      console.error('Failed to load bookmarks:', e)
+// Helper to get initial bookmarks from localStorage
+function getInitialBookmarks(): string[] {
+  if (typeof window === 'undefined') return []
+  
+  try {
+    const saved = localStorage.getItem(BOOKMARKS_KEY)
+    if (saved) {
+      return JSON.parse(saved)
     }
-    setIsLoaded(true)
-  }, [])
+  } catch (e) {
+    console.error('Failed to load bookmarks:', e)
+  }
+  
+  return []
+}
+
+export function useBookmarks() {
+  const [bookmarks, setBookmarks] = useState<string[]>(getInitialBookmarks)
 
   // 保存到 localStorage
   const saveBookmarks = useCallback((newBookmarks: string[]) => {
@@ -64,7 +66,7 @@ export function useBookmarks() {
 
   return {
     bookmarks,
-    isLoaded,
+    isLoaded: typeof window !== 'undefined',
     addBookmark,
     removeBookmark,
     toggleBookmark,

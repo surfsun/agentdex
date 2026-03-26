@@ -17,15 +17,26 @@ export function useIdentity() {
   return useContext(IdentityContext)
 }
 
-export function IdentityProvider({ children }: { children: ReactNode }) {
-  const [identity, setIdentityState] = useState<Identity | null>(null)
+// Helper to get initial identity from localStorage (avoids effect setState)
+function getInitialIdentity(): Identity | null {
+  if (typeof window === 'undefined') return null
+  const saved = localStorage.getItem('agentdex_identity')
+  return saved as Identity | null
+}
 
-  // Load from localStorage on mount
+export function IdentityProvider({ children }: { children: ReactNode }) {
+  const [identity, setIdentityState] = useState<Identity | null>(getInitialIdentity)
+
+  // Sync identity to URL on mount (optional, for shareable links)
   useEffect(() => {
-    const saved = localStorage.getItem('agentdex_identity')
-    if (saved) {
-      setIdentityState(saved as Identity)
+    if (identity) {
+      const url = new URL(window.location.href)
+      if (!url.searchParams.has('identity')) {
+        url.searchParams.set('identity', identity)
+        window.history.replaceState({}, '', url.toString())
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Save to localStorage and update URL

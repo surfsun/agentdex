@@ -1,26 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Tool } from '@/lib/tools'
-import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
+import { Locale } from '@/lib/i18n'
 import CompareModal from '@/components/CompareModal'
 
 interface CompareClientProps {
   tools: Tool[]
   initialToolIds: string[]
+  locale: Locale
 }
 
-export default function CompareClient({ tools, initialToolIds }: CompareClientProps) {
-  const [locale, setLocale] = useState<Locale>('en')
+export default function CompareClient({ tools, initialToolIds, locale }: CompareClientProps) {
   const [selectedToolIds, setSelectedToolIds] = useState<string[]>(initialToolIds)
   const [showModal, setShowModal] = useState(initialToolIds.length >= 2)
-  const t = getTranslations(locale)
-
-  useEffect(() => {
-    const savedLocale = localStorage.getItem('locale') || 'en'
-    setLocale(savedLocale as Locale)
-  }, [])
 
   const selectedTools = selectedToolIds
     .map(id => tools.find(t => t.id === id))

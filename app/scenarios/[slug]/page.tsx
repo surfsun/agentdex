@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { getScenarioBySlug, getToolsForScenario, getPriorityLabel, getPriorityColor, scenarios } from '@/lib/scenarios'
-import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
+import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import Link from 'next/link'
 
 interface Props {
@@ -38,7 +38,6 @@ export default async function ScenarioPage({ params }: Props) {
   const cookieStore = await cookies()
   const localeCookie = cookieStore.get('locale')?.value
   const locale: Locale = getLocaleFromCookie(localeCookie)
-  const t = getTranslations(locale)
   
   const scenarioTools = await getToolsForScenario(scenario)
   const scenarioName = locale === 'zh-CN' && scenario.name_zh ? scenario.name_zh : scenario.name

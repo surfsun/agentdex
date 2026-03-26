@@ -2,13 +2,12 @@ import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { getAllTools, categories } from '@/lib/db'
-import { sortByRecentlyAdded, getBrandNewCount, sortToolsByIdentity, Identity, getRecentUpdates, ToolUpdate, Tool } from '@/lib/tools'
+import { sortByRecentlyAdded, getBrandNewCount, sortToolsByIdentity, Identity, getRecentUpdates, Tool } from '@/lib/tools'
 import { scenarios } from '@/lib/scenarios'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import ClientSearch from '@/components/ClientSearch'
 import ClientCompare from '@/components/ClientCompare'
 import BookmarksFilter from '@/components/BookmarksFilter'
-import IdentitySection from '@/components/IdentitySection'
 
 interface SearchParams {
   category?: string
@@ -824,12 +823,12 @@ export default async function HomePage({
           {t.filters.popular}
         </a>
         {activeFilterCount > 0 && (
-          <a
+          <Link
             href="/"
             className="px-3 py-1 rounded-full text-sm text-red-500 hover:text-red-700 border border-red-200 hover:border-red-300"
           >
             {t.filters.clear} ({activeFilterCount})
-          </a>
+          </Link>
         )}
       </div>
 
@@ -879,7 +878,7 @@ export default async function HomePage({
         <div className="mb-4 text-sm text-gray-600">
           {t.results.found} {displayTools.length} {displayTools.length !== 1 ? t.results.results_plural : t.results.results} {t.results.for} &quot;{query}&quot;
           {' — '}
-          <a href="/" className="text-blue-500 hover:underline">{t.results.clearFilters}</a>
+          <Link href="/" className="text-blue-500 hover:underline">{t.results.clearFilters}</Link>
         </div>
       )}
 
@@ -898,7 +897,7 @@ export default async function HomePage({
       {/* Tool Grid */}
       {displayTools.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
-          <p>{t.results.noTools} <a href="/" className="text-blue-500 hover:underline">{t.results.clearFilters}</a></p>
+          <p>{t.results.noTools} <Link href="/" className="text-blue-500 hover:underline">{t.results.clearFilters}</Link></p>
         </div>
       ) : (
         <ClientCompare tools={displayTools} locale={locale} bookmarkedFilter={bookmarkedFilter} />
@@ -913,12 +912,12 @@ export default async function HomePage({
           {t.cta.subtitle}
         </p>
         <div className="flex justify-center gap-3">
-          <a
+          <Link
             href="/for-agents"
             className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
           >
             {t.cta.submitApi}
-          </a>
+          </Link>
           <a
             href="https://github.com/surfsun/agentdex/issues/new"
             target="_blank"

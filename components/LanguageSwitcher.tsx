@@ -13,7 +13,8 @@ export default function LanguageSwitcher({ currentLocale }: LanguageSwitcherProp
   const [isOpen, setIsOpen] = useState(false)
 
   const handleLocaleChange = async (locale: Locale) => {
-    // Set cookie
+    // Set cookie (this is the correct place for side effects in event handlers)
+    // eslint-disable-next-line react-hooks/immutability
     document.cookie = `locale=${locale};path=/;max-age=31536000`
     setIsOpen(false)
     // Refresh the page to apply the new locale

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 
 const VOTES_KEY = 'agentdex_votes'
 const LOCAL_VOTE_COUNTS_KEY = 'agentdex_local_vote_counts'
@@ -22,28 +22,33 @@ interface VotesContextType {
 
 const VotesContext = createContext<VotesContextType | null>(null)
 
-export function VotesProvider({ children }: { children: ReactNode }) {
-  const [votedTools, setVotedTools] = useState<string[]>([])
-  const [localVoteCounts, setLocalVoteCounts] = useState<Record<string, number>>({})
-  const [isLoaded, setIsLoaded] = useState(false)
+// Helper to get initial votes from localStorage
+function getInitialVotedTools(): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const saved = localStorage.getItem(VOTES_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch (e) {
+    console.error('Failed to load votes:', e)
+  }
+  return []
+}
 
-  // Load from localStorage
-  useEffect(() => {
-    try {
-      const savedVotes = localStorage.getItem(VOTES_KEY)
-      const savedCounts = localStorage.getItem(LOCAL_VOTE_COUNTS_KEY)
-      
-      if (savedVotes) {
-        setVotedTools(JSON.parse(savedVotes))
-      }
-      if (savedCounts) {
-        setLocalVoteCounts(JSON.parse(savedCounts))
-      }
-    } catch (e) {
-      console.error('Failed to load votes:', e)
-    }
-    setIsLoaded(true)
-  }, [])
+// Helper to get initial vote counts from localStorage
+function getInitialVoteCounts(): Record<string, number> {
+  if (typeof window === 'undefined') return {}
+  try {
+    const saved = localStorage.getItem(LOCAL_VOTE_COUNTS_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch (e) {
+    console.error('Failed to load vote counts:', e)
+  }
+  return {}
+}
+
+export function VotesProvider({ children }: { children: ReactNode }) {
+  const [votedTools, setVotedTools] = useState<string[]>(getInitialVotedTools)
+  const [localVoteCounts, setLocalVoteCounts] = useState<Record<string, number>>(getInitialVoteCounts)
 
   // Save votes to localStorage
   const saveVotes = useCallback((tools: string[]) => {
@@ -106,7 +111,7 @@ export function VotesProvider({ children }: { children: ReactNode }) {
         toggleVote,
         isVoted,
         getVoteCount,
-        isLoaded,
+        isLoaded: typeof window !== 'undefined',
       }}
     >
       {children}

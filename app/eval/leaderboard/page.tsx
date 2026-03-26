@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface LeaderboardEntry {
   rank: number;
@@ -18,25 +19,38 @@ export default function LeaderboardPage() {
   const [selectedFramework, setSelectedFramework] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
-  const fetchLeaderboard = useCallback(async () => {
-    setLoading(true);
-    try {
-      const url = selectedFramework 
-        ? `/api/eval/leaderboard?framework=${selectedFramework}`
-        : '/api/eval/leaderboard';
-      const res = await fetch(url);
-      const data = await res.json();
-      setEntries(data.entries || []);
-      setFrameworks(data.frameworks || []);
-    } catch {
-      console.error('Failed to fetch leaderboard');
-    }
-    setLoading(false);
-  }, [selectedFramework]);
-
+  // Fetch data when selectedFramework changes
   useEffect(() => {
-    fetchLeaderboard();
-  }, [fetchLeaderboard]);
+    let isMounted = true;
+    
+    async function loadLeaderboard() {
+      setLoading(true);
+      try {
+        const url = selectedFramework 
+          ? `/api/eval/leaderboard?framework=${selectedFramework}`
+          : '/api/eval/leaderboard';
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (isMounted) {
+          setEntries(data.entries || []);
+          setFrameworks(data.frameworks || []);
+          setLoading(false);
+        }
+      } catch {
+        console.error('Failed to fetch leaderboard');
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+    
+    loadLeaderboard();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedFramework]);
 
   const levelColors: Record<string, string> = {
     Expert: 'text-amber-500',
@@ -129,9 +143,9 @@ export default function LeaderboardPage() {
         )}
 
         <div className="mt-8 text-center">
-          <a href="/eval" className="text-blue-600 hover:underline">
+          <Link href="/eval" className="text-blue-600 hover:underline">
             参加评测 →
-          </a>
+          </Link>
         </div>
       </div>
     </div>

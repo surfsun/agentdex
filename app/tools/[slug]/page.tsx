@@ -115,18 +115,18 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6 flex items-center justify-between">
           <div>
-            <a href="/" className="hover:text-gray-700 dark:hover:text-gray-300">Home</a>
+            <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-300">Home</Link>
             {' / '}
-            <a href={`/?category=${tool.category}`} className="hover:text-gray-700 dark:hover:text-gray-300">{category?.label || tool.category}</a>
+            <Link href={`/?category=${tool.category}`} className="hover:text-gray-700 dark:hover:text-gray-300">{category?.label || tool.category}</Link>
             {' / '}
             <span className="text-gray-900 dark:text-white">{tool.name}</span>
           </div>
-          <a
+          <Link
             href="/"
             className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm flex items-center gap-1"
           >
             ← Back to Home
-          </a>
+          </Link>
         </nav>
 
       {/* Header */}
@@ -229,12 +229,12 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
             )}
           </div>
           <div className="mt-4">
-            <a 
+            <Link 
               href="/scenarios/persona-agent"
               className="text-sm text-pink-600 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300 font-medium"
             >
               → Explore Persona Agent Scenario
-            </a>
+            </Link>
           </div>
         </div>
       )}
@@ -281,12 +281,12 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
             >
               → MCP Documentation
             </a>
-            <a 
+            <Link 
               href="/?mcp=true"
               className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
             >
               → Browse MCP Tools
-            </a>
+            </Link>
           </div>
         </div>
       )}

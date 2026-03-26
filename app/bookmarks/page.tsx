@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { getAllTools } from '@/lib/db'
-import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
+import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import BookmarksContent from './BookmarksContent'
 
 export const metadata: Metadata = {
@@ -14,7 +14,6 @@ export default async function BookmarksPage() {
   const cookieStore = await cookies()
   const localeCookie = cookieStore.get('locale')?.value
   const locale: Locale = getLocaleFromCookie(localeCookie)
-  const t = getTranslations(locale)
 
   // 从数据库获取工具
   const tools = await getAllTools()
