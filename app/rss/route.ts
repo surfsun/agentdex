@@ -1,8 +1,10 @@
-import { tools, getRecentUpdates, ToolUpdate } from '@/lib/tools'
+import { getAllTools } from '@/lib/db'
+import { getRecentUpdates, ToolUpdate, Tool } from '@/lib/tools'
 
 export async function GET() {
+  const tools = await getAllTools()
   const allTools = tools.slice(0, 50) // 最近 50 个工具
-  const recentUpdates = getRecentUpdates(20) // 最近 20 个更新
+  const recentUpdates = getRecentUpdates(tools as Tool[], 20) // 最近 20 个更新
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -42,12 +44,12 @@ function generateChangelogItems(updates: ToolUpdate[]): string {
   }).join('')
 }
 
-function generateNewToolItems(tools: { name: string; slug: string; description: string; category: string; created_at: string }[]): string {
+function generateNewToolItems(tools: { name: string; slug: string; description: string | null; category: string; created_at: string }[]): string {
   return tools.map(tool => `
     <item>
       <title>New Tool: ${tool.name}</title>
       <link>https://www.agentdex.top/tools/${tool.slug}</link>
-      <description><![CDATA[${tool.description}]]></description>
+      <description><![CDATA[${tool.description || ''}]]></description>
       <category>${tool.category}</category>
       <pubDate>${new Date(tool.created_at).toUTCString()}</pubDate>
       <guid>https://www.agentdex.top/tools/${tool.slug}</guid>

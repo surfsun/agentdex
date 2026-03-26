@@ -1,7 +1,10 @@
 import { MetadataRoute } from 'next'
-import { tools } from '@/lib/tools'
+import { supabase } from '@/lib/supabase'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// 使用动态渲染
+export const dynamic = 'force-dynamic'
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.agentdex.top'
 
   // 静态页面
@@ -26,10 +29,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
 
+  // 从数据库获取工具 slug
+  const { data: tools } = await supabase
+    .from('tools')
+    .select('slug')
+    .eq('status', 'active')
+
+  const slugs = tools?.map(t => t.slug) || []
+
   // 工具详情页
-  const toolPages: MetadataRoute.Sitemap = tools.map(tool => ({
-    url: `${baseUrl}/tools/${tool.slug}`,
-    lastModified: new Date(tool.created_at),
+  const toolPages: MetadataRoute.Sitemap = slugs.map(slug => ({
+    url: `${baseUrl}/tools/${slug}`,
+    lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }))

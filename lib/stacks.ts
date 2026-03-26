@@ -1,5 +1,6 @@
 import stacksData from '@/data/stacks.json'
-import { tools, Tool } from './tools'
+import { Tool } from './tools'
+import { supabase } from './supabase'
 
 export type StackTool = {
   id: string
@@ -40,11 +41,27 @@ export function getStackBySlug(slug: string): Stack | undefined {
   return stacks.find(s => s.slug === slug)
 }
 
-export function getToolsForStack(stack: Stack): (StackTool & { tool: Tool | undefined; alternativeTools: Tool[] })[] {
+export async function getToolsForStack(stack: Stack): Promise<(StackTool & { tool: Tool | undefined; alternativeTools: Tool[] })[]> {
+  // 从数据库获取工具
+  const allToolIds = [
+    ...stack.tools.map(st => st.id),
+    ...stack.tools.flatMap(st => st.alternatives)
+  ]
+  
+  const { data: tools } = await supabase
+    .from('tools')
+    .select('*')
+    .in('id', allToolIds)
+    .eq('status', 'active')
+
+  const toolMap = new Map(tools?.map(t => [t.id, t]) || [])
+
   return stack.tools.map(st => ({
     ...st,
-    tool: tools.find(t => t.id === st.id),
-    alternativeTools: st.alternatives.map(altId => tools.find(t => t.id === altId)).filter((t): t is Tool => t !== undefined)
+    tool: toolMap.get(st.id),
+    alternativeTools: st.alternatives
+      .map(altId => toolMap.get(altId))
+      .filter((t): t is Tool => t !== undefined)
   }))
 }
 
@@ -66,7 +83,7 @@ export function getDifficultyColor(difficulty: string): string {
   return colors[difficulty] || 'text-gray-600'
 }
 
-// Get all stacks that contain a specific tool
+// Get all stacks that contain a specific tool (client-side, uses static stacks data)
 export function getStacksForTool(toolId: string): (Stack & { role: string; role_zh: string; required: boolean })[] {
   return stacks
     .filter(stack => stack.tools.some(t => t.id === toolId))

@@ -1,5 +1,6 @@
 import scenariosData from '@/data/scenarios.json'
-import { tools, Tool } from './tools'
+import { Tool } from './tools'
+import { supabase } from './supabase'
 
 export type ScenarioTool = {
   id: string
@@ -36,13 +37,23 @@ export function getScenarioBySlug(slug: string): Scenario | undefined {
   return scenarios.find(s => s.slug === slug)
 }
 
-export function getToolsForScenario(scenario: Scenario): (ScenarioTool & { tool: Tool })[] {
+export async function getToolsForScenario(scenario: Scenario): Promise<(ScenarioTool & { tool: Tool })[]> {
+  // 从数据库获取工具
+  const toolIds = scenario.tools.map(st => st.id)
+  const { data: tools } = await supabase
+    .from('tools')
+    .select('*')
+    .in('id', toolIds)
+    .eq('status', 'active')
+
+  const toolMap = new Map(tools?.map(t => [t.id, t]) || [])
+
   return scenario.tools
     .map(st => ({
       ...st,
-      tool: tools.find(t => t.id === st.id)!
+      tool: toolMap.get(st.id)!
     }))
-    .filter(st => st.tool) // Filter out any missing tools
+    .filter(st => st.tool)
 }
 
 export function getPriorityLabel(priority: string, locale: string): string {

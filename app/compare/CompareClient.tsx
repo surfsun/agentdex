@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { tools, Tool } from '@/lib/tools'
+import { Tool } from '@/lib/tools'
 import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
 import CompareModal from '@/components/CompareModal'
 
 interface CompareClientProps {
+  tools: Tool[]
   initialToolIds: string[]
 }
 
-export default function CompareClient({ initialToolIds }: CompareClientProps) {
+export default function CompareClient({ tools, initialToolIds }: CompareClientProps) {
   const [locale, setLocale] = useState<Locale>('en')
   const [selectedToolIds, setSelectedToolIds] = useState<string[]>(initialToolIds)
   const [showModal, setShowModal] = useState(initialToolIds.length >= 2)

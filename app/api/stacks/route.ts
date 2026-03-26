@@ -1,10 +1,27 @@
 import { NextResponse } from 'next/server'
 import { stacks } from '@/lib/stacks'
-import { tools } from '@/lib/tools'
+import { supabase } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const slug = searchParams.get('slug')
+
+  // 从数据库获取所有工具
+  const { data: tools, error } = await supabase
+    .from('tools')
+    .select('*')
+    .eq('status', 'active')
+
+  if (error) {
+    console.error('[API /stacks] Error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Database error', details: error.message },
+      { status: 500 }
+    )
+  }
+
+  // 创建工具 ID 到工具详情的映射
+  const toolMap = new Map(tools?.map(t => [t.id, t]) || [])
 
   // If slug is provided, return single stack with full tool details
   if (slug) {
@@ -16,8 +33,8 @@ export async function GET(request: Request) {
     // Enrich with full tool details
     const enrichedTools = stack.tools.map(st => ({
       ...st,
-      tool: tools.find(t => t.id === st.id) || null,
-      alternative_tools: st.alternatives.map(altId => tools.find(t => t.id === altId)).filter(Boolean)
+      tool: toolMap.get(st.id) || null,
+      alternative_tools: st.alternatives.map(altId => toolMap.get(altId)).filter(Boolean)
     }))
 
     return NextResponse.json({

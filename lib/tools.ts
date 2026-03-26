@@ -1,4 +1,7 @@
-import toolsData from '@/data/tools.json'
+/**
+ * 工具类型定义
+ * 数据查询已迁移到 lib/db.ts
+ */
 
 export type IntegrationLevel = 'quick_start' | 'standard' | 'advanced'
 
@@ -51,24 +54,25 @@ export type MCPConfig = {
   verified?: boolean
 }
 
+// 前端使用的工具类型（合并了数据库类型和额外字段）
 export type Tool = {
   id: string
   slug: string
   name: string
-  tagline: string
-  description: string
-  website: string
-  github: string
+  tagline: string | null
+  description: string | null
+  website: string | null
+  github: string | null
   category: string
   tags: string[]
-  pricing: 'free' | 'freemium' | 'paid'
-  price_detail: string
+  pricing: string | null
+  price_detail: string | null
   agent_friendly: boolean
   api_available: boolean
   open_source: boolean
   featured: boolean
   verified: boolean
-  submitted_by: string
+  submitted_by: string | null
   created_at: string
   votes?: number  // Optional: number of upvotes
   integration_level?: IntegrationLevel  // Quick Start / Standard / Advanced
@@ -86,48 +90,23 @@ export type Tool = {
   persona?: PersonaCapabilities  // Agent persona/personality support
   // MCP (Model Context Protocol) support
   mcp?: MCPConfig
+  // Database fields
+  status?: string
+  view_count?: number
+  updated_at?: string
 }
 
-export const tools: Tool[] = toolsData as Tool[]
-
-export const categories = [
-  { id: 'all',           label: 'All Tools',      label_zh: '全部' },
-  { id: 'framework',     label: 'Framework',      label_zh: '框架' },
-  { id: 'social',        label: 'Social',         label_zh: '社交' },
-  { id: 'communication', label: 'Communication',  label_zh: '通信' },
-  { id: 'memory',        label: 'Memory',         label_zh: '记忆' },
-  { id: 'web',           label: 'Web & Data',     label_zh: '网页数据' },
-  { id: 'execution',     label: 'Execution',      label_zh: '代码执行' },
-  { id: 'integration',   label: 'Integration',    label_zh: '集成' },
-  { id: 'observability', label: 'Observability',  label_zh: '可观测' },
-  { id: 'security',      label: 'Security',       label_zh: '安全' },
-  { id: 'payment',       label: 'Payment',        label_zh: '支付' },
+// Identity-related helpers
+export const identities: { id: Identity; label: string; label_zh: string; icon: string }[] = [
+  { id: 'developer', label: 'Developer', label_zh: '开发者', icon: '👨‍💻' },
+  { id: 'founder', label: 'Founder', label_zh: '创始人', icon: '🚀' },
+  { id: 'researcher', label: 'Researcher', label_zh: '研究者', icon: '🔬' },
+  { id: 'pm', label: 'Product Manager', label_zh: '产品经理', icon: '📊' },
 ]
 
-export function getToolBySlug(slug: string): Tool | undefined {
-  return tools.find(t => t.slug === slug)
-}
-
-export function getToolsByCategory(category: string): Tool[] {
-  if (category === 'all') return tools
-  return tools.filter(t => t.category === category)
-}
-
-export function searchTools(query: string): Tool[] {
-  const q = query.toLowerCase()
-  return tools.filter(t =>
-    t.name.toLowerCase().includes(q) ||
-    t.tagline.toLowerCase().includes(q) ||
-    t.description.toLowerCase().includes(q) ||
-    t.tags.some(tag => tag.includes(q))
-  )
-}
-
-export function getFeaturedTools(): Tool[] {
-  return tools.filter(t => t.featured)
-}
-
-// Check if a tool is brand new (added within the last 7 days)
+/**
+ * 检查工具是否为全新（7天内添加）
+ */
 export function isBrandNewTool(tool: Tool): boolean {
   const createdAt = new Date(tool.created_at)
   const sevenDaysAgo = new Date()
@@ -135,7 +114,9 @@ export function isBrandNewTool(tool: Tool): boolean {
   return createdAt > sevenDaysAgo
 }
 
-// Check if a tool is new (added within the last 30 days)
+/**
+ * 检查工具是否为新工具（30天内添加）
+ */
 export function isNewTool(tool: Tool): boolean {
   const createdAt = new Date(tool.created_at)
   const thirtyDaysAgo = new Date()
@@ -143,12 +124,9 @@ export function isNewTool(tool: Tool): boolean {
   return createdAt > thirtyDaysAgo
 }
 
-// Get all new tools (within 30 days)
-export function getNewTools(): Tool[] {
-  return tools.filter(isNewTool)
-}
-
-// Sort tools by created_at (most recent first)
+/**
+ * 按最近添加排序
+ */
 export function sortByRecentlyAdded(toolList: Tool[]): Tool[] {
   return [...toolList].sort((a, b) => {
     const dateA = new Date(a.created_at).getTime()
@@ -157,12 +135,9 @@ export function sortByRecentlyAdded(toolList: Tool[]): Tool[] {
   })
 }
 
-// Get count of tools added within 7 days
-export function getBrandNewCount(): number {
-  return tools.filter(isBrandNewTool).length
-}
-
-// Identity-related functions
+/**
+ * 按身份推荐排序
+ */
 export function sortToolsByIdentity(toolList: Tool[], identity: Identity | null): Tool[] {
   if (!identity) return toolList
   
@@ -173,31 +148,28 @@ export function sortToolsByIdentity(toolList: Tool[], identity: Identity | null)
   })
 }
 
+/**
+ * 获取推荐理由
+ */
 export function getRecommendedReason(tool: Tool, identity: Identity, locale: 'en' | 'zh-CN' = 'en'): string | null {
   const rec = tool.recommended_for?.[identity]
   if (!rec) return null
   return locale === 'zh-CN' && rec.reason_zh ? rec.reason_zh : rec.reason
 }
 
-export const identities: { id: Identity; label: string; label_zh: string; icon: string }[] = [
-  { id: 'developer', label: 'Developer', label_zh: '开发者', icon: '👨‍💻' },
-  { id: 'founder', label: 'Founder', label_zh: '创始人', icon: '🚀' },
-  { id: 'researcher', label: 'Researcher', label_zh: '研究者', icon: '🔬' },
-  { id: 'pm', label: 'Product Manager', label_zh: '产品经理', icon: '📊' },
-]
-
-// Get tools with recent changelog updates
+/**
+ * 获取最近更新的工具
+ */
 export type ToolUpdate = {
   tool: Tool
   latestChange: ChangelogEntry
 }
 
-export function getRecentUpdates(limit: number = 5): ToolUpdate[] {
+export function getRecentUpdates(tools: Tool[], limit: number = 5): ToolUpdate[] {
   const updates: ToolUpdate[] = []
   
   for (const tool of tools) {
     if (tool.changelog && tool.changelog.length > 0) {
-      // Get the latest changelog entry (first in array)
       const latestChange = tool.changelog[0]
       updates.push({
         tool,
@@ -206,7 +178,6 @@ export function getRecentUpdates(limit: number = 5): ToolUpdate[] {
     }
   }
   
-  // Sort by changelog date (most recent first)
   updates.sort((a, b) => {
     const dateA = new Date(a.latestChange.date).getTime()
     const dateB = new Date(b.latestChange.date).getTime()
@@ -216,33 +187,9 @@ export function getRecentUpdates(limit: number = 5): ToolUpdate[] {
   return updates.slice(0, limit)
 }
 
-// Get changelog updates within last N days
-export function getRecentChangelogUpdates(days: number = 30): ToolUpdate[] {
-  const cutoffDate = new Date()
-  cutoffDate.setDate(cutoffDate.getDate() - days)
-  
-  const updates: ToolUpdate[] = []
-  
-  for (const tool of tools) {
-    if (tool.changelog && tool.changelog.length > 0) {
-      const latestChange = tool.changelog[0]
-      const changeDate = new Date(latestChange.date)
-      
-      if (changeDate > cutoffDate) {
-        updates.push({
-          tool,
-          latestChange
-        })
-      }
-    }
-  }
-  
-  // Sort by date
-  updates.sort((a, b) => {
-    const dateA = new Date(a.latestChange.date).getTime()
-    const dateB = new Date(b.latestChange.date).getTime()
-    return dateB - dateA
-  })
-  
-  return updates
+/**
+ * 获取全新工具数量
+ */
+export function getBrandNewCount(tools: Tool[]): number {
+  return tools.filter(isBrandNewTool).length
 }

@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { tools } from '@/lib/tools'
+import { getToolsByFilter } from '@/lib/db'
 import CompareClient from './CompareClient'
 
 interface ComparePageProps {
@@ -18,8 +18,11 @@ export async function generateMetadata({ searchParams }: ComparePageProps): Prom
     }
   }
   
+  // 从数据库获取工具
+  const { tools: foundTools } = await getToolsByFilter({ limit: 1000 })
+  
   const toolNames = toolIds
-    .map(id => tools.find(t => t.id === id || t.slug === id)?.name)
+    .map(id => foundTools.find(t => t.id === id || t.slug === id)?.name)
     .filter(Boolean)
     .join(' vs ')
   
@@ -38,6 +41,9 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   const params = await searchParams
   const toolIds = params.tools?.split(',').filter(Boolean) || []
   
+  // 从数据库获取所有工具
+  const { tools } = await getToolsByFilter({ limit: 1000 })
+  
   // Validate tools exist
   const validTools = toolIds
     .map(id => tools.find(t => t.id === id || t.slug === id))
@@ -47,5 +53,5 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
     notFound()
   }
   
-  return <CompareClient initialToolIds={validTools.map(t => t!.id)} />
+  return <CompareClient tools={tools} initialToolIds={validTools.map(t => t!.id)} />
 }

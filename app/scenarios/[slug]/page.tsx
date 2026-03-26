@@ -9,11 +9,9 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  return scenarios.map(scenario => ({
-    slug: scenario.slug
-  }))
-}
+// 使用动态渲染
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -42,7 +40,7 @@ export default async function ScenarioPage({ params }: Props) {
   const locale: Locale = getLocaleFromCookie(localeCookie)
   const t = getTranslations(locale)
   
-  const scenarioTools = getToolsForScenario(scenario)
+  const scenarioTools = await getToolsForScenario(scenario)
   const scenarioName = locale === 'zh-CN' && scenario.name_zh ? scenario.name_zh : scenario.name
   const scenarioDesc = locale === 'zh-CN' && scenario.description_zh ? scenario.description_zh : scenario.description
 

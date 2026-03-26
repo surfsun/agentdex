@@ -9,9 +9,9 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  return stacks.map(stack => ({ slug: stack.slug }))
-}
+// 使用动态渲染
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -39,7 +39,7 @@ export default async function StackPage({ params }: Props) {
   const localeCookie = cookieStore.get('locale')?.value
   const locale: Locale = getLocaleFromCookie(localeCookie)
   
-  const stackTools = getToolsForStack(stack)
+  const stackTools = await getToolsForStack(stack)
   const stackName = locale === 'zh-CN' && stack.name_zh ? stack.name_zh : stack.name
   const stackDesc = locale === 'zh-CN' && stack.description_zh ? stack.description_zh : stack.description
 

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { tools, categories } from '@/lib/tools'
+import { getAllTools, categories } from '@/lib/db'
 
 export async function GET() {
+  const tools = await getAllTools()
   const agentFriendlyCount = tools.filter(t => t.agent_friendly).length
   const openSourceCount = tools.filter(t => t.open_source).length
   

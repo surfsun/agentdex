@@ -1,14 +1,28 @@
 import { NextResponse } from 'next/server'
-import { tools } from '@/lib/tools'
+import { supabase } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const tag = searchParams.get('tag')
 
+  // 从数据库获取所有工具
+  const { data: tools, error } = await supabase
+    .from('tools')
+    .select('tags, name, slug, category, tagline, pricing, agent_friendly')
+    .eq('status', 'active')
+
+  if (error) {
+    console.error('[API /tags] Error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Database error', details: error.message },
+      { status: 500 }
+    )
+  }
+
   // 统计所有标签
   const tagMap = new Map<string, number>()
-  tools.forEach(t => {
-    t.tags.forEach(tag => {
+  tools?.forEach(t => {
+    t.tags?.forEach((tag: string) => {
       tagMap.set(tag, (tagMap.get(tag) || 0) + 1)
     })
   })
@@ -20,7 +34,7 @@ export async function GET(request: Request) {
 
   // 如果指定了标签，返回该标签的工具
   if (tag) {
-    const tagTools = tools.filter(t => t.tags.includes(tag))
+    const tagTools = tools?.filter(t => t.tags?.includes(tag)) || []
     
     return NextResponse.json({
       success: true,

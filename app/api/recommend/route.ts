@@ -1,13 +1,27 @@
 import { NextResponse } from 'next/server'
-import { tools, categories } from '@/lib/tools'
+import { supabase } from '@/lib/supabase'
+import { categories } from '@/lib/db'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const task = searchParams.get('task')?.toLowerCase() || ''
   const category = searchParams.get('category')
 
+  // 从数据库获取所有工具
+  const { data: tools, error } = await supabase
+    .from('tools')
+    .select('*')
+    .eq('status', 'active')
+
+  if (error) {
+    console.error('[API /recommend] Error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Database error', details: error.message },
+      { status: 500 }
+    )
+  }
+
   // 基于任务关键词推荐工具
-  // 注意：关键词映射到实际的分类 ID（如 'web' 而不是 'scraping'）
   const taskKeywords: Record<string, string[]> = {
     memory: ['remember', 'memory', 'store', 'persist', 'context', 'recall'],
     web: ['scrape', 'crawl', 'extract', 'web', 'html', 'parse', 'browser', 'website'],
@@ -36,7 +50,7 @@ export async function GET(request: Request) {
     }
 
     if (matchedCategory) {
-      const categoryTools = tools
+      const categoryTools = tools!
         .filter(t => t.category === matchedCategory && t.agent_friendly)
         .map(t => {
           let score = 0
@@ -61,14 +75,14 @@ export async function GET(request: Request) {
     }
 
     // 如果无法匹配分类，返回所有agent-friendly工具
-    const allAgentFriendly = tools
+    const allAgentFriendly = tools!
       .filter(t => t.agent_friendly)
       .map(t => {
         // 检查任务是否匹配工具的标签、名称、描述
         const matchesTask = 
-          t.tags.some(tag => task.includes(tag)) ||
+          t.tags?.some((tag: string) => task.includes(tag)) ||
           t.name.toLowerCase().includes(task) ||
-          t.tagline.toLowerCase().includes(task)
+          t.tagline?.toLowerCase().includes(task)
         
         let score = matchesTask ? 5 : 0
         if (t.agent_friendly) score += 3
@@ -90,7 +104,7 @@ export async function GET(request: Request) {
   const recommendations = categories
     .filter(c => c.id !== 'all')
     .map(cat => {
-      const catTools = tools.filter(t => t.category === cat.id && t.agent_friendly)
+      const catTools = tools!.filter(t => t.category === cat.id && t.agent_friendly)
       if (catTools.length === 0) return null
 
       const top = catTools.reduce((best, t) => {

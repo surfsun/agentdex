@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { tools as fallbackTools, Tool } from '@/lib/tools'
+import { supabase } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -36,9 +36,22 @@ export async function GET(request: Request) {
     }, { status: 400 })
   }
 
-  // Find tools by slug
-  const foundTools = fallbackTools.filter(t => slugList.includes(t.slug))
-  const foundSlugs = foundTools.map(t => t.slug)
+  // 从数据库查询工具
+  const { data: foundTools, error } = await supabase
+    .from('tools')
+    .select('*')
+    .in('slug', slugList)
+    .eq('status', 'active')
+
+  if (error) {
+    console.error('[API /compare] Error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Database error', details: error.message },
+      { status: 500 }
+    )
+  }
+
+  const foundSlugs = foundTools?.map(t => t.slug) || []
   const missingSlugs = slugList.filter(s => !foundSlugs.includes(s))
 
   if (missingSlugs.length > 0) {
@@ -62,7 +75,7 @@ export async function GET(request: Request) {
   ]
 
   // Extract comparison data for each tool
-  const comparisonData = foundTools.map(tool => ({
+  const comparisonData = foundTools!.map(tool => ({
     id: tool.id,
     slug: tool.slug,
     name: tool.name,
@@ -86,23 +99,23 @@ export async function GET(request: Request) {
   const winners: Record<string, string[]> = {}
   
   // GitHub Stars - higher is better
-  const maxStars = Math.max(...foundTools.map(t => t.github_stars || 0))
-  winners.github_stars = foundTools.filter(t => t.github_stars === maxStars && maxStars > 0).map(t => t.slug)
+  const maxStars = Math.max(...foundTools!.map(t => t.github_stars || 0))
+  winners.github_stars = foundTools!.filter(t => t.github_stars === maxStars && maxStars > 0).map(t => t.slug)
   
   // Integration Complexity - lower is better (low=1, medium=2, high=3)
   const complexityOrder: Record<string, number> = { low: 1, medium: 2, high: 3 }
-  const complexityValues = foundTools.map(t => complexityOrder[t.integration_complexity || 'high'])
+  const complexityValues = foundTools!.map(t => complexityOrder[t.integration_complexity || 'high'])
   const minComplexity = Math.min(...complexityValues)
-  winners.integration_complexity = foundTools.filter(t => complexityOrder[t.integration_complexity || 'high'] === minComplexity).map(t => t.slug)
+  winners.integration_complexity = foundTools!.filter(t => complexityOrder[t.integration_complexity || 'high'] === minComplexity).map(t => t.slug)
   
   // Agent Friendly - all true ones are winners
-  winners.agent_friendly = foundTools.filter(t => t.agent_friendly).map(t => t.slug)
+  winners.agent_friendly = foundTools!.filter(t => t.agent_friendly).map(t => t.slug)
   
   // Open Source - all true ones are winners
-  winners.open_source = foundTools.filter(t => t.open_source).map(t => t.slug)
+  winners.open_source = foundTools!.filter(t => t.open_source).map(t => t.slug)
   
   // API Available - all true ones are winners
-  winners.api_available = foundTools.filter(t => t.api_available).map(t => t.slug)
+  winners.api_available = foundTools!.filter(t => t.api_available).map(t => t.slug)
 
   // Build summary
   const summary = {
