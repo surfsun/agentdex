@@ -1,6 +1,10 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
+import Link from 'next/link'
 import { tools, getToolBySlug, categories } from '@/lib/tools'
+import { getStacksForTool, getDifficultyLabel, getDifficultyColor } from '@/lib/stacks'
+import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AddToCompareButton from '@/components/AddToCompareButton'
 
 interface Params {
@@ -57,7 +61,15 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
     notFound()
   }
 
+  // Get locale from cookie
+  const cookieStore = await cookies()
+  const localeCookie = cookieStore.get('locale')?.value
+  const locale: Locale = getLocaleFromCookie(localeCookie)
+
   const category = categories.find(c => c.id === tool.category)
+  
+  // Get stacks that contain this tool
+  const toolStacks = getStacksForTool(tool.id)
 
   const pricingColor = {
     free: 'bg-green-100 text-green-700',
@@ -547,6 +559,70 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
           curl https://www.agentdex.top/api/tools/{tool.slug}
         </code>
       </div>
+
+      {/* Tool Stacks - 所在的工具栈 */}
+      {toolStacks.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <span>🧩</span>
+              {locale === 'zh-CN' ? '所在的工具栈' : 'Tool Stacks'}
+            </h2>
+            <Link
+              href="/stacks"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              {locale === 'zh-CN' ? '查看全部 →' : 'View All →'}
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {toolStacks.map(stack => {
+              const stackName = locale === 'zh-CN' && stack.name_zh ? stack.name_zh : stack.name
+              const stackDesc = locale === 'zh-CN' && stack.description_zh ? stack.description_zh : stack.description
+              const roleLabel = locale === 'zh-CN' && stack.role_zh ? stack.role_zh : stack.role
+              
+              return (
+                <Link
+                  key={stack.id}
+                  href={`/stacks/${stack.slug}`}
+                  className="group p-5 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-xl hover:shadow-md transition-all"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{stack.icon}</span>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                          {stackName}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded">
+                            {roleLabel}
+                          </span>
+                          {stack.required && (
+                            <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
+                              {locale === 'zh-CN' ? '必需' : 'Required'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                    {stackDesc}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span>⏱️ {stack.integration_time}</span>
+                    <span>💰 {stack.monthly_cost}</span>
+                    <span className={getDifficultyColor(stack.difficulty)}>
+                      {getDifficultyLabel(stack.difficulty, locale)}
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Related Tools - 同类工具 */}
       <div className="mt-12">
