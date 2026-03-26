@@ -139,7 +139,20 @@
     "tags": "标签",
     "add": "添加到对比",
     "remove": "从对比中移除",
-    "maxReached": "最多对比 4 个工具"
+    "maxReached": "最多对比 4 个工具",
+    "presets": "快速对比",
+    "presetsHint": "常见场景的预设对比组合",
+    "exportMarkdown": "导出 Markdown",
+    "exportHint": "复制对比表格为 Markdown",
+    "copied": "已复制！",
+    "githubStars": "GitHub Stars",
+    "integrationComplexity": "集成难度",
+    "bestFor": "最适合",
+    "gettingStarted": "入门难度",
+    "quickSummary": "快速对比",
+    "mostStars": "最多 Stars",
+    "easiestSetup": "最易集成",
+    "smartRecommendations": "智能推荐"
   },
   "votes": {
     "add": "点赞推荐",

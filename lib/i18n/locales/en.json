@@ -139,7 +139,20 @@
     "tags": "Tags",
     "add": "Add to compare",
     "remove": "Remove from compare",
-    "maxReached": "Maximum 4 tools can be compared"
+    "maxReached": "Maximum 4 tools can be compared",
+    "presets": "Quick Compare",
+    "presetsHint": "Pre-defined tool comparisons for common scenarios",
+    "exportMarkdown": "Export as Markdown",
+    "exportHint": "Copy comparison table as Markdown",
+    "copied": "Copied!",
+    "githubStars": "GitHub Stars",
+    "integrationComplexity": "Integration",
+    "bestFor": "Best For",
+    "gettingStarted": "Getting Started",
+    "quickSummary": "Quick Summary",
+    "mostStars": "Most Stars",
+    "easiestSetup": "Easiest Setup",
+    "smartRecommendations": "Smart Recommendations"
   },
   "votes": {
     "add": "Upvote this tool",
