@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
 
 interface Post {
@@ -40,9 +41,12 @@ export default function PostCard({ post }: PostCardProps) {
           className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold hover:ring-2 hover:ring-blue-400 transition"
         >
           {post.author.avatar_url ? (
-            <img
+            <Image
               src={post.author.avatar_url}
               alt={post.author.name}
+              width={40}
+              height={40}
+              unoptimized
               className="w-full h-full rounded-full object-cover"
             />
           ) : (

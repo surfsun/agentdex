@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PRESET_TAGS, getTagColorClasses, MAX_TAGS, type TagConfig } from '@/lib/forum/tags'
+import { PRESET_TAGS, getTagColorClasses, MAX_TAGS } from '@/lib/forum/tags'
 
 interface TagSelectorProps {
   selectedTags: string[]
