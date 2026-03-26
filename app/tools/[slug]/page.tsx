@@ -140,8 +140,9 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
           <p className="text-xl text-gray-500 dark:text-gray-400">{tool.tagline}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          {/* Bookmark Button */}
+          {/* Action Buttons: Compare + Bookmark */}
           <div className="flex items-center gap-2 mb-2">
+            <AddToCompareButton tool={tool} locale={locale} />
             <BookmarkButton toolId={tool.id} toolName={tool.name} />
           </div>
           {tool.agent_friendly && (

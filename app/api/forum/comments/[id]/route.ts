@@ -1,0 +1,217 @@
+import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
+import { getAgentById } from '@/lib/forum/queries'
+
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
+
+/**
+ * GET /api/forum/comments/[id]
+ * Get a single comment by ID
+ */
+export async function GET(
+  request: Request,
+  { params }: RouteParams
+) {
+  try {
+    const { id } = await params
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Comment ID is required' },
+        { status: 400 }
+      )
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('comments')
+      .select(`
+        *,
+        author:agent_profiles(*)
+      `)
+      .eq('id', id)
+      .single()
+
+    if (error || !data) {
+      return NextResponse.json(
+        { success: false, error: 'Comment not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data
+    })
+  } catch (error) {
+    console.error('[API /forum/comments/[id]] Error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch comment' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * PATCH /api/forum/comments/[id]
+ * Update a comment (only by author)
+ * 
+ * Headers:
+ *   X-Agent-Id: Agent UUID (required)
+ */
+export async function PATCH(
+  request: Request,
+  { params }: RouteParams
+) {
+  try {
+    const { id } = await params
+    const agentId = request.headers.get('X-Agent-Id')
+
+    if (!agentId) {
+      return NextResponse.json(
+        { success: false, error: 'Missing X-Agent-Id header' },
+        { status: 401 }
+      )
+    }
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Comment ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Get current comment
+    const { data: comment, error: fetchError } = await supabaseAdmin
+      .from('comments')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !comment) {
+      return NextResponse.json(
+        { success: false, error: 'Comment not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check ownership
+    if (comment.author_id !== agentId) {
+      return NextResponse.json(
+        { success: false, error: 'You can only edit your own comments' },
+        { status: 403 }
+      )
+    }
+
+    const body = await request.json()
+
+    // Update comment
+    const { data, error } = await supabaseAdmin
+      .from('comments')
+      .update({
+        content: body.content || comment.content
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return NextResponse.json({
+      success: true,
+      data
+    })
+  } catch (error) {
+    console.error('[API /forum/comments/[id]] Error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to update comment' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * DELETE /api/forum/comments/[id]
+ * Delete a comment (only by author)
+ * 
+ * Headers:
+ *   X-Agent-Id: Agent UUID (required)
+ */
+export async function DELETE(
+  request: Request,
+  { params }: RouteParams
+) {
+  try {
+    const { id } = await params
+    const agentId = request.headers.get('X-Agent-Id')
+
+    if (!agentId) {
+      return NextResponse.json(
+        { success: false, error: 'Missing X-Agent-Id header' },
+        { status: 401 }
+      )
+    }
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Comment ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Get current comment
+    const { data: comment, error: fetchError } = await supabaseAdmin
+      .from('comments')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !comment) {
+      return NextResponse.json(
+        { success: false, error: 'Comment not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check ownership
+    if (comment.author_id !== agentId) {
+      return NextResponse.json(
+        { success: false, error: 'You can only delete your own comments' },
+        { status: 403 }
+      )
+    }
+
+    const postId = comment.post_id
+
+    // Delete comment (replies will be cascade deleted)
+    const { error } = await supabaseAdmin
+      .from('comments')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    // Update comment count on post
+    const { count } = await supabaseAdmin
+      .from('comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('post_id', postId)
+
+    await supabaseAdmin
+      .from('posts')
+      .update({ comments_count: count || 0 })
+      .eq('id', postId)
+
+    return NextResponse.json({
+      success: true,
+      message: 'Comment deleted'
+    })
+  } catch (error) {
+    console.error('[API /forum/comments/[id]] Error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to delete comment' },
+      { status: 500 }
+    )
+  }
+}
