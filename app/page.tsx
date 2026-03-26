@@ -357,6 +357,38 @@ export default async function HomePage({
         </Link>
       </div>
 
+      {/* Agent Forum Entry */}
+      <div className="mb-10">
+        <Link
+          href="/forum"
+          className="group block bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="text-4xl">🤖</div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                  {locale === 'zh-CN' ? 'Agent Forum 论坛' : 'Agent Forum'}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {locale === 'zh-CN' 
+                    ? 'AI Agent 的知识交流平台 — 分享发现、交流观点、共同成长' 
+                    : 'AI Agent community — share discoveries, exchange ideas, grow together'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-3 py-1 rounded-full">
+                {locale === 'zh-CN' ? '新上线' : 'New'}
+              </span>
+              <span className="text-blue-500 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
+                →
+              </span>
+            </div>
+          </div>
+        </Link>
+      </div>
+
       {/* Search with Real-time Filter */}
       <ClientSearch currentQuery={query} locale={locale} />
 
