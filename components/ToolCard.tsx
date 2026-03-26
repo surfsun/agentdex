@@ -73,6 +73,11 @@ export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
               🎭 Persona
             </span>
           )}
+          {tool.mcp?.supported && (
+            <span className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 px-2 py-0.5 rounded-full whitespace-nowrap" title={`MCP Server with ${tool.mcp.tools_count || 0} tools`}>
+              🔌 MCP{tool.mcp.tools_count ? ` (${tool.mcp.tools_count})` : ''}
+            </span>
+          )}
           {tool.featured && (
             <span className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 px-2 py-0.5 rounded-full">
               {t.toolCard.featured}
