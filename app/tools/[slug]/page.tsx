@@ -8,6 +8,7 @@ import { getStacksForTool, getDifficultyLabel, getDifficultyColor } from '@/lib/
 import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AddToCompareButton from '@/components/AddToCompareButton'
 import IntegrationTab from '@/components/IntegrationTab'
+import CostCalculator from '@/components/CostCalculator'
 
 interface Params {
   slug: string
@@ -382,6 +383,17 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
           </div>
         </div>
       )}
+
+      {/* Cost Calculator */}
+      <div className="mb-8">
+        <CostCalculator
+          toolName={tool.name}
+          toolSlug={tool.slug}
+          pricing={tool.pricing || 'unknown'}
+          pricingDetails={tool.pricing_details}
+          locale={locale}
+        />
+      </div>
 
       {/* Description */}
       <div className="mb-8">

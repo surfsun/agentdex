@@ -3,6 +3,9 @@
  * 数据查询已迁移到 lib/db.ts
  */
 
+// Re-export Locale type for components
+export type { Locale } from './i18n'
+
 export type IntegrationLevel = 'quick_start' | 'standard' | 'advanced'
 
 export type ChangeType = 'breaking' | 'feature' | 'fix' | 'deprecation' | 'security'
@@ -71,6 +74,53 @@ export type CodeExamples = {
   rust?: CodeExample
 }
 
+// Pricing model types
+export type PricingModel = 'usage_based' | 'per_request' | 'tiered' | 'flat_rate' | 'token_based' | 'hybrid'
+
+// Pricing tier for tiered pricing
+export type PricingTier = {
+  from: number       // Start of tier
+  to: number | null  // End of tier (null = unlimited)
+  unit: string       // e.g., "minute", "request", "token"
+  price: number      // Price per unit
+}
+
+// Free tier configuration
+export type FreeTierConfig = {
+  included: number   // Amount included in free tier
+  unit: string       // e.g., "minutes/month", "requests/month"
+  period?: string    // e.g., "month", "day"
+}
+
+// Usage scenario for cost estimation
+export type UsageScenario = {
+  label: string           // e.g., "Light Usage"
+  label_zh?: string
+  description: string     // e.g., "500 sessions/month"
+  description_zh?: string
+  monthly_cost: number    // Estimated monthly cost in USD
+}
+
+// Detailed pricing information for cost calculator
+export type PricingDetails = {
+  model: PricingModel
+  currency: string                    // e.g., "USD"
+  unit?: string                       // Primary billing unit
+  rate?: number                       // Price per unit (for usage_based/per_request)
+  tiers?: PricingTier[]               // For tiered pricing
+  free_tier?: FreeTierConfig          // Free tier info
+  scenarios?: UsageScenario[]         // Pre-calculated usage scenarios
+  cost_factors?: {                    // Factors that affect cost
+    name: string
+    description: string
+    description_zh?: string
+    default_value: number
+    unit: string
+  }[]
+  notes?: string                      // Additional pricing notes
+  notes_zh?: string
+}
+
 // 前端使用的工具类型（合并了数据库类型和额外字段）
 export type Tool = {
   id: string
@@ -110,6 +160,8 @@ export type Tool = {
   // Integration code examples
   integration_minutes?: number  // Estimated integration time in minutes
   code_examples?: CodeExamples  // Multi-language code examples
+  // Cost Calculator
+  pricing_details?: PricingDetails  // Detailed pricing for cost estimation
   // Database fields
   status?: string
   view_count?: number
