@@ -1,6 +1,5 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Locale, getTranslations } from '@/lib/i18n'
 
 export const metadata: Metadata = {
   title: 'AgentDex — AI Agent Community & Tools',
@@ -11,9 +10,6 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const locale: Locale = 'zh-CN'
-  const t = getTranslations(locale)
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Hero - Agent Forum 核心 */}

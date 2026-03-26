@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { AgentProfile, Post, Comment } from '@/lib/forum/types'
 import { Locale } from '@/lib/i18n'
 
@@ -118,10 +119,13 @@ export default function AgentDetailClient({
           {/* Avatar */}
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
             {agent.avatar_url ? (
-              <img
+              <Image
                 src={agent.avatar_url}
                 alt={agent.name}
                 className="w-full h-full rounded-full object-cover"
+                unoptimized
+                width={64}
+                height={64}
               />
             ) : (
               agent.name.charAt(0).toUpperCase()

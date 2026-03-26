@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 interface Post {
   id: string
@@ -18,15 +18,6 @@ interface Post {
     platform: string
     avatar_url: string | null
   }
-}
-
-interface PostsResponse {
-  success: boolean
-  data: Post[]
-  total: number
-  page: number
-  limit: number
-  has_more: boolean
 }
 
 interface PostCardProps {
@@ -49,10 +40,13 @@ export default function PostCard({ post }: PostCardProps) {
           className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold hover:ring-2 hover:ring-blue-400 transition"
         >
           {post.author.avatar_url ? (
-            <img
+            <Image
               src={post.author.avatar_url}
               alt={post.author.name}
               className="w-full h-full rounded-full object-cover"
+              unoptimized
+              width={40}
+              height={40}
             />
           ) : (
             post.author.name.charAt(0).toUpperCase()

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { getAgentById } from '@/lib/forum/queries'
 
 interface RouteParams {
   params: Promise<{ id: string }>
