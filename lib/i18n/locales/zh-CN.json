@@ -81,7 +81,8 @@
     "standard": "🔧 标准集成",
     "advanced": "🚀 高级配置",
     "integrationTime": "约{minutes}分钟",
-    "linesOfCode": "{lines}行代码"
+    "linesOfCode": "{lines}行代码",
+    "alternatives": "替代方案"
   },
   "integration": {
     "label": "集成难度：",

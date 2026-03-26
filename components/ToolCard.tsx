@@ -1,13 +1,14 @@
-import { Tool, isNewTool, isBrandNewTool, getRecommendedReason, Identity } from '@/lib/tools'
+import { Tool, isNewTool, isBrandNewTool, getRecommendedReason, Identity, getAlternatives } from '@/lib/tools'
 import { Locale, getTranslations } from '@/lib/i18n'
 
 interface ToolCardProps {
   tool: Tool
   locale: Locale
   identity?: Identity | null
+  allTools?: Tool[]
 }
 
-export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
+export default function ToolCard({ tool, locale, identity, allTools }: ToolCardProps) {
   const t = getTranslations(locale)
   
   const pricingColor = tool.pricing ? {
@@ -27,6 +28,9 @@ export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
   
   // Get recommendation reason for current identity
   const recommendationReason = identity ? getRecommendedReason(tool, identity, locale) : null
+  
+  // Get alternatives (similar tools in same category)
+  const alternatives = allTools ? getAlternatives(tool, allTools, 2) : []
   
   // Get dynamic pick label based on identity
   const getPickLabel = () => {
@@ -127,6 +131,25 @@ export default function ToolCard({ tool, locale, identity }: ToolCardProps) {
               {tool.integration_level === 'advanced' && (locale === 'zh-CN' ? '🚀 高级配置' : '🚀 Advanced')}
             </span>
           )}
+        </div>
+      )}
+
+      {/* Alternatives - 替代方案 */}
+      {alternatives.length > 0 && (
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-gray-400 dark:text-gray-500">
+            🔄 {locale === 'zh-CN' ? '替代方案' : 'Alternatives'}:
+          </span>
+          {alternatives.map(alt => (
+            <a
+              key={alt.id}
+              href={`/tools/${alt.slug}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-0.5 rounded transition-colors"
+            >
+              {alt.name}
+            </a>
+          ))}
         </div>
       )}
 

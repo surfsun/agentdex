@@ -437,34 +437,48 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
       {(() => {
         const similarTools = allTools
           .filter(t => t.category === tool.category && t.id !== tool.id)
-          .slice(0, 3)
+          .slice(0, 4)
         
         if (similarTools.length === 0) return null
         
         return (
-          <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                ⚖️ Compare with similar tools
+          <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                ⚖️ {locale === 'zh-CN' ? '同类工具对比' : 'Compare with Alternatives'}
               </h3>
               <a 
-                href={`/compare?tools=${tool.id}`}
-                className="text-sm text-blue-500 hover:text-blue-600"
+                href={`/compare?tools=${tool.id},${similarTools.map(t => t.id).join(',')}`}
+                className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition"
               >
-                View all →
+                {locale === 'zh-CN' ? '一键对比全部 →' : 'Compare All →'}
               </a>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              {locale === 'zh-CN' 
+                ? `探索与 ${tool.name} 类似的 ${similarTools.length} 个替代方案`
+                : `Explore ${similarTools.length} alternatives similar to ${tool.name}`}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {similarTools.map(t => (
-                <a
+                <div
                   key={t.id}
-                  href={`/compare?tools=${tool.id},${t.id}`}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:border-blue-300 dark:hover:border-blue-600 transition"
+                  className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
-                  <span className="font-medium text-gray-900 dark:text-white">{tool.name}</span>
-                  <span className="text-gray-400">vs</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{t.name}</span>
-                </a>
+                  <a
+                    href={`/tools/${t.slug}`}
+                    className="flex-1"
+                  >
+                    <div className="font-medium text-gray-900 dark:text-white">{t.name}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{t.tagline}</div>
+                  </a>
+                  <a
+                    href={`/compare?tools=${tool.id},${t.id}`}
+                    className="ml-3 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded-lg transition"
+                  >
+                    vs
+                  </a>
+                </div>
               ))}
             </div>
           </div>

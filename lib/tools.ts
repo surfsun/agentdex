@@ -213,3 +213,33 @@ export function getRecentUpdates(tools: Tool[], limit: number = 5): ToolUpdate[]
 export function getBrandNewCount(tools: Tool[]): number {
   return tools.filter(isBrandNewTool).length
 }
+
+/**
+ * 计算两个工具的相似度（基于 tags 重叠）
+ */
+export function calculateSimilarity(toolA: Tool, toolB: Tool): number {
+  const tagsA = new Set(toolA.tags)
+  const tagsB = new Set(toolB.tags)
+  const intersection = [...tagsA].filter(tag => tagsB.has(tag))
+  const union = new Set([...tagsA, ...tagsB])
+  // Jaccard similarity + bonus for same category
+  const jaccard = intersection.length / union.size
+  const categoryBonus = toolA.category === toolB.category ? 0.3 : 0
+  return jaccard + categoryBonus
+}
+
+/**
+ * 获取工具的替代方案（相似工具）
+ */
+export function getAlternatives(tool: Tool, allTools: Tool[], limit: number = 2): Tool[] {
+  return allTools
+    .filter(t => t.id !== tool.id && t.category === tool.category)
+    .map(t => ({
+      tool: t,
+      score: calculateSimilarity(tool, t)
+    }))
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(item => item.tool)
+}

@@ -81,7 +81,8 @@
     "standard": "🔧 Standard",
     "advanced": "🚀 Advanced",
     "integrationTime": "~{minutes} min",
-    "linesOfCode": "{lines} lines"
+    "linesOfCode": "{lines} lines",
+    "alternatives": "Alternatives"
   },
   "integration": {
     "label": "Integration Level:",
