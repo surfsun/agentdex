@@ -77,24 +77,31 @@ export default async function RootLayout({
       </head>
       <body className={inter.className}>
         <Providers>
-        <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
+        <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <Link href="/" className="font-bold text-xl text-gray-900">
+            <Link href="/" className="font-bold text-xl text-gray-900 dark:text-white">
               Agent<span className="text-blue-600">Dex</span>
             </Link>
-            <nav className="flex items-center gap-6 text-sm text-gray-600">
-              <Link href="/bookmarks" className="hover:text-gray-900 flex items-center gap-1" title={locale === 'zh-CN' ? '我的收藏' : 'My Bookmarks'}>
+            <nav className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <Link href="/bookmarks" className="hover:text-gray-900 dark:hover:text-white flex items-center gap-1" title={locale === 'zh-CN' ? '我的收藏' : 'My Bookmarks'}>
                 🔖
               </Link>
-              <Link href="/for-agents" className="hover:text-gray-900">{t.nav.forAgents}</Link>
-              <Link href="/eval" className="hover:text-gray-900">{t.nav.eval}</Link>
+              <Link href="/for-agents" className="hover:text-gray-900 dark:hover:text-white hidden sm:inline">{t.nav.forAgents}</Link>
+              <Link href="/eval" className="hover:text-gray-900 dark:hover:text-white hidden sm:inline">{t.nav.eval}</Link>
               {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-              <a href="/api/tools" className="hover:text-gray-900 font-mono text-xs bg-gray-100 px-2 py-1 rounded">{t.nav.api}</a>
+              <a href="/api/tools" className="hover:text-gray-900 dark:hover:text-white font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded hidden sm:inline">{t.nav.api}</a>
+              <Link
+                href="/submit"
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+              >
+                <span>🚀</span>
+                <span className="hidden sm:inline">{t.nav.submit}</span>
+              </Link>
               <a
                 href="https://github.com/surfsun/agentdex"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-gray-900"
+                className="hover:text-gray-900 dark:hover:text-white hidden md:inline"
               >
                 {t.nav.github}
               </a>
@@ -104,15 +111,15 @@ export default async function RootLayout({
           </div>
         </header>
         <main>{children}</main>
-        <footer className="border-t border-gray-200 mt-20 py-8 text-center text-sm text-gray-400">
+        <footer className="border-t border-gray-200 dark:border-gray-800 mt-20 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
           <p>{t.footer.tagline}</p>
           <p className="mt-1">
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a href="/api/tools" className="hover:text-gray-600 font-mono">{t.footer.apiLink}</a>
+            <a href="/api/tools" className="hover:text-gray-600 dark:hover:text-gray-300 font-mono">{t.footer.apiLink}</a>
             {' · '}
-            <Link href="/for-agents" className="hover:text-gray-600">{t.footer.agentGuide}</Link>
+            <Link href="/for-agents" className="hover:text-gray-600 dark:hover:text-gray-300">{t.footer.agentGuide}</Link>
             {' · '}
-            <a href="https://github.com/surfsun/agentdex" className="hover:text-gray-600">{t.nav.github}</a>
+            <a href="https://github.com/surfsun/agentdex" className="hover:text-gray-600 dark:hover:text-gray-300">{t.nav.github}</a>
           </p>
         </footer>
         <Analytics />
