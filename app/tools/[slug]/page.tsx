@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { getToolBySlug, getAllTools, categories } from '@/lib/db'
 import { Tool } from '@/lib/tools'
 import { getStacksForTool, getDifficultyLabel, getDifficultyColor } from '@/lib/stacks'
+import { getSkillsForTool } from '@/lib/skills'
 import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AddToCompareButton from '@/components/AddToCompareButton'
 import IntegrationTab from '@/components/IntegrationTab'
@@ -750,6 +751,66 @@ agent = initialize_agent(tools, llm, agent="zero-shot-react-description")`}</cod
           </div>
         </div>
       )}
+
+      {/* Related Skills - 使用此工具的 Skills */}
+      {(() => {
+        const relatedSkills = getSkillsForTool(tool.slug)
+        if (relatedSkills.length === 0) return null
+        
+        return (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <span>🧠</span>
+                {locale === 'zh-CN' ? '相关 Skills' : 'Related Skills'}
+              </h2>
+              <Link
+                href="/skills"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {locale === 'zh-CN' ? '查看全部 →' : 'View All →'}
+              </Link>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              {locale === 'zh-CN' 
+                ? `以下 Agent Skills 使用了 ${tool.name}` 
+                : `The following Agent Skills use ${tool.name}`}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {relatedSkills.map(skill => {
+                const skillName = locale === 'zh-CN' && skill.name_zh ? skill.name_zh : skill.name
+                const skillDesc = locale === 'zh-CN' && skill.description_zh ? skill.description_zh : skill.description
+                
+                return (
+                  <Link
+                    key={skill.id}
+                    href={`/skills/${skill.id}`}
+                    className="group p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">{skill.icon}</span>
+                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">
+                        {skillName}
+                      </h3>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                      {skillDesc}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-xs bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded font-mono">
+                        {skill.trigger}
+                      </code>
+                      {skill.verified && (
+                        <span className="text-xs text-green-600 dark:text-green-400">✓ Verified</span>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Related Tools - 同类工具 */}
       <div className="mt-12">

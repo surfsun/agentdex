@@ -370,6 +370,38 @@ export default async function HomePage({
         </Link>
       </div>
 
+      {/* Skills Directory Entry */}
+      <div className="mb-10">
+        <Link
+          href="/skills"
+          className="group block bg-gradient-to-r from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="text-4xl">🧠</div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">
+                  {locale === 'zh-CN' ? 'Agent Skills 目录' : 'Agent Skills Directory'}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {locale === 'zh-CN' 
+                    ? '可复用的 Agent 行为模式，直接安装到 Claude Code、Cursor 等工具' 
+                    : 'Reusable agent behavior patterns for Claude Code, Cursor and more'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-3 py-1 rounded-full">
+                10+ skills
+              </span>
+              <span className="text-amber-500 dark:text-amber-400 group-hover:translate-x-1 transition-transform">
+                →
+              </span>
+            </div>
+          </div>
+        </Link>
+      </div>
+
       {/* Search with Real-time Filter */}
       <ClientSearch currentQuery={query} locale={locale} />
 
