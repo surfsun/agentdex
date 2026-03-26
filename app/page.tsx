@@ -338,6 +338,38 @@ export default async function HomePage({
         </div>
       </div>
 
+      {/* MCP Server Directory Entry */}
+      <div className="mb-10">
+        <Link
+          href="/mcp-servers"
+          className="group block bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-blue-900/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-6 hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="text-4xl">🔌</div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                  {locale === 'zh-CN' ? 'MCP Server 目录' : 'MCP Server Directory'}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {locale === 'zh-CN' 
+                    ? '探索为 Claude、Cursor、Windsurf 等平台优化的 MCP Server' 
+                    : 'Explore MCP servers optimized for Claude, Cursor, Windsurf and more'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/50 px-3 py-1 rounded-full">
+                {mcpCount}+ servers
+              </span>
+              <span className="text-indigo-500 dark:text-indigo-400 group-hover:translate-x-1 transition-transform">
+                →
+              </span>
+            </div>
+          </div>
+        </Link>
+      </div>
+
       {/* Search with Real-time Filter */}
       <ClientSearch currentQuery={query} locale={locale} />
 
