@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createSession, getQuestion } from '@/lib/eval/session';
+import { createSession } from '@/lib/eval/session';
 import { getQuestionBank } from '@/lib/eval/session';
 import type { StartEvalRequest, StartEvalResponse, QuestionPrompt } from '@/lib/eval/types';
 

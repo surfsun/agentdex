@@ -16,7 +16,7 @@ interface ClientToolCardProps {
 }
 
 // Helper function to get integration level display info
-function getIntegrationLevelInfo(level: IntegrationLevel | undefined, t: any) {
+function getIntegrationLevelInfo(level: IntegrationLevel | undefined, t: ReturnType<typeof getTranslations>) {
   if (!level) return null
   
   const config = {

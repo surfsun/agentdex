@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession, addAnswer, moveToNextQuestion, getQuestion, getQuestionBank } from '@/lib/eval/session';
 import { scoreAnswer } from '@/lib/eval/scorer';
 import { calculateDimensionScores, calculateTotalScoreAndLevel } from '@/lib/eval/scorer';
-import type { SubmitAnswerRequest, SubmitAnswerResponse, AnswerRecord, QuestionPrompt } from '@/lib/eval/types';
+import type { SubmitAnswerRequest, SubmitAnswerResponse, AnswerRecord, QuestionPrompt, Dimension } from '@/lib/eval/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
         summary: {
           total_score: totalScore,
           level: level,
-          strongest: strongest as any,
-          weakest: weakest as any,
+          strongest: strongest as Dimension,
+          weakest: weakest as Dimension,
         },
       };
 

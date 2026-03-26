@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession, getQuestionBank } from '@/lib/eval/session';
 import { calculateDimensionScores } from '@/lib/eval/scorer';
-import { Dimension, DIMENSION_LABELS } from '@/lib/eval/types';
+import { DIMENSION_LABELS } from '@/lib/eval/types';
 
 interface RouteParams {
   params: Promise<{ id: string }>;

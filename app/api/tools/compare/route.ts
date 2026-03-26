@@ -2,6 +2,22 @@ import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { categories } from '@/lib/db'
 
+// Tool type for comparison API
+interface CompareTool {
+  name: string
+  slug: string
+  category?: string
+  pricing: string | null
+  agent_friendly: boolean
+  api_available: boolean
+  open_source: boolean
+  tags: string[]
+  tagline: string
+  website?: string
+  github?: string
+  featured?: boolean
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const category = searchParams.get('category')
@@ -135,7 +151,7 @@ export async function GET(request: Request) {
   })
 }
 
-function buildComparisonMatrix(toolsList: any[]) {
+function buildComparisonMatrix(toolsList: CompareTool[]) {
   const features = [
     { key: 'agent_friendly', label: 'Agent-friendly', type: 'boolean' },
     { key: 'api_available', label: 'API Available', type: 'boolean' },
@@ -156,7 +172,7 @@ function buildComparisonMatrix(toolsList: any[]) {
   }
 }
 
-function getRecommendation(toolsList: any[]) {
+function getRecommendation(toolsList: CompareTool[]) {
   if (toolsList.length === 1) {
     return {
       top_pick: toolsList[0].name,

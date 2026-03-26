@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface LeaderboardEntry {
   rank: number;
@@ -18,11 +18,7 @@ export default function LeaderboardPage() {
   const [selectedFramework, setSelectedFramework] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchLeaderboard();
-  }, [selectedFramework]);
-
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
       const url = selectedFramework 
@@ -36,7 +32,11 @@ export default function LeaderboardPage() {
       console.error('Failed to fetch leaderboard');
     }
     setLoading(false);
-  };
+  }, [selectedFramework]);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [fetchLeaderboard]);
 
   const levelColors: Record<string, string> = {
     Expert: 'text-amber-500',

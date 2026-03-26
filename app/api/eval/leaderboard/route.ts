@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import type { AnswerRecord } from '@/lib/eval/types';
 
 interface LeaderboardEntry {
   rank: number;
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
     for (const session of sessions || []) {
       const answers = Array.isArray(session.answers) ? session.answers : [];
       const questionCount = Array.isArray(session.questions) ? session.questions.length : 0;
-      const sumScore = answers.reduce((sum: number, answer: any) => sum + (Number(answer?.score) || 0), 0);
+      const sumScore = answers.reduce((sum: number, answer: AnswerRecord) => sum + (Number(answer?.score) || 0), 0);
       const avgScore = questionCount > 0 ? sumScore / questionCount : 0;
 
       entries.push({
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
       total: entries.length,
       frameworks: [...new Set(entries.map(e => e.agent_framework))],
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to load leaderboard' }, { status: 500 });
   }
 }

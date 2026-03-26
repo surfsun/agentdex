@@ -11,7 +11,8 @@ interface CostCalculatorProps {
   locale?: Locale
 }
 
-export default function CostCalculator({
+// Inner component with hooks at top level
+function CostCalculatorInner({
   toolName,
   toolSlug,
   pricing,
@@ -23,33 +24,9 @@ export default function CostCalculator({
     pricingDetails?.unit || 'requests'
   )
 
-  // If no detailed pricing, show simple message
-  if (!pricingDetails) {
-    return (
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          💰 {locale === 'zh-CN' ? '成本估算' : 'Cost Estimation'}
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {locale === 'zh-CN' 
-            ? `${toolName} 采用 ${pricing} 定价模式。访问官网获取详细定价信息。`
-            : `${toolName} uses a ${pricing} pricing model. Visit their website for detailed pricing.`}
-        </p>
-        <a
-          href={`https://www.${toolSlug}.com/pricing`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 px-4 py-2 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-800 transition inline-block"
-        >
-          {locale === 'zh-CN' ? '查看官方定价 →' : 'View Official Pricing →'}
-        </a>
-      </div>
-    )
-  }
+  const { model, currency, rate, tiers, free_tier, scenarios, cost_factors, notes, notes_zh } = pricingDetails!
 
-  const { model, currency, rate, tiers, free_tier, scenarios, cost_factors, notes, notes_zh } = pricingDetails
-
-  // Calculate cost based on model
+  // Calculate cost based on model - hooks must be at top level
   const calculateCost = useMemo(() => {
     let cost = 0
     const totalUnits = usageAmount
@@ -99,7 +76,7 @@ export default function CostCalculator({
       cost,
       currency
     }
-  }, [usageAmount, model, rate, tiers, free_tier])
+  }, [usageAmount, model, rate, tiers, free_tier, currency])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -183,8 +160,8 @@ export default function CostCalculator({
               onChange={(e) => setSelectedUnit(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             >
-              <option value={pricingDetails.unit || 'requests'}>
-                {pricingDetails.unit || 'requests'}
+              <option value={pricingDetails?.unit || 'requests'}>
+                {pricingDetails?.unit || 'requests'}
               </option>
             </select>
           </div>
@@ -293,5 +270,47 @@ export default function CostCalculator({
         </p>
       </div>
     </div>
+  )
+}
+
+export default function CostCalculator({
+  toolName,
+  toolSlug,
+  pricing,
+  pricingDetails,
+  locale = 'en'
+}: CostCalculatorProps) {
+  // If no detailed pricing, show simple message - this check is now at component boundary
+  if (!pricingDetails) {
+    return (
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+          💰 {locale === 'zh-CN' ? '成本估算' : 'Cost Estimation'}
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {locale === 'zh-CN' 
+            ? `${toolName} 采用 ${pricing} 定价模式。访问官网获取详细定价信息。`
+            : `${toolName} uses a ${pricing} pricing model. Visit their website for detailed pricing.`}
+        </p>
+        <a
+          href={`https://www.${toolSlug}.com/pricing`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 px-4 py-2 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-800 transition inline-block"
+        >
+          {locale === 'zh-CN' ? '查看官方定价 →' : 'View Official Pricing →'}
+        </a>
+      </div>
+    )
+  }
+
+  return (
+    <CostCalculatorInner
+      toolName={toolName}
+      toolSlug={toolSlug}
+      pricing={pricing}
+      pricingDetails={pricingDetails}
+      locale={locale}
+    />
   )
 }
