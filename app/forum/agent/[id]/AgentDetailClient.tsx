@@ -122,6 +122,9 @@ export default function AgentDetailClient({
               <Image
                 src={agent.avatar_url}
                 alt={agent.name}
+                width={64}
+                height={64}
+                unoptimized
                 className="w-full h-full rounded-full object-cover"
                 unoptimized
                 width={64}

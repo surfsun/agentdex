@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import PostCard from '@/components/forum/PostCard'
+import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
 
 interface Post {
   id: string
@@ -29,7 +30,6 @@ export default function ForumPage() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
   const [total, setTotal] = useState(0)
-  const [allTags, setAllTags] = useState<string[]>([])
 
   // Fetch posts
   useEffect(() => {
@@ -54,13 +54,6 @@ export default function ForumPage() {
           }
           setHasMore(data.has_more)
           setTotal(data.total)
-
-          // Extract unique tags
-          const tags = new Set<string>()
-          data.data.forEach((post: Post) => {
-            post.tags.forEach(t => tags.add(t))
-          })
-          setAllTags(prev => [...new Set([...prev, ...Array.from(tags)])])
         }
       } catch (error) {
         console.error('Failed to fetch posts:', error)
@@ -100,61 +93,68 @@ export default function ForumPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex flex-wrap items-center gap-4">
-        {/* Sort */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500 dark:text-gray-400">排序：</span>
-          <button
-            onClick={() => setSort('new')}
-            className={`px-3 py-1 rounded-lg text-sm transition ${
-              sort === 'new'
-                ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
-          >
-            最新
-          </button>
-          <button
-            onClick={() => setSort('hot')}
-            className={`px-3 py-1 rounded-lg text-sm transition ${
-              sort === 'hot'
-                ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
-          >
-            热门
-          </button>
-        </div>
-
-        {/* Tags */}
-        {allTags.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-gray-500 dark:text-gray-400">标签：</span>
+      <div className="mb-6 space-y-4">
+        {/* Sort & Tags Row */}
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Sort */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400">排序：</span>
             <button
-              onClick={() => setTag('')}
+              onClick={() => setSort('new')}
               className={`px-3 py-1 rounded-lg text-sm transition ${
-                tag === ''
-                  ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
+                sort === 'new'
+                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              全部
+              最新
             </button>
-            {allTags.slice(0, 5).map(t => (
+            <button
+              onClick={() => setSort('hot')}
+              className={`px-3 py-1 rounded-lg text-sm transition ${
+                sort === 'hot'
+                  ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              热门
+            </button>
+          </div>
+        </div>
+
+        {/* Tag Cloud - Preset Tags */}
+        <div className="flex items-start gap-2 flex-wrap">
+          <span className="text-sm text-gray-500 dark:text-gray-400 pt-1">标签：</span>
+          <button
+            onClick={() => setTag('')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+              tag === ''
+                ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 ring-2 ring-purple-300'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+            }`}
+          >
+            全部
+          </button>
+          {PRESET_TAGS.map(t => {
+            const colors = getTagColorClasses(t.id)
+            const isActive = tag === t.name
+            
+            return (
               <button
-                key={t}
-                onClick={() => setTag(t)}
-                className={`px-3 py-1 rounded-lg text-sm transition ${
-                  tag === t
-                    ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
+                key={t.id}
+                onClick={() => setTag(t.name)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${
+                  isActive
+                    ? `${colors.bg} ${colors.text} ring-2 ring-offset-1`
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
-                #{t}
+                <span>{t.icon}</span>
+                <span>{t.name}</span>
               </button>
-            ))}
-          </div>
-        )}
+            )
+          })}
+        </div>
       </div>
 
       {/* Stats */}

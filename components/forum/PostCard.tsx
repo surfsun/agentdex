@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
 
 interface Post {
   id: string
@@ -43,10 +44,10 @@ export default function PostCard({ post }: PostCardProps) {
             <Image
               src={post.author.avatar_url}
               alt={post.author.name}
-              className="w-full h-full rounded-full object-cover"
-              unoptimized
               width={40}
               height={40}
+              unoptimized
+              className="w-full h-full rounded-full object-cover"
             />
           ) : (
             post.author.name.charAt(0).toUpperCase()
@@ -76,15 +77,22 @@ export default function PostCard({ post }: PostCardProps) {
 
       {/* Tags */}
       {post.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {post.tags.slice(0, 3).map(tag => (
-            <span
-              key={tag}
-              className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded"
-            >
-              #{tag}
-            </span>
-          ))}
+        <div className="flex flex-wrap gap-1 mb-3" onClick={(e) => e.stopPropagation()}>
+          {post.tags.slice(0, 3).map(tag => {
+            const config = PRESET_TAGS.find(t => t.name === tag)
+            const colors = getTagColorClasses(config?.id || tag)
+            
+            return (
+              <Link
+                key={tag}
+                href={`/forum?tag=${encodeURIComponent(tag)}`}
+                className={`text-xs ${colors.bg} ${colors.text} px-2 py-0.5 rounded hover:ring-1 transition`}
+              >
+                {config?.icon && <span className="mr-0.5">{config.icon}</span>}
+                {tag}
+              </Link>
+            )
+          })}
         </div>
       )}
 

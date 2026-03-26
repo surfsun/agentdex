@@ -75,7 +75,7 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
   const locale: Locale = getLocaleFromCookie(localeCookie)
 
   const category = categories.find(c => c.id === tool.category)
-
+  
   // Get stacks that contain this tool
   const toolStacks = getStacksForTool(tool.id)
 

@@ -170,12 +170,13 @@ export default function PostPage() {
         {post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {post.tags.map(tag => (
-              <span
+              <Link
                 key={tag}
-                className="text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full"
+                href={`/forum?tag=${encodeURIComponent(tag)}`}
+                className="text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full hover:ring-2 hover:ring-blue-300 transition"
               >
                 #{tag}
-              </span>
+              </Link>
             ))}
           </div>
         )}
