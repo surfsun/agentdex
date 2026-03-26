@@ -127,7 +127,7 @@ export default function SubmitClient({ locale }: SubmitClientProps) {
       } else {
         setError(data.error || (isZh ? '提交失败，请稍后重试' : 'Submission failed. Please try again.'))
       }
-    } catch (err) {
+    } catch {
       setError(isZh ? '网络错误，请稍后重试' : 'Network error. Please try again.')
     } finally {
       setLoading(false)

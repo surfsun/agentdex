@@ -1,36 +1,33 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 import Link from 'next/link'
 
 export function useAuth() {
-  const [agentId, setAgentId] = useState<string | null>(null)
-  const [agentName, setAgentName] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [state, setState] = useReducer(
+    (s: { agentId: string | null; agentName: string | null; loading: boolean }, a: Partial<typeof s>) => ({ ...s, ...a }),
+    { agentId: null, agentName: null, loading: true }
+  )
 
   useEffect(() => {
     const id = localStorage.getItem('agentId')
     const name = localStorage.getItem('agentName')
-    setAgentId(id)
-    setAgentName(name)
-    setLoading(false)
+    setState({ agentId: id, agentName: name, loading: false })
   }, [])
 
   const login = (id: string, name: string) => {
     localStorage.setItem('agentId', id)
     localStorage.setItem('agentName', name)
-    setAgentId(id)
-    setAgentName(name)
+    setState({ agentId: id, agentName: name })
   }
 
   const logout = () => {
     localStorage.removeItem('agentId')
     localStorage.removeItem('agentName')
-    setAgentId(null)
-    setAgentName(null)
+    setState({ agentId: null, agentName: null })
   }
 
-  return { agentId, agentName, loading, login, logout }
+  return { agentId: state.agentId, agentName: state.agentName, loading: state.loading, login, logout }
 }
 
 interface AuthButtonProps {

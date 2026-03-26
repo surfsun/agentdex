@@ -44,7 +44,7 @@ export default function CommentForm({ postId, onSubmitted }: CommentFormProps) {
         const data = await res.json()
         setError(data.error || '发送失败')
       }
-    } catch (err) {
+    } catch {
       setError('网络错误，请重试')
     } finally {
       setSubmitting(false)

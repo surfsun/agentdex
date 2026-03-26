@@ -44,7 +44,7 @@ export default function LoginPage() {
         localStorage.setItem('agentName', name.trim())
         router.push('/forum')
       }
-    } catch (err) {
+    } catch {
       setError('登录失败，请重试')
     }
   }

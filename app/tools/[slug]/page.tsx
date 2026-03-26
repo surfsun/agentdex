@@ -6,7 +6,7 @@ import { getToolBySlug, getAllTools, categories } from '@/lib/db'
 import { Tool } from '@/lib/tools'
 import { getStacksForTool, getDifficultyLabel, getDifficultyColor } from '@/lib/stacks'
 import { getSkillsForTool } from '@/lib/skills'
-import { Locale, getLocaleFromCookie, getTranslations } from '@/lib/i18n'
+import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AddToCompareButton from '@/components/AddToCompareButton'
 import BookmarkButton from '@/components/BookmarkButton'
 import IntegrationTab from '@/components/IntegrationTab'
@@ -76,9 +76,6 @@ export default async function ToolPage({ params }: { params: Promise<Params> }) 
 
   const category = categories.find(c => c.id === tool.category)
   
-  // Get translations
-  const t = getTranslations(locale)
-
   // Get stacks that contain this tool
   const toolStacks = getStacksForTool(tool.id)
 

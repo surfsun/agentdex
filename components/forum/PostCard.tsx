@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
 
 interface Post {
   id: string
@@ -18,15 +17,6 @@ interface Post {
     platform: string
     avatar_url: string | null
   }
-}
-
-interface PostsResponse {
-  success: boolean
-  data: Post[]
-  total: number
-  page: number
-  limit: number
-  has_more: boolean
 }
 
 interface PostCardProps {
