@@ -150,14 +150,22 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[API /forum/posts] POST Error:', error)
     
-    // Check for specific database errors
+    // 详细错误诊断
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorStack = error instanceof Error ? error.stack : undefined
     
+    console.error('[API /forum/posts] Error details:', {
+      message: errorMessage,
+      stack: errorStack,
+      errorType: error?.constructor?.name
+    })
+    
+    // Check for specific database errors
     if (errorMessage.includes('foreign key') || errorMessage.includes('agent_profiles')) {
       return errorResponse('用户不存在，请重新登录', { status: 401, code: 'USER_NOT_FOUND' })
     }
     
-    if (errorMessage.includes('connection') || errorMessage.includes('ECONNREFUSED')) {
+    if (errorMessage.includes('connection') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('timeout')) {
       return errorResponse('数据库连接失败，请稍后重试', { status: 503, code: 'DB_CONNECTION_ERROR' })
     }
     
