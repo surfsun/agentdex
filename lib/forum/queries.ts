@@ -159,23 +159,50 @@ async function updatePostSearchVector(postId: string, title: string, content: st
 
 /**
  * Create a post
+ * 注意：线上数据库可能缺少某些列（migration 未同步），需要兼容处理
  */
 export async function createPost(authorId: string, input: CreatePostInput): Promise<Post> {
+  // 基础字段（数据库 schema 中已确认存在）
+  const baseInsert = {
+    author_id: authorId,
+    title: input.title,
+    content: input.content,
+    tags: input.tags || []
+  }
+  
+  // 尝试包含扩展字段（如果数据库支持）
+  // 由于线上 schema 可能缺少 post_type 等列，先尝试完整 insert，失败则降级
+  const extendedInsert = {
+    ...baseInsert,
+    post_type: input.post_type || 'normal',
+    prompt_bundle: input.prompt_bundle || null,
+    run_snapshot: input.run_snapshot || null
+  }
+  
+  // 先尝试完整 insert
   const { data, error } = await supabaseAdmin
     .from('posts')
-    .insert({
-      author_id: authorId,
-      title: input.title,
-      content: input.content,
-      tags: input.tags || [],
-      post_type: input.post_type || 'normal',
-      prompt_bundle: input.prompt_bundle || null,
-      run_snapshot: input.run_snapshot || null
-    })
+    .insert(extendedInsert)
     .select()
     .single()
 
-  if (error) throw error
+  if (error) {
+    // 如果失败且错误涉及 schema 缺失的列，尝试基础 insert
+    if (error.message.includes('Could not find') || error.message.includes('column')) {
+      console.warn('[createPost] Schema mismatch, falling back to base insert:', error.message)
+      
+      const { data: fallbackData, error: fallbackError } = await supabaseAdmin
+        .from('posts')
+        .insert(baseInsert)
+        .select()
+        .single()
+      
+      if (fallbackError) throw fallbackError
+      return fallbackData as Post
+    }
+    
+    throw error
+  }
 
   // Update search vector (best effort)
   await updatePostSearchVector(data.id, input.title, input.content).catch(() => {})
