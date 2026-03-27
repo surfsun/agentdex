@@ -3,11 +3,11 @@ import { createComment, getCommentsByPostId, buildCommentTree, getPostById } fro
 import type { CreateCommentInput } from '@/lib/forum/types'
 
 interface RouteParams {
-  params: Promise<{ postId: string }>
+  params: Promise<{ id: string }>
 }
 
 /**
- * GET /api/forum/posts/[postId]/comments
+ * GET /api/forum/posts/[id]/comments
  * Get all comments for a post as a tree structure
  */
 export async function GET(
@@ -15,9 +15,9 @@ export async function GET(
   { params }: RouteParams
 ) {
   try {
-    const { postId } = await params
+    const { id } = await params
 
-    if (!postId) {
+    if (!id) {
       return NextResponse.json(
         { success: false, error: 'Post ID is required' },
         { status: 400 }
@@ -25,7 +25,7 @@ export async function GET(
     }
 
     // Check if post exists
-    const post = await getPostById(postId)
+    const post = await getPostById(id)
     if (!post) {
       return NextResponse.json(
         { success: false, error: 'Post not found' },
@@ -34,7 +34,7 @@ export async function GET(
     }
 
     // Get flat comments and build tree
-    const comments = await getCommentsByPostId(postId)
+    const comments = await getCommentsByPostId(id)
     const commentTree = buildCommentTree(comments)
 
     return NextResponse.json({
@@ -43,7 +43,7 @@ export async function GET(
       total: comments.length
     })
   } catch (error) {
-    console.error('[API /forum/posts/[postId]/comments] Error:', error)
+    console.error('[API /forum/posts/[id]/comments] Error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch comments' },
       { status: 500 }
@@ -52,7 +52,7 @@ export async function GET(
 }
 
 /**
- * POST /api/forum/posts/[postId]/comments
+ * POST /api/forum/posts/[id]/comments
  * Create a new comment
  * 
  * Headers:
@@ -67,7 +67,7 @@ export async function POST(
   { params }: RouteParams
 ) {
   try {
-    const { postId } = await params
+    const { id } = await params
     const agentId = request.headers.get('X-Agent-Id')
 
     if (!agentId) {
@@ -77,7 +77,7 @@ export async function POST(
       )
     }
 
-    if (!postId) {
+    if (!id) {
       return NextResponse.json(
         { success: false, error: 'Post ID is required' },
         { status: 400 }
@@ -85,7 +85,7 @@ export async function POST(
     }
 
     // Check if post exists
-    const post = await getPostById(postId)
+    const post = await getPostById(id)
     if (!post) {
       return NextResponse.json(
         { success: false, error: 'Post not found' },
@@ -119,14 +119,14 @@ export async function POST(
       parent_id: body.parent_id || undefined
     }
 
-    const comment = await createComment(postId, agentId, input)
+    const comment = await createComment(id, agentId, input)
 
     return NextResponse.json({
       success: true,
       data: comment
     }, { status: 201 })
   } catch (error) {
-    console.error('[API /forum/posts/[postId]/comments] Error:', error)
+    console.error('[API /forum/posts/[id]/comments] Error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to create comment' },
       { status: 500 }
