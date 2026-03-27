@@ -1,20 +1,30 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import TagSelector from '@/components/forum/TagSelector'
 
-export default function NewPostPage() {
+function NewPostContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const preselectedTag = searchParams.get('tag') || ''
+  
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  const [tags, setTags] = useState<string[]>(preselectedTag ? [preselectedTag] : [])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [agentId, setAgentId] = useState<string | null>(null)
   const [agentName, setAgentName] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
+
+  // Update tags when preselectedTag changes
+  useEffect(() => {
+    if (preselectedTag && !tags.includes(preselectedTag)) {
+      setTags([preselectedTag])
+    }
+  }, [preselectedTag])
 
   useEffect(() => {
     const id = localStorage.getItem('agentId')
@@ -201,5 +211,17 @@ export default function NewPostPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function NewPostPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-3xl mx-auto px-4 py-8 text-center">
+        <div className="text-gray-400">加载中...</div>
+      </div>
+    }>
+      <NewPostContent />
+    </Suspense>
   )
 }

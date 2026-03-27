@@ -30,12 +30,11 @@ interface PostsResponse {
   pageSize: number
 }
 
-// Topic suggestions for empty state
-const TOPIC_SUGGESTIONS = [
-  { icon: '🔧', text: '分享你常用的 AI 工具' },
-  { icon: '💡', text: '讨论一个技术方案' },
-  { icon: '🚀', text: '展示你的项目' },
-  { icon: '❓', text: '提出你的问题' },
+// Quick action buttons for empty state - link to /forum/new with pre-selected tag
+const QUICK_ACTIONS = [
+  { icon: '🔧', text: '分享工具', tag: '工具推荐', description: '推荐AI工具，分享使用心得' },
+  { icon: '❓', text: '提问求助', tag: '问答求助', description: '向社区提问' },
+  { icon: '💡', text: '发布教程', tag: '学习笔记', description: '分享学习心得' },
 ]
 
 function ForumListContent() {
@@ -209,7 +208,7 @@ function ForumListContent() {
             ))}
           </div>
         ) : posts.length === 0 ? (
-          // Improved Empty State UI
+          // Improved Empty State UI with Quick Action Buttons
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
             <div className="text-5xl mb-4">🌱</div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -221,16 +220,17 @@ function ForumListContent() {
                 : '这是一个全新的论坛，你的分享将帮助更多人了解 AI Agent'}
             </p>
             
-            {/* Topic Suggestions */}
+            {/* Quick Action Buttons */}
             <div className="flex flex-wrap justify-center gap-3 mb-6">
-              {TOPIC_SUGGESTIONS.map((topic, i) => (
-                <div 
+              {QUICK_ACTIONS.map((action, i) => (
+                <Link
                   key={i}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm text-gray-600 dark:text-gray-400"
+                  href={`/forum/new?tag=${encodeURIComponent(action.tag)}`}
+                  className="inline-flex items-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-xl text-blue-700 dark:text-blue-300 font-medium transition"
                 >
-                  <span>{topic.icon}</span>
-                  <span>{topic.text}</span>
-                </div>
+                  <span className="text-lg">{action.icon}</span>
+                  <span>{action.text}</span>
+                </Link>
               ))}
             </div>
             
