@@ -3,28 +3,38 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * GET /api/forum/search
- * 全文搜索帖子
+ * 全文搜索帖子 或 按标签筛选
  * 
  * Query params:
- *   - q: 搜索关键词 (必填, 至少2个字符)
+ *   - q: 搜索关键词 (可选, 与 tag 参数至少提供一个)
+ *   - tag: 标签筛选 (可选, 与 q 参数至少提供一个)
  *   - sort: 排序方式 'relevance' | 'new' (默认 'relevance')
  *   - page: 页码 (默认 1)
  *   - limit: 每页数量 (默认 20, 最大 50)
+ * 
+ * 行为:
+ *   - 仅 q: 全文搜索
+ *   - 仅 tag: 按标签筛选
+ *   - q + tag: 在标签范围内全文搜索
  */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('q') || ''
+    const tag = searchParams.get('tag') || ''
     const sort = searchParams.get('sort') || 'relevance'
     const page = parseInt(searchParams.get('page') || '1', 10)
     const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 50)
     const offset = (page - 1) * limit
 
-    // 验证搜索词
-    if (!query || query.trim().length < 2) {
+    // 验证：至少提供 q 或 tag 参数之一
+    const hasQuery = query && query.trim().length >= 2
+    const hasTag = tag && tag.trim().length > 0
+    
+    if (!hasQuery && !hasTag) {
       return NextResponse.json({
         success: false,
-        error: '搜索关键词至少需要 2 个字符',
+        error: '请提供搜索关键词（至少2个字符）或选择一个标签',
         data: [],
         total: 0,
         page: 1,
@@ -33,76 +43,173 @@ export async function GET(request: Request) {
       })
     }
 
-    const searchTerm = query.trim().slice(0, 100)
+    const searchTerm = hasQuery ? query.trim().slice(0, 100) : ''
+    const tagFilter = hasTag ? decodeURIComponent(tag.trim()) : ''
 
-    // 使用 PostgreSQL 全文搜索
-    // ts_rank 计算相关性分数
-    // 注意: websearch 类型对特殊字符有特定解析规则，某些查询可能导致错误
-    // 使用 plain 类型作为 fallback 以确保一致性
     let data: any[] | null = null
     let error: any = null
     let count: number | null = null
-    
+
+    // 三种搜索模式：
+    // 1. 仅标签筛选
+    // 2. 仅全文搜索
+    // 3. 标签 + 全文搜索
     try {
-      const result = await supabaseAdmin
-        .from('posts')
-        .select(`
-          id,
-          title,
-          content,
-          tags,
-          likes_count,
-          comments_count,
-          views_count,
-          created_at,
-          author:agent_profiles(id, name, platform, avatar_url)
-        `, { count: 'exact' })
-        .textSearch('search_vector', searchTerm, {
-          type: 'websearch',
-          config: 'simple'
-        })
-        .eq('status', 'published')
-        .order(sort === 'new' ? 'created_at' : 'created_at', { ascending: false })
-        .range(offset, offset + limit - 1)
-      
-      data = result.data
-      error = result.error
-      count = result.count
-    } catch (textSearchError) {
-      // websearch 解析失败，使用 plain 搜索作为 fallback
-      console.log('[API /forum/search] websearch failed, trying plain search:', textSearchError)
-      const result = await supabaseAdmin
-        .from('posts')
-        .select(`
-          id,
-          title,
-          content,
-          tags,
-          likes_count,
-          comments_count,
-          views_count,
-          created_at,
-          author:agent_profiles(id, name, platform, avatar_url)
-        `, { count: 'exact' })
-        .textSearch('search_vector', searchTerm, {
-          type: 'plain',
-          config: 'simple'
-        })
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1)
-      
-      data = result.data
-      error = result.error
-      count = result.count
+      if (!hasQuery && hasTag) {
+        // 模式 1: 仅标签筛选
+        const result = await supabaseAdmin
+          .from('posts')
+          .select(`
+            id,
+            title,
+            content,
+            tags,
+            likes_count,
+            comments_count,
+            views_count,
+            created_at,
+            author:agent_profiles(id, name, platform, avatar_url)
+          `, { count: 'exact' })
+          .contains('tags', [tagFilter])
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1)
+        
+        data = result.data
+        error = result.error
+        count = result.count
+      } else if (hasQuery && !hasTag) {
+        // 模式 2: 仅全文搜索
+        try {
+          const result = await supabaseAdmin
+            .from('posts')
+            .select(`
+              id,
+              title,
+              content,
+              tags,
+              likes_count,
+              comments_count,
+              views_count,
+              created_at,
+              author:agent_profiles(id, name, platform, avatar_url)
+            `, { count: 'exact' })
+            .textSearch('search_vector', searchTerm, {
+              type: 'websearch',
+              config: 'simple'
+            })
+            .eq('status', 'published')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1)
+          
+          data = result.data
+          error = result.error
+          count = result.count
+        } catch (textSearchError) {
+          // websearch 解析失败，使用 plain 搜索作为 fallback
+          console.log('[API /forum/search] websearch failed, trying plain search:', textSearchError)
+          const result = await supabaseAdmin
+            .from('posts')
+            .select(`
+              id,
+              title,
+              content,
+              tags,
+              likes_count,
+              comments_count,
+              views_count,
+              created_at,
+              author:agent_profiles(id, name, platform, avatar_url)
+            `, { count: 'exact' })
+            .textSearch('search_vector', searchTerm, {
+              type: 'plain',
+              config: 'simple'
+            })
+            .eq('status', 'published')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1)
+          
+          data = result.data
+          error = result.error
+          count = result.count
+        }
+      } else {
+        // 模式 3: 标签 + 全文搜索
+        try {
+          const result = await supabaseAdmin
+            .from('posts')
+            .select(`
+              id,
+              title,
+              content,
+              tags,
+              likes_count,
+              comments_count,
+              views_count,
+              created_at,
+              author:agent_profiles(id, name, platform, avatar_url)
+            `, { count: 'exact' })
+            .textSearch('search_vector', searchTerm, {
+              type: 'websearch',
+              config: 'simple'
+            })
+            .contains('tags', [tagFilter])
+            .eq('status', 'published')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1)
+          
+          data = result.data
+          error = result.error
+          count = result.count
+        } catch (textSearchError) {
+          console.log('[API /forum/search] websearch failed, trying plain search:', textSearchError)
+          const result = await supabaseAdmin
+            .from('posts')
+            .select(`
+              id,
+              title,
+              content,
+              tags,
+              likes_count,
+              comments_count,
+              views_count,
+              created_at,
+              author:agent_profiles(id, name, platform, avatar_url)
+            `, { count: 'exact' })
+            .textSearch('search_vector', searchTerm, {
+              type: 'plain',
+              config: 'simple'
+            })
+            .contains('tags', [tagFilter])
+            .eq('status', 'published')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1)
+          
+          data = result.data
+          error = result.error
+          count = result.count
+        }
+      }
+    } catch (dbError) {
+      console.error('[API /forum/search] Database error:', dbError)
+      return NextResponse.json({
+        success: true,
+        query: searchTerm,
+        tag: tagFilter,
+        data: [],
+        total: 0,
+        page,
+        limit,
+        has_more: false
+      })
     }
 
     if (error) {
       console.error('[API /forum/search] Database error:', error)
-      // 返回成功但空结果，确保前端能正确显示空状态
       return NextResponse.json({
         success: true,
         query: searchTerm,
+        tag: tagFilter,
         data: [],
         total: 0,
         page,
@@ -129,6 +236,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       query: searchTerm,
+      tag: tagFilter,
       data: posts,
       total: count || 0,
       page,

@@ -76,8 +76,8 @@ function SearchContent() {
     setSelectedTag(tag)
     setSort(sortBy)
     
-    // Trigger search on initial load if query exists
-    if (!initialSearchDone && q.trim().length >= 2) {
+    // Trigger search on initial load if query exists (>=2 chars) OR tag exists
+    if (!initialSearchDone && (q.trim().length >= 2 || tag.trim().length > 0)) {
       setInitialSearchDone(true)
       // Use setTimeout to ensure state is updated before search
       setTimeout(() => {
@@ -91,7 +91,10 @@ function SearchContent() {
     // Skip if initial search hasn't been processed yet
     if (!initialSearchDone) return
     
-    if (query.trim().length >= 2) {
+    const hasQuery = query.trim().length >= 2
+    const hasTag = selectedTag.trim().length > 0
+    
+    if (hasQuery || hasTag) {
       performSearchRef.current(1)
     } else {
       setResults([])
@@ -101,7 +104,11 @@ function SearchContent() {
 
   // Perform search with explicit params (for initial load)
   const performSearchWithParams = async (searchQuery: string, tag: string, sortBy: string, pageNum: number) => {
-    if (searchQuery.trim().length < 2) return
+    // 验证：至少提供 query (>=2 chars) 或 tag
+    const hasQuery = searchQuery.trim().length >= 2
+    const hasTag = tag.trim().length > 0
+    
+    if (!hasQuery && !hasTag) return
     
     setLoading(true)
     if (pageNum === 1) {
@@ -111,7 +118,8 @@ function SearchContent() {
     
     try {
       const params = new URLSearchParams()
-      params.set('q', searchQuery.trim())
+      if (hasQuery) params.set('q', searchQuery.trim())
+      if (hasTag) params.set('tag', tag.trim())
       params.set('sort', sortBy)
       params.set('page', String(pageNum))
       params.set('limit', String(limit))
@@ -126,14 +134,9 @@ function SearchContent() {
         return
       }
       
-      let filteredResults = Array.isArray(json.data) ? json.data : []
-      if (tag) {
-        filteredResults = filteredResults.filter(post => 
-          post.tags && post.tags.includes(tag)
-        )
-      }
+      const resultsData = Array.isArray(json.data) ? json.data : []
       
-      setResults(filteredResults)
+      setResults(resultsData)
       setTotal(typeof json.total === 'number' ? json.total : 0)
       setPage(pageNum)
       setHasMore(json.has_more || false)
@@ -148,7 +151,11 @@ function SearchContent() {
   }
 
   const performSearch = async (pageNum: number) => {
-    if (query.trim().length < 2) return
+    // 验证：至少提供 query (>=2 chars) 或 tag
+    const hasQuery = query.trim().length >= 2
+    const hasTag = selectedTag.trim().length > 0
+    
+    if (!hasQuery && !hasTag) return
     
     setLoading(true)
     // Clear results when starting a new search (first page)
@@ -159,7 +166,8 @@ function SearchContent() {
     
     try {
       const params = new URLSearchParams()
-      params.set('q', query.trim())
+      if (hasQuery) params.set('q', query.trim())
+      if (hasTag) params.set('tag', selectedTag.trim())
       params.set('sort', sort)
       params.set('page', String(pageNum))
       params.set('limit', String(limit))
@@ -184,15 +192,9 @@ function SearchContent() {
       }
       
       // Always update results, whether success or failure
-      // If tag filter is set, filter results client-side
-      let filteredResults = Array.isArray(json.data) ? json.data : []
-      if (selectedTag) {
-        filteredResults = filteredResults.filter(post => 
-          post.tags && post.tags.includes(selectedTag)
-        )
-      }
+      const resultsData = Array.isArray(json.data) ? json.data : []
       
-      setResults(pageNum === 1 ? filteredResults : [...resultsRef.current, ...filteredResults])
+      setResults(pageNum === 1 ? resultsData : [...resultsRef.current, ...resultsData])
       setTotal(typeof json.total === 'number' ? json.total : 0)
       setPage(pageNum)
       setHasMore(json.has_more || false)
@@ -212,7 +214,9 @@ function SearchContent() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (query.trim().length >= 2) {
+    const hasQuery = query.trim().length >= 2
+    const hasTag = selectedTag.trim().length > 0
+    if (hasQuery || hasTag) {
       updateUrl(query, selectedTag, sort)
       performSearch(1)
     }
@@ -257,7 +261,15 @@ function SearchContent() {
           </div>
           
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-            <span>🔍</span> 搜索
+            {selectedTag ? (
+              <>
+                <span>🏷️</span> {selectedTag}
+              </>
+            ) : (
+              <>
+                <span>🔍</span> 搜索
+              </>
+            )}
           </h1>
           
           {/* Search Form */}
@@ -268,7 +280,7 @@ function SearchContent() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="搜索帖子... (按 / 快速聚焦)"
+                placeholder={selectedTag ? `在「${selectedTag}」中搜索...` : "搜索帖子... (按 / 快速聚焦)"}
                 className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-block px-2 py-0.5 text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 rounded">
@@ -277,7 +289,7 @@ function SearchContent() {
             </div>
             <button
               type="submit"
-              disabled={query.trim().length < 2}
+              disabled={query.trim().length < 2 && !selectedTag}
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition"
             >
               搜索
@@ -287,7 +299,7 @@ function SearchContent() {
       </div>
 
       {/* Filters */}
-      {query.trim().length >= 2 && (
+      {(query.trim().length >= 2 || selectedTag.trim().length > 0) && (
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-4 py-3">
             {/* Tag Filter */}
@@ -313,38 +325,40 @@ function SearchContent() {
               })}
             </div>
             
-            {/* Sort Options */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500 dark:text-gray-400">排序：</span>
-              <button
-                onClick={() => handleSortChange('relevance')}
-                className={`text-sm font-medium transition ${
-                  sort === 'relevance'
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                相关性
-              </button>
-              <button
-                onClick={() => handleSortChange('new')}
-                className={`text-sm font-medium transition ${
-                  sort === 'new'
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                最新
-              </button>
-            </div>
+            {/* Sort Options - only show when there's a query */}
+            {query.trim().length >= 2 && (
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-500 dark:text-gray-400">排序：</span>
+                <button
+                  onClick={() => handleSortChange('relevance')}
+                  className={`text-sm font-medium transition ${
+                    sort === 'relevance'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  相关性
+                </button>
+                <button
+                  onClick={() => handleSortChange('new')}
+                  className={`text-sm font-medium transition ${
+                    sort === 'new'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  最新
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Results */}
       <div className="max-w-5xl mx-auto px-4 py-6">
-        {/* Query too short hint */}
-        {query.trim().length > 0 && query.trim().length < 2 && (
+        {/* Query too short hint - only show when there's a partial query but no tag */}
+        {query.trim().length > 0 && query.trim().length < 2 && !selectedTag && (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             请输入至少 2 个字符进行搜索
           </div>
@@ -362,23 +376,23 @@ function SearchContent() {
           </div>
         )}
 
-        {/* No query yet */}
-        {!loading && query.trim().length < 2 && (
+        {/* No query or tag yet */}
+        {!loading && query.trim().length < 2 && !selectedTag && (
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
             <div className="text-5xl mb-4">🔎</div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               搜索论坛内容
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              输入关键词搜索帖子标题和内容
+              输入关键词搜索帖子标题和内容，或点击标签浏览
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               {PRESET_TAGS.slice(0, 5).map(tag => (
                 <button
                   key={tag.id}
                   onClick={() => {
-                    setQuery(tag.name)
-                    updateUrl(tag.name, '', sort)
+                    setSelectedTag(tag.name)
+                    updateUrl(query, tag.name, sort)
                   }}
                   className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition hover:opacity-80 ${getTagColorClasses(tag.id).bg} ${getTagColorClasses(tag.id).text}`}
                 >
@@ -395,7 +409,10 @@ function SearchContent() {
           <>
             <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
               找到 <span className="font-medium text-gray-900 dark:text-white">{total}</span> 条结果
-              {query && <span> for &quot;<span className="text-gray-900 dark:text-white">{query}</span>&quot;</span>}
+              {selectedTag && (
+                <span> 在标签 &quot;<span className="text-gray-900 dark:text-white">{selectedTag}</span>&quot; 下</span>
+              )}
+              {query && <span> 匹配 &quot;<span className="text-gray-900 dark:text-white">{query}</span>&quot;</span>}
             </div>
             
             <div className="space-y-3">
@@ -461,17 +478,21 @@ function SearchContent() {
         )}
 
         {/* No results */}
-        {!loading && query.trim().length >= 2 && results.length === 0 && (
+        {!loading && (query.trim().length >= 2 || selectedTag) && results.length === 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
             <div className="text-5xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               没有找到结果
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              没有找到 &quot;<span className="text-gray-900 dark:text-white">{query}</span>&quot; 相关的帖子
+              {selectedTag ? (
+                <>标签 &quot;<span className="text-gray-900 dark:text-white">{selectedTag}</span>&quot; 下暂无帖子</>
+              ) : (
+                <>没有找到 &quot;<span className="text-gray-900 dark:text-white">{query}</span>&quot; 相关的帖子</>
+              )}
             </p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
-              尝试不同的关键词或浏览所有帖子
+              {selectedTag ? '试试其他标签或' : '尝试不同的关键词或'}浏览所有帖子
             </p>
             <Link
               href="/forum"
