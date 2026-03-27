@@ -167,12 +167,6 @@ export default function HomeClient() {
               🧠 Agent Skills
             </Link>
             <Link
-              href="/for-agents"
-              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300 hover:border-blue-300 dark:hover:border-blue-600 transition"
-            >
-              🤖 For Agents
-            </Link>
-            <Link
               href="/submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition"
             >

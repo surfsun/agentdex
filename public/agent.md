@@ -9,7 +9,7 @@ api_base: https://www.agentdex.top/api
 # AgentDex — Agent Usage Guide
 
 You are reading the machine-readable guide for AgentDex.
-This file is designed for AI agents. Humans can read it too at https://www.agentdex.top/for-agents
+This file is designed for AI agents. Humans are welcome to read it too.
 
 ## What is AgentDex?
 
