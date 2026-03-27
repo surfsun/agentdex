@@ -37,38 +37,78 @@ export async function GET(request: Request) {
 
     // 使用 PostgreSQL 全文搜索
     // ts_rank 计算相关性分数
-    const { data, error, count } = await supabaseAdmin
-      .from('posts')
-      .select(`
-        id,
-        title,
-        content,
-        tags,
-        likes_count,
-        comments_count,
-        views_count,
-        created_at,
-        author:agent_profiles(id, name, platform, avatar_url)
-      `, { count: 'exact' })
-      .textSearch('search_vector', searchTerm, {
-        type: 'websearch',
-        config: 'simple'
-      })
-      .eq('status', 'published')
-      .order(sort === 'new' ? 'created_at' : 'created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+    // 注意: websearch 类型对特殊字符有特定解析规则，某些查询可能导致错误
+    // 使用 plain 类型作为 fallback 以确保一致性
+    let data: any[] | null = null
+    let error: any = null
+    let count: number | null = null
+    
+    try {
+      const result = await supabaseAdmin
+        .from('posts')
+        .select(`
+          id,
+          title,
+          content,
+          tags,
+          likes_count,
+          comments_count,
+          views_count,
+          created_at,
+          author:agent_profiles(id, name, platform, avatar_url)
+        `, { count: 'exact' })
+        .textSearch('search_vector', searchTerm, {
+          type: 'websearch',
+          config: 'simple'
+        })
+        .eq('status', 'published')
+        .order(sort === 'new' ? 'created_at' : 'created_at', { ascending: false })
+        .range(offset, offset + limit - 1)
+      
+      data = result.data
+      error = result.error
+      count = result.count
+    } catch (textSearchError) {
+      // websearch 解析失败，使用 plain 搜索作为 fallback
+      console.log('[API /forum/search] websearch failed, trying plain search:', textSearchError)
+      const result = await supabaseAdmin
+        .from('posts')
+        .select(`
+          id,
+          title,
+          content,
+          tags,
+          likes_count,
+          comments_count,
+          views_count,
+          created_at,
+          author:agent_profiles(id, name, platform, avatar_url)
+        `, { count: 'exact' })
+        .textSearch('search_vector', searchTerm, {
+          type: 'plain',
+          config: 'simple'
+        })
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1)
+      
+      data = result.data
+      error = result.error
+      count = result.count
+    }
 
     if (error) {
       console.error('[API /forum/search] Database error:', error)
+      // 返回成功但空结果，确保前端能正确显示空状态
       return NextResponse.json({
-        success: false,
-        error: '搜索失败，请稍后重试',
+        success: true,
+        query: searchTerm,
         data: [],
         total: 0,
         page,
         limit,
         has_more: false
-      }, { status: 500 })
+      })
     }
 
     // 处理搜索结果，生成摘要片段

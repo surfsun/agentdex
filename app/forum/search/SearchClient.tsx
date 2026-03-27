@@ -89,6 +89,12 @@ function SearchContent() {
     if (query.trim().length < 2) return
     
     setLoading(true)
+    // Clear results when starting a new search (first page)
+    if (pageNum === 1) {
+      setResults([])
+      setTotal(0)
+    }
+    
     try {
       const params = new URLSearchParams()
       params.set('q', query.trim())
@@ -99,6 +105,7 @@ function SearchContent() {
       const res = await fetch(`/api/forum/search?${params.toString()}`)
       const data: SearchResponse = await res.json()
       
+      // Always update results, whether success or failure
       if (data.success) {
         // If tag filter is set, filter results client-side
         let filteredResults = data.data || []
@@ -112,9 +119,18 @@ function SearchContent() {
         setTotal(data.total)
         setPage(pageNum)
         setHasMore(data.has_more)
+      } else {
+        // On failure, ensure we show empty state with proper context
+        setResults([])
+        setTotal(0)
+        setHasMore(false)
       }
     } catch (err) {
       console.error('Search failed:', err)
+      // On network/parse error, show empty state
+      setResults([])
+      setTotal(0)
+      setHasMore(false)
     } finally {
       setLoading(false)
     }
