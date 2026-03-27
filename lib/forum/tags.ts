@@ -88,66 +88,75 @@ export function getTagColorClasses(tagIdOrName: string): {
   border: string
   activeBg: string
   activeText: string
+  ring: string
 } {
   const config = getTagConfig(tagIdOrName)
   const color = config?.color || 'gray'
 
-  const colorMap: Record<string, { bg: string; text: string; border: string; activeBg: string; activeText: string }> = {
+  const colorMap: Record<string, { bg: string; text: string; border: string; activeBg: string; activeText: string; ring: string }> = {
     blue: {
       bg: 'bg-blue-50 dark:bg-blue-900/30',
       text: 'text-blue-600 dark:text-blue-400',
       border: 'border-blue-200 dark:border-blue-800',
       activeBg: 'bg-blue-500 dark:bg-blue-600',
-      activeText: 'text-white'
+      activeText: 'text-white',
+      ring: 'ring-blue-500 dark:ring-blue-400'
     },
     purple: {
       bg: 'bg-purple-50 dark:bg-purple-900/30',
       text: 'text-purple-600 dark:text-purple-400',
       border: 'border-purple-200 dark:border-purple-800',
       activeBg: 'bg-purple-500 dark:bg-purple-600',
-      activeText: 'text-white'
+      activeText: 'text-white',
+      ring: 'ring-purple-500 dark:ring-purple-400'
     },
     green: {
       bg: 'bg-green-50 dark:bg-green-900/30',
       text: 'text-green-600 dark:text-green-400',
       border: 'border-green-200 dark:border-green-800',
       activeBg: 'bg-green-500 dark:bg-green-600',
-      activeText: 'text-white'
+      activeText: 'text-white',
+      ring: 'ring-green-500 dark:ring-green-400'
     },
     yellow: {
       bg: 'bg-yellow-50 dark:bg-yellow-900/30',
       text: 'text-yellow-600 dark:text-yellow-400',
       border: 'border-yellow-200 dark:border-yellow-800',
       activeBg: 'bg-yellow-500 dark:bg-yellow-600',
-      activeText: 'text-white'
+      activeText: 'text-white',
+      ring: 'ring-yellow-500 dark:ring-yellow-400'
     },
     orange: {
       bg: 'bg-orange-50 dark:bg-orange-900/30',
       text: 'text-orange-600 dark:text-orange-400',
       border: 'border-orange-200 dark:border-orange-800',
       activeBg: 'bg-orange-500 dark:bg-orange-600',
-      activeText: 'text-white'
+      activeText: 'text-white',
+      ring: 'ring-orange-500 dark:ring-orange-400'
     },
     cyan: {
       bg: 'bg-cyan-50 dark:bg-cyan-900/30',
       text: 'text-cyan-600 dark:text-cyan-400',
       border: 'border-cyan-200 dark:border-cyan-800',
       activeBg: 'bg-cyan-500 dark:bg-cyan-600',
-      activeText: 'text-white'
+      activeText: 'text-white',
+      ring: 'ring-cyan-500 dark:ring-cyan-400'
     },
     pink: {
       bg: 'bg-pink-50 dark:bg-pink-900/30',
       text: 'text-pink-600 dark:text-pink-400',
       border: 'border-pink-200 dark:border-pink-800',
       activeBg: 'bg-pink-500 dark:bg-pink-600',
-      activeText: 'text-white'
+      activeText: 'text-white',
+      ring: 'ring-pink-500 dark:ring-pink-400'
     },
     gray: {
       bg: 'bg-gray-50 dark:bg-gray-700',
       text: 'text-gray-600 dark:text-gray-400',
       border: 'border-gray-200 dark:border-gray-600',
       activeBg: 'bg-gray-500 dark:bg-gray-600',
-      activeText: 'text-white'
+      activeText: 'text-white',
+      ring: 'ring-gray-500 dark:ring-gray-400'
     }
   }
 

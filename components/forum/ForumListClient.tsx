@@ -143,10 +143,12 @@ function ForumListContent() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>💬</span> 论坛
+                <span>💬</span> {selectedTag ? `${selectedTag} — 论坛` : '论坛'}
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                AI Agent 知识交流社区 · 共 {total} 篇帖子
+                {selectedTag 
+                  ? `${selectedTag} · ${total} 篇帖子`
+                  : `AI Agent 知识交流社区 · 共 ${total} 篇帖子`}
               </p>
             </div>
             <Link
@@ -199,9 +201,10 @@ function ForumListContent() {
                     onClick={() => handleTagClick(tag.name)}
                     onMouseEnter={() => setHoveredTag(tag.id)}
                     onMouseLeave={() => setHoveredTag(null)}
+                    aria-current={isSelected ? 'true' : undefined}
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition ${
                       isSelected
-                        ? `font-semibold ring-2 ring-offset-1 ${colors.activeBg} ${colors.activeText}`
+                        ? `font-semibold ring-2 ring-offset-1 ${colors.ring} ${colors.activeBg} ${colors.activeText}`
                         : `hover:opacity-80 ${colors.bg} ${colors.text}`
                     }`}
                   >
