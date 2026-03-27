@@ -39,14 +39,15 @@ function SearchContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   
-  const [query, setQuery] = useState(searchParams.get('q') || '')
-  const [selectedTag, setSelectedTag] = useState(searchParams.get('tag') || '')
-  const [sort, setSort] = useState<'relevance' | 'new'>(searchParams.get('sort') as 'relevance' | 'new' || 'relevance')
+  const [query, setQuery] = useState('')
+  const [selectedTag, setSelectedTag] = useState('')
+  const [sort, setSort] = useState<'relevance' | 'new'>('relevance')
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
+  const [initialSearchDone, setInitialSearchDone] = useState(false)
   const limit = 20
   const resultsRef = useRef<SearchResult[]>([])
   resultsRef.current = results
@@ -65,26 +66,86 @@ function SearchContent() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Sync state with URL params
+  // Sync state with URL params and trigger initial search
   useEffect(() => {
     const q = searchParams.get('q') || ''
     const tag = searchParams.get('tag') || ''
-    const sortBy = searchParams.get('sort') as 'relevance' | 'new' || 'relevance'
+    const sortBy = (searchParams.get('sort') as 'relevance' | 'new') || 'relevance'
     
     setQuery(q)
     setSelectedTag(tag)
     setSort(sortBy)
-  }, [searchParams])
+    
+    // Trigger search on initial load if query exists
+    if (!initialSearchDone && q.trim().length >= 2) {
+      setInitialSearchDone(true)
+      // Use setTimeout to ensure state is updated before search
+      setTimeout(() => {
+        performSearchWithParams(q, tag, sortBy, 1)
+      }, 0)
+    }
+  }, [searchParams, initialSearchDone])
 
-  // Search when query changes
+  // Search when query/tag/sort changes (after initial load)
   useEffect(() => {
+    // Skip if initial search hasn't been processed yet
+    if (!initialSearchDone) return
+    
     if (query.trim().length >= 2) {
       performSearchRef.current(1)
     } else {
       setResults([])
       setTotal(0)
     }
-  }, [query, selectedTag, sort])
+  }, [query, selectedTag, sort, initialSearchDone])
+
+  // Perform search with explicit params (for initial load)
+  const performSearchWithParams = async (searchQuery: string, tag: string, sortBy: string, pageNum: number) => {
+    if (searchQuery.trim().length < 2) return
+    
+    setLoading(true)
+    if (pageNum === 1) {
+      setResults([])
+      setTotal(0)
+    }
+    
+    try {
+      const params = new URLSearchParams()
+      params.set('q', searchQuery.trim())
+      params.set('sort', sortBy)
+      params.set('page', String(pageNum))
+      params.set('limit', String(limit))
+      
+      const res = await fetch(`/api/forum/search?${params.toString()}`)
+      const json: SearchResponse = await res.json()
+      
+      if (!res.ok || !json.success) {
+        setResults([])
+        setTotal(0)
+        setHasMore(false)
+        return
+      }
+      
+      let filteredResults = Array.isArray(json.data) ? json.data : []
+      if (tag) {
+        filteredResults = filteredResults.filter(post => 
+          post.tags && post.tags.includes(tag)
+        )
+      }
+      
+      setResults(filteredResults)
+      setTotal(typeof json.total === 'number' ? json.total : 0)
+      setPage(pageNum)
+      setHasMore(json.has_more || false)
+    } catch (err) {
+      console.error('Search failed:', err)
+      setResults([])
+      setTotal(0)
+      setHasMore(false)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const performSearch = async (pageNum: number) => {
     if (query.trim().length < 2) return
