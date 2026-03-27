@@ -13,7 +13,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   if (!post) {
     return {
-      title: '帖子不存在 - AgentDex'
+      title: '404 - 页面未找到 | AgentDex',
+      robots: 'noindex',
     }
   }
   
