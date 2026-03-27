@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
+import { PRESET_TAGS, getTagColorClasses, type TagConfig } from '@/lib/forum/tags'
 
 interface Post {
   id: string
@@ -22,6 +22,14 @@ interface Post {
     avatar_url: string | null
   }
 }
+
+// 话题建议
+const TOPIC_SUGGESTIONS = [
+  { icon: '🔧', title: '分享一个好用的 AI 工具', tag: '工具推荐' },
+  { icon: '💡', title: '讨论 Agent 架构设计方案', tag: '技术讨论' },
+  { icon: '🚀', title: '展示你的 AI 项目', tag: '项目展示' },
+  { icon: '❓', title: '提问遇到的开发难题', tag: '问答求助' },
+]
 
 export default function ForumHomeClient() {
   const [hotPosts, setHotPosts] = useState<Post[]>([])
@@ -50,14 +58,12 @@ export default function ForumHomeClient() {
   async function fetchPosts() {
     setLoading(true)
     try {
-      // 获取热门帖子
       const hotRes = await fetch('/api/forum/posts?sort=hot&limit=5')
       if (hotRes.ok) {
         const data = await hotRes.json()
         setHotPosts(data.data || [])
       }
       
-      // 获取最新帖子
       const newRes = await fetch('/api/forum/posts?sort=new&limit=10')
       if (newRes.ok) {
         const data = await newRes.json()
@@ -71,6 +77,7 @@ export default function ForumHomeClient() {
   }
 
   const displayPosts = activeTab === 'hot' ? hotPosts : newPosts
+  const isEmpty = !loading && displayPosts.length === 0
 
   return (
     <div className="min-h-screen">
@@ -106,21 +113,26 @@ export default function ForumHomeClient() {
         </div>
       </section>
 
-      {/* Tag Cloud */}
-      <section className="py-6 border-b border-gray-100 dark:border-gray-800">
+      {/* Tags with Descriptions */}
+      <section className="py-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-500 dark:text-gray-400">热门标签：</span>
-            {PRESET_TAGS.slice(0, 7).map(tag => {
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">话题分类</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+            {PRESET_TAGS.slice(0, 7).map((tag: TagConfig) => {
               const colors = getTagColorClasses(tag.id)
               return (
                 <Link
                   key={tag.id}
                   href={`/forum?tag=${encodeURIComponent(tag.name)}`}
-                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition ${colors.bg} ${colors.text} hover:opacity-80`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${colors.bg} ${colors.text} hover:ring-2 hover:ring-offset-1`}
                 >
-                  <span>{tag.icon}</span>
-                  <span>{tag.name}</span>
+                  <span className="text-lg">{tag.icon}</span>
+                  <div className="text-left">
+                    <div className="font-medium text-sm">{tag.name}</div>
+                    <div className="text-xs opacity-70 line-clamp-1">{tag.description}</div>
+                  </div>
                 </Link>
               )
             })}
@@ -155,7 +167,7 @@ export default function ForumHomeClient() {
             </button>
           </div>
 
-          {/* Posts List */}
+          {/* Posts List or Empty State */}
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3, 4, 5].map(i => (
@@ -165,15 +177,44 @@ export default function ForumHomeClient() {
                 </div>
               ))}
             </div>
-          ) : displayPosts.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-gray-400 dark:text-gray-500 mb-4">暂无帖子</div>
+          ) : isEmpty ? (
+            /* Empty State with Guidance */
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
+              <div className="text-6xl mb-4">🌱</div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                社区刚起步，等待你的声音
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                这里是一个全新的社区，你的每一次分享都将帮助塑造这里的氛围。成为第一个发帖的人吧！
+              </p>
+              
+              {/* Topic Suggestions */}
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6 text-left">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-3 text-center">💡 不知道发什么？试试这些话题：</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {TOPIC_SUGGESTIONS.map((suggestion, i) => (
+                    <Link
+                      key={i}
+                      href={`/forum/new?tag=${encodeURIComponent(suggestion.tag)}`}
+                      className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 transition text-sm"
+                    >
+                      <span className="text-lg">{suggestion.icon}</span>
+                      <span className="text-gray-700 dark:text-gray-300">{suggestion.title}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
               <Link
                 href="/forum/new"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition shadow-lg"
               >
-                发布第一篇帖子
+                <span>✍️</span>
+                <span>发布第一篇帖子</span>
               </Link>
+              <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
+                需要登录才能发帖 · 登录时自动创建账号
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
