@@ -1,0 +1,409 @@
+'use client'
+
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import PostCard from '@/components/forum/PostCard'
+import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
+
+interface SearchResult {
+  id: string
+  title: string
+  content: string
+  content_snippet?: string
+  title_highlighted?: string
+  tags: string[]
+  likes_count: number
+  comments_count: number
+  views_count: number
+  created_at: string
+  author: {
+    id: string
+    name: string
+    platform: string
+    avatar_url: string | null
+  }
+}
+
+interface SearchResponse {
+  success: boolean
+  query?: string
+  data: SearchResult[]
+  total: number
+  page: number
+  limit: number
+  has_more: boolean
+  error?: string
+}
+
+function SearchContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  
+  const [query, setQuery] = useState(searchParams.get('q') || '')
+  const [selectedTag, setSelectedTag] = useState(searchParams.get('tag') || '')
+  const [sort, setSort] = useState<'relevance' | 'new'>(searchParams.get('sort') as 'relevance' | 'new' || 'relevance')
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [loading, setLoading] = useState(false)
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+  const limit = 20
+
+  // Keyboard shortcut: '/' to focus search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Only trigger if not already focused on input
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault()
+        document.getElementById('search-input')?.focus()
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Sync state with URL params
+  useEffect(() => {
+    const q = searchParams.get('q') || ''
+    const tag = searchParams.get('tag') || ''
+    const sortBy = searchParams.get('sort') as 'relevance' | 'new' || 'relevance'
+    
+    setQuery(q)
+    setSelectedTag(tag)
+    setSort(sortBy)
+  }, [searchParams])
+
+  // Search when query changes
+  useEffect(() => {
+    if (query.trim().length >= 2) {
+      performSearch(1)
+    } else {
+      setResults([])
+      setTotal(0)
+    }
+  }, [query, selectedTag, sort])
+
+  const performSearch = async (pageNum: number) => {
+    if (query.trim().length < 2) return
+    
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      params.set('q', query.trim())
+      params.set('sort', sort)
+      params.set('page', String(pageNum))
+      params.set('limit', String(limit))
+      
+      const res = await fetch(`/api/forum/search?${params.toString()}`)
+      const data: SearchResponse = await res.json()
+      
+      if (data.success) {
+        // If tag filter is set, filter results client-side
+        let filteredResults = data.data || []
+        if (selectedTag) {
+          filteredResults = filteredResults.filter(post => 
+            post.tags && post.tags.includes(selectedTag)
+          )
+        }
+        
+        setResults(pageNum === 1 ? filteredResults : [...results, ...filteredResults])
+        setTotal(data.total)
+        setPage(pageNum)
+        setHasMore(data.has_more)
+      }
+    } catch (err) {
+      console.error('Search failed:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (query.trim().length >= 2) {
+      updateUrl(query, selectedTag, sort)
+      performSearch(1)
+    }
+  }
+
+  const handleTagClick = (tag: string) => {
+    const newTag = selectedTag === tag ? '' : tag
+    setSelectedTag(newTag)
+    updateUrl(query, newTag, sort)
+  }
+
+  const handleSortChange = (newSort: 'relevance' | 'new') => {
+    setSort(newSort)
+    updateUrl(query, selectedTag, newSort)
+  }
+
+  const updateUrl = (q: string, tag: string, sortBy: string) => {
+    const params = new URLSearchParams()
+    if (q) params.set('q', q)
+    if (tag) params.set('tag', tag)
+    if (sortBy !== 'relevance') params.set('sort', sortBy)
+    
+    const queryString = params.toString()
+    router.push(queryString ? `/forum/search?${queryString}` : '/forum/search')
+  }
+
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      performSearch(page + 1)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-5xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/forum" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+              ← 返回论坛
+            </Link>
+          </div>
+          
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+            <span>🔍</span> 搜索
+          </h1>
+          
+          {/* Search Form */}
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                id="search-input"
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="搜索帖子... (按 / 快速聚焦)"
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-block px-2 py-0.5 text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-600 rounded">
+                /
+              </kbd>
+            </div>
+            <button
+              type="submit"
+              disabled={query.trim().length < 2}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition"
+            >
+              搜索
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Filters */}
+      {query.trim().length >= 2 && (
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-5xl mx-auto px-4 py-3">
+            {/* Tag Filter */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="text-sm text-gray-500 dark:text-gray-400 mr-2">标签：</span>
+              {PRESET_TAGS.map(tag => {
+                const colors = getTagColorClasses(tag.id)
+                const isSelected = selectedTag === tag.name
+                return (
+                  <button
+                    key={tag.id}
+                    onClick={() => handleTagClick(tag.name)}
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition ${
+                      isSelected
+                        ? 'ring-2 ring-blue-500 ring-offset-1'
+                        : 'hover:opacity-80'
+                    } ${colors.bg} ${colors.text}`}
+                  >
+                    <span>{tag.icon}</span>
+                    <span>{tag.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+            
+            {/* Sort Options */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-500 dark:text-gray-400">排序：</span>
+              <button
+                onClick={() => handleSortChange('relevance')}
+                className={`text-sm font-medium transition ${
+                  sort === 'relevance'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                相关性
+              </button>
+              <button
+                onClick={() => handleSortChange('new')}
+                className={`text-sm font-medium transition ${
+                  sort === 'new'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                最新
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        {/* Query too short hint */}
+        {query.trim().length > 0 && query.trim().length < 2 && (
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            请输入至少 2 个字符进行搜索
+          </div>
+        )}
+
+        {/* Loading */}
+        {loading && results.length === 0 && (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 animate-pulse">
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* No query yet */}
+        {!loading && query.trim().length < 2 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+            <div className="text-5xl mb-4">🔎</div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              搜索论坛内容
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
+              输入关键词搜索帖子标题和内容
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {PRESET_TAGS.slice(0, 5).map(tag => (
+                <button
+                  key={tag.id}
+                  onClick={() => {
+                    setQuery(tag.name)
+                    updateUrl(tag.name, '', sort)
+                  }}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition hover:opacity-80 ${getTagColorClasses(tag.id).bg} ${getTagColorClasses(tag.id).text}`}
+                >
+                  <span>{tag.icon}</span>
+                  <span>{tag.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Results */}
+        {!loading && results.length > 0 && (
+          <>
+            <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+              找到 <span className="font-medium text-gray-900 dark:text-white">{total}</span> 条结果
+              {query && <span> for "<span className="text-gray-900 dark:text-white">{query}</span>"</span>}
+            </div>
+            
+            <div className="space-y-3">
+              {results.map((post) => (
+                <article
+                  key={post.id}
+                  className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:border-gray-300 dark:hover:border-gray-600 transition"
+                >
+                  <Link href={`/forum/post/${post.id}`}>
+                    <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2">
+                      {post.title}
+                    </h2>
+                  </Link>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                    {post.content_snippet || post.content}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center gap-1">
+                        👤 {post.author?.name || 'Anonymous'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        ❤️ {post.likes_count}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        💬 {post.comments_count}
+                      </span>
+                    </div>
+                    <time className="text-xs text-gray-400 dark:text-gray-500">
+                      {new Date(post.created_at).toLocaleDateString('zh-CN')}
+                    </time>
+                  </div>
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex gap-1.5 mt-3 flex-wrap">
+                      {post.tags.slice(0, 3).map((t, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleTagClick(t)}
+                          className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+
+            {/* Load More */}
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={loadMore}
+                  disabled={loading}
+                  className="px-6 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition"
+                >
+                  {loading ? '加载中...' : '加载更多'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* No results */}
+        {!loading && query.trim().length >= 2 && results.length === 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+            <div className="text-5xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              没有找到结果
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
+              没有找到 "<span className="text-gray-900 dark:text-white">{query}</span>" 相关的帖子
+            </p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
+              尝试不同的关键词或浏览所有帖子
+            </p>
+            <Link
+              href="/forum"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
+            >
+              浏览论坛
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function SearchClient() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-400">加载中...</div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
+  )
+}

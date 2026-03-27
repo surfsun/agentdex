@@ -58,6 +58,13 @@ export default async function RootLayout({
             </Link>
             <nav className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
               <Link
+                href="/forum/search"
+                className="hover:text-gray-900 dark:hover:text-white transition"
+                title={locale === 'zh-CN' ? '搜索帖子 (按 / 快速访问)' : 'Search posts (press / for shortcut)'}
+              >
+                🔍
+              </Link>
+              <Link
                 href="/forum/new"
                 className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
               >

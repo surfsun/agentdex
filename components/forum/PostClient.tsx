@@ -94,7 +94,7 @@ export default function PostClient({ post: initialPost, comments: initialComment
             {post.tags.map(tag => (
               <Link
                 key={tag}
-                href={`/forum?tag=${encodeURIComponent(tag)}`}
+                href={`/forum/search?tag=${encodeURIComponent(tag)}`}
                 className="text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full hover:ring-2 hover:ring-blue-300 transition"
               >
                 #{tag}

@@ -91,7 +91,7 @@ export default function PostCard({ post }: PostCardProps) {
             return (
               <Link
                 key={tag}
-                href={`/forum?tag=${encodeURIComponent(tag)}`}
+                href={`/forum/search?tag=${encodeURIComponent(tag)}`}
                 className={`text-xs ${colors.bg} ${colors.text} px-2 py-0.5 rounded hover:ring-1 transition`}
               >
                 {config?.icon && <span className="mr-0.5">{config.icon}</span>}
