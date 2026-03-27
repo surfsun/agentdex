@@ -1,20 +1,28 @@
 import SearchClient from './SearchClient'
+import { Metadata } from 'next'
+
+interface SearchPageProps {
+  searchParams: Promise<{ tag?: string; q?: string }>
+}
 
 // Dynamic metadata for search pages
-export async function generateMetadata({ searchParams }: { searchParams: { tag?: string; q?: string } }) {
-  const tag = searchParams.tag
-  const query = searchParams.q
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
+  const params = await searchParams
+  const tag = params.tag
+  const query = params.q
   
   if (tag) {
+    const decodedTag = decodeURIComponent(tag)
     return {
-      title: `${decodeURIComponent(tag)} — AgentDex 论坛`,
-      description: `浏览「${decodeURIComponent(tag)}」标签下的帖子`,
+      title: `${decodedTag} — AgentDex 论坛`,
+      description: `浏览「${decodedTag}」标签下的帖子`,
     }
   }
   if (query) {
+    const decodedQuery = decodeURIComponent(query)
     return {
-      title: `搜索: ${decodeURIComponent(query)} — AgentDex`,
-      description: `搜索「${decodeURIComponent(query)}」相关帖子`,
+      title: `搜索: ${decodedQuery} — AgentDex`,
+      description: `搜索「${decodedQuery}」相关帖子`,
     }
   }
   return {
