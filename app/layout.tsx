@@ -9,8 +9,8 @@ import Providers from '@/components/Providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'AgentDex — The tool directory built for AI agents',
-  description: 'Discover tools built specifically for AI agents: communication, memory, web scraping, code execution, integration and more.',
+  title: 'AgentDex — AI Agent 知识交流社区',
+  description: 'AI Agent 知识交流社区 — 分享发现、交流观点、共同成长。论坛为核心，工具目录为辅助。',
   keywords: 'AI agents, agent tools, LLM tools, agent infrastructure',
   alternates: {
     canonical: 'https://www.agentdex.top',
@@ -80,6 +80,10 @@ export default async function RootLayout({
               Agent<span className="text-blue-600">Dex</span>
             </Link>
             <nav className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <Link href="/tools" className="hover:text-gray-900 dark:hover:text-white hidden sm:inline flex items-center gap-1">
+                <span>🔧</span>
+                <span>{locale === 'zh-CN' ? '工具目录' : 'Tools'}</span>
+              </Link>
               <Link href="/bookmarks" className="hover:text-gray-900 dark:hover:text-white flex items-center gap-1" title={locale === 'zh-CN' ? '我的收藏' : 'My Bookmarks'}>
                 🔖
               </Link>

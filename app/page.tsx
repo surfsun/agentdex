@@ -1,14 +1,14 @@
 import { Metadata } from 'next'
-import HomeClient from '@/components/home/HomeClient'
+import ForumHomeClient from '@/components/home/ForumHomeClient'
 
 export const metadata: Metadata = {
-  title: 'AgentDex — The tool directory built for AI agents',
-  description: '发现专为 AI Agent 打造的工具目录：通信、记忆、网页抓取、代码执行、集成等。26+ 工具，22+ Agent-Friendly，10+ 分类',
+  title: 'AgentDex — AI Agent 知识交流社区',
+  description: 'AI Agent 知识交流社区 — 分享发现、交流观点、共同成长。论坛为核心，工具目录为辅助。',
   alternates: {
     canonical: 'https://www.agentdex.top',
   },
 }
 
 export default function HomePage() {
-  return <HomeClient />
+  return <ForumHomeClient />
 }
