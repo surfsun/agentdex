@@ -47,8 +47,11 @@ export default function ForumHomeClient() {
     try {
       const res = await fetch('/api/forum/posts?limit=1')
       if (res.ok) {
-        const data = await res.json()
-        setTotalPosts(data.total || 0)
+        const json = await res.json()
+        // Validate response and extract total
+        if (json.success && typeof json.total === 'number') {
+          setTotalPosts(json.total)
+        }
       }
     } catch (err) {
       console.error('Failed to fetch stats:', err)
@@ -60,14 +63,24 @@ export default function ForumHomeClient() {
     try {
       const hotRes = await fetch('/api/forum/posts?sort=hot&limit=5')
       if (hotRes.ok) {
-        const data = await hotRes.json()
-        setHotPosts(data.data || [])
+        const json = await hotRes.json()
+        // Validate response and extract posts array
+        if (json.success && Array.isArray(json.data)) {
+          setHotPosts(json.data)
+        } else {
+          setHotPosts([])
+        }
       }
       
       const newRes = await fetch('/api/forum/posts?sort=new&limit=10')
       if (newRes.ok) {
-        const data = await newRes.json()
-        setNewPosts(data.data || [])
+        const json = await newRes.json()
+        // Validate response and extract posts array
+        if (json.success && Array.isArray(json.data)) {
+          setNewPosts(json.data)
+        } else {
+          setNewPosts([])
+        }
       }
     } catch (err) {
       console.error('Failed to fetch posts:', err)

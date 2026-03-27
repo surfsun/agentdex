@@ -71,8 +71,18 @@ function ForumListContent() {
       const res = await fetch(`/api/forum/posts?${params.toString()}`)
       const json = await res.json()
       
+      // Check for HTTP errors first
       if (!res.ok) {
         console.error('[ForumList] API error:', json)
+        setError(json.error || 'Failed to load posts')
+        setPosts([])
+        setTotal(0)
+        return
+      }
+      
+      // Validate response structure and success flag
+      if (!json.success) {
+        console.error('[ForumList] API returned failure:', json)
         setError(json.error || 'Failed to load posts')
         setPosts([])
         setTotal(0)
@@ -86,10 +96,12 @@ function ForumListContent() {
         total: json.total 
       })
       
-      // Handle both {data: [...]} and {posts: [...]} response structures
-      const postsArray = json.data || json.posts || []
+      // Extract posts array - handle both {data: [...]} and {posts: [...]} response structures
+      const postsArray = Array.isArray(json.data) ? json.data : (Array.isArray(json.posts) ? json.posts : [])
+      const totalCount = typeof json.total === 'number' ? json.total : 0
+      
       setPosts(postsArray)
-      setTotal(json.total || 0)
+      setTotal(totalCount)
     } catch (err) {
       console.error('[ForumList] Failed to fetch posts:', err)
       setError(err instanceof Error ? err.message : 'Network error')

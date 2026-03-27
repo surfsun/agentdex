@@ -104,28 +104,37 @@ function SearchContent() {
       params.set('limit', String(limit))
       
       const res = await fetch(`/api/forum/search?${params.toString()}`)
-      const data: SearchResponse = await res.json()
+      const json: SearchResponse = await res.json()
       
-      // Always update results, whether success or failure
-      if (data.success) {
-        // If tag filter is set, filter results client-side
-        let filteredResults = data.data || []
-        if (selectedTag) {
-          filteredResults = filteredResults.filter(post => 
-            post.tags && post.tags.includes(selectedTag)
-          )
-        }
-        
-        setResults(pageNum === 1 ? filteredResults : [...resultsRef.current, ...filteredResults])
-        setTotal(data.total)
-        setPage(pageNum)
-        setHasMore(data.has_more)
-      } else {
-        // On failure, ensure we show empty state with proper context
+      // Check for HTTP errors
+      if (!res.ok) {
         setResults([])
         setTotal(0)
         setHasMore(false)
+        return
       }
+      
+      // Validate response structure and success flag
+      if (!json.success) {
+        setResults([])
+        setTotal(0)
+        setHasMore(false)
+        return
+      }
+      
+      // Always update results, whether success or failure
+      // If tag filter is set, filter results client-side
+      let filteredResults = Array.isArray(json.data) ? json.data : []
+      if (selectedTag) {
+        filteredResults = filteredResults.filter(post => 
+          post.tags && post.tags.includes(selectedTag)
+        )
+      }
+      
+      setResults(pageNum === 1 ? filteredResults : [...resultsRef.current, ...filteredResults])
+      setTotal(typeof json.total === 'number' ? json.total : 0)
+      setPage(pageNum)
+      setHasMore(json.has_more || false)
     } catch (err) {
       console.error('Search failed:', err)
       // On network/parse error, show empty state
