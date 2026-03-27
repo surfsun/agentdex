@@ -66,6 +66,9 @@ function SearchContent() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  // Track if we've already performed a search with the current URL params
+  const lastSearchParamsRef = useRef<string>('')
+
   // Sync state with URL params and trigger initial search
   useEffect(() => {
     const q = searchParams.get('q') || ''
@@ -76,15 +79,20 @@ function SearchContent() {
     setSelectedTag(tag)
     setSort(sortBy)
     
-    // Trigger search on initial load if query exists (>=2 chars) OR tag exists
-    if (!initialSearchDone && (q.trim().length >= 2 || tag.trim().length > 0)) {
+    // Create a unique key for the current search params
+    const paramsKey = `${q}|${tag}|${sortBy}`
+    
+    // Trigger search if we have valid params AND we haven't searched with these params yet
+    const hasQuery = q.trim().length >= 2
+    const hasTag = tag.trim().length > 0
+    
+    if ((hasQuery || hasTag) && lastSearchParamsRef.current !== paramsKey) {
+      lastSearchParamsRef.current = paramsKey
       setInitialSearchDone(true)
-      // Use setTimeout to ensure state is updated before search
-      setTimeout(() => {
-        performSearchWithParams(q, tag, sortBy, 1)
-      }, 0)
+      // Directly call search with URL params (no setTimeout needed)
+      performSearchWithParams(q, tag, sortBy, 1)
     }
-  }, [searchParams, initialSearchDone])
+  }, [searchParams])
 
   // Search when query/tag/sort changes (after initial load)
   useEffect(() => {

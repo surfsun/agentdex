@@ -201,9 +201,9 @@ function ForumListContent() {
                     onMouseLeave={() => setHoveredTag(null)}
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition ${
                       isSelected
-                        ? 'ring-2 ring-blue-500 ring-offset-1'
-                        : 'hover:opacity-80'
-                    } ${colors.bg} ${colors.text}`}
+                        ? `font-semibold ring-2 ring-offset-1 ${colors.activeBg} ${colors.activeText}`
+                        : `hover:opacity-80 ${colors.bg} ${colors.text}`
+                    }`}
                   >
                     <span>{tag.icon}</span>
                     <span>{tag.name}</span>
