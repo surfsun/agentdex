@@ -4,6 +4,8 @@
     "description": "Discover tools built specifically for AI agents: communication, memory, web scraping, code execution, integration and more."
   },
   "nav": {
+    "tools": "Tools",
+    "forum": "Forum",
     "forAgents": "For Agents",
     "eval": "Eval",
     "api": "API",

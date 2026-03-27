@@ -80,9 +80,11 @@ export default async function RootLayout({
               Agent<span className="text-blue-600">Dex</span>
             </Link>
             <nav className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <Link href="/tools" className="hover:text-gray-900 dark:hover:text-white hidden sm:inline flex items-center gap-1">
-                <span>🔧</span>
-                <span>{locale === 'zh-CN' ? '工具目录' : 'Tools'}</span>
+              <Link href="/tools" className="hover:text-gray-900 dark:hover:text-white hidden sm:inline">
+                {t.nav.tools}
+              </Link>
+              <Link href="/forum" className="hover:text-gray-900 dark:hover:text-white hidden sm:inline">
+                {t.nav.forum}
               </Link>
               <Link href="/bookmarks" className="hover:text-gray-900 dark:hover:text-white flex items-center gap-1" title={locale === 'zh-CN' ? '我的收藏' : 'My Bookmarks'}>
                 🔖

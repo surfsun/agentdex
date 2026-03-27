@@ -4,6 +4,8 @@
     "description": "发现专为 AI Agent 打造的工具：通信、记忆、网页抓取、代码执行、集成等。"
   },
   "nav": {
+    "tools": "工具目录",
+    "forum": "论坛",
     "forAgents": "For Agents",
     "eval": "评测",
     "api": "API",
