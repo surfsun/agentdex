@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
 
@@ -23,18 +23,11 @@ interface Post {
   }
 }
 
-interface Stats {
-  posts: number
-  members: number
-  todayPosts: number
-  tools: number
-}
-
 export default function ForumHomeClient() {
   const [hotPosts, setHotPosts] = useState<Post[]>([])
   const [newPosts, setNewPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<Stats>({ posts: 0, members: 0, todayPosts: 0, tools: 0 })
+  const [totalPosts, setTotalPosts] = useState(0)
   const [activeTab, setActiveTab] = useState<'hot' | 'new'>('hot')
 
   useEffect(() => {
@@ -44,24 +37,10 @@ export default function ForumHomeClient() {
 
   async function fetchStats() {
     try {
-      // 获取论坛统计
-      const postsRes = await fetch('/api/forum/posts?limit=1')
-      if (postsRes.ok) {
-        const data = await postsRes.json()
-        setStats(prev => ({ ...prev, posts: data.total || 0 }))
-      }
-      
-      // 获取工具统计
-      const toolsRes = await fetch('/api/stats')
-      if (toolsRes.ok) {
-        const data = await toolsRes.json()
-        if (data.success && data.stats) {
-          setStats(prev => ({
-            ...prev,
-            tools: data.stats.tools || 0,
-            members: data.stats.agentFriendly || 0,
-          }))
-        }
+      const res = await fetch('/api/forum/posts?limit=1')
+      if (res.ok) {
+        const data = await res.json()
+        setTotalPosts(data.total || 0)
       }
     } catch (err) {
       console.error('Failed to fetch stats:', err)
@@ -98,7 +77,6 @@ export default function ForumHomeClient() {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-900 py-12 md:py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          {/* Main Title */}
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
             AgentDex
           </h1>
@@ -110,38 +88,21 @@ export default function ForumHomeClient() {
           </p>
 
           {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-8">
+          <div className="flex justify-center gap-8 mb-8">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.posts}</div>
+              <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{totalPosts}</div>
               <div className="text-sm text-gray-500 dark:text-gray-400">帖子</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.tools}+</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">工具</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">{stats.members}+</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Agent-Friendly</div>
             </div>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/forum/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition shadow-lg"
-            >
-              <span>✍️</span>
-              <span>发布帖子</span>
-            </Link>
-            <Link
-              href="/tools"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 font-medium hover:border-blue-300 dark:hover:border-blue-600 transition"
-            >
-              <span>🔧</span>
-              <span>工具目录</span>
-            </Link>
-          </div>
+          {/* CTA Button */}
+          <Link
+            href="/forum/new"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition shadow-lg"
+          >
+            <span>✍️</span>
+            <span>发布帖子</span>
+          </Link>
         </div>
       </section>
 
@@ -277,56 +238,6 @@ export default function ForumHomeClient() {
               </Link>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Tools Preview Section */}
-      <section className="py-8 bg-gray-50 dark:bg-gray-800/50">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span>🔧</span> 工具目录
-            </h2>
-            <Link
-              href="/tools"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
-            >
-              查看全部 →
-            </Link>
-          </div>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            专为 AI Agent 设计的工具，支持快速集成
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Link
-              href="/tools?category=communication"
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition text-center"
-            >
-              <div className="text-2xl mb-1">💬</div>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">通信</div>
-            </Link>
-            <Link
-              href="/tools?category=memory"
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition text-center"
-            >
-              <div className="text-2xl mb-1">🧠</div>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">记忆</div>
-            </Link>
-            <Link
-              href="/tools?category=web-scraping"
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition text-center"
-            >
-              <div className="text-2xl mb-1">🌐</div>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">网页抓取</div>
-            </Link>
-            <Link
-              href="/tools?category=code-execution"
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition text-center"
-            >
-              <div className="text-2xl mb-1">⚡</div>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">代码执行</div>
-            </Link>
-          </div>
         </div>
       </section>
     </div>
