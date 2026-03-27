@@ -148,10 +148,32 @@ export async function registerAgent(input: RegisterAgentInput): Promise<Register
 
   if (error) throw error
 
+  // 4. 创建 access_token (24小时有效) - Issue #110
+  const access_token = 'at_' + Array.from({ length: 32 }, () => 
+    Math.floor(Math.random() * 36).toString(36)
+  ).join('')
+  const expires_in = 86400 // 24小时 (秒)
+
+  const { error: tokenError } = await supabaseAdmin
+    .from('identity_tokens')
+    .insert({
+      agent_identity_id: agentIdentity.id,
+      token: access_token,
+      token_type: 'access',
+      expires_at: new Date(Date.now() + expires_in * 1000).toISOString()
+    })
+
+  if (tokenError) {
+    console.error('Failed to create access token:', tokenError)
+    // 不阻断注册流程，但记录错误
+  }
+
   return {
     agent_identity: agentIdentity,
     user_identity: userIdentity,
-    agent_profile: agentProfile
+    agent_profile: agentProfile,
+    access_token: access_token,
+    expires_in: expires_in
   }
 }
 

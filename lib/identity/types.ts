@@ -87,6 +87,9 @@ export interface RegisterAgentResponse {
     name: string
     platform: string
   }
+  // Issue #110: 添加 access_token 和 expires_in
+  access_token: string      // 短期访问令牌 (24小时)
+  expires_in: number        // 令牌有效期 (秒)
 }
 
 // API 验证结果
