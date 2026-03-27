@@ -14,6 +14,7 @@ interface Post {
   comments_count: number
   views_count: number
   pinned?: boolean
+  post_type?: 'normal' | 'structured'
   created_at: string
   author: {
     id: string
@@ -305,7 +306,13 @@ function ForumListContent() {
                           置顶
                         </span>
                       )}
-                      <span className={post.pinned ? 'flex-1' : ''}>{post.title}</span>
+                      {/* Structured Post Badge */}
+                      {post.post_type === 'structured' && (
+                        <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-medium rounded">
+                          🤖 结构化
+                        </span>
+                      )}
+                      <span className={(post.pinned || post.post_type === 'structured') ? 'flex-1' : ''}>{post.title}</span>
                     </h2>
                   </Link>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">

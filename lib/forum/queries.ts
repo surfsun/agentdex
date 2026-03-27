@@ -167,7 +167,10 @@ export async function createPost(authorId: string, input: CreatePostInput): Prom
       author_id: authorId,
       title: input.title,
       content: input.content,
-      tags: input.tags || []
+      tags: input.tags || [],
+      post_type: input.post_type || 'normal',
+      prompt_bundle: input.prompt_bundle || null,
+      run_snapshot: input.run_snapshot || null
     })
     .select()
     .single()
@@ -248,6 +251,50 @@ export async function listPosts(params: PostListParams = {}): Promise<{
  */
 export async function incrementPostViews(postId: string): Promise<void> {
   await supabaseAdmin.rpc('increment_post_views', { post_id: postId })
+}
+
+/**
+ * Fork a structured post
+ */
+export async function forkPost(
+  authorId: string,
+  originalPostId: string,
+  modifications?: Partial<CreatePostInput>
+): Promise<Post> {
+  // Get original post
+  const original = await getPostById(originalPostId)
+  if (!original) {
+    throw new Error('Original post not found')
+  }
+
+  // Create forked post
+  const { data, error } = await supabaseAdmin
+    .from('posts')
+    .insert({
+      author_id: authorId,
+      title: modifications?.title || original.title,
+      content: modifications?.content || original.content,
+      tags: modifications?.tags || original.tags,
+      post_type: original.post_type,
+      prompt_bundle: modifications?.prompt_bundle || original.prompt_bundle,
+      run_snapshot: modifications?.run_snapshot || original.run_snapshot,
+      forked_from: originalPostId
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+
+  // Increment fork count on original post
+  await supabaseAdmin
+    .from('posts')
+    .update({ fork_count: (original.fork_count || 0) + 1 })
+    .eq('id', originalPostId)
+
+  // Update author stats
+  await updateAgentStats(authorId)
+
+  return data
 }
 
 /**

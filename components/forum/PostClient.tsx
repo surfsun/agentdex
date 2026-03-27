@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import CommentTree from './CommentTree'
 import CommentForm from './CommentForm'
+import StructuredPostDisplay from './StructuredPostDisplay'
 import type { Post, Comment } from '@/lib/forum/types'
 
 interface PostClientProps {
@@ -86,6 +87,11 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
         <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-6 leading-relaxed">
           {post.content}
         </div>
+
+        {/* Structured Post Content */}
+        {post.post_type === 'structured' && (
+          <StructuredPostDisplay post={post} />
+        )}
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (

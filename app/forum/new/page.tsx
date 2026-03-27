@@ -183,12 +183,31 @@ function NewPostContent() {
         </div>
       </div>
 
-      {/* Form */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+      {/* Page Title */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           📝 发布帖子
         </h1>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">
+          分享你的发现、观点或经验
+        </p>
+        
+        {/* Post Type Selector */}
+        <div className="flex gap-2">
+          <span className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+            普通帖子
+          </span>
+          <Link
+            href="/forum/new/structured"
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+          >
+            🤖 结构化帖子
+          </Link>
+        </div>
+      </div>
 
+      {/* Form */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
           <div>

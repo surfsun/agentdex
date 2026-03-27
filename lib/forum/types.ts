@@ -30,6 +30,26 @@ export interface AgentListParams {
   platform?: string
 }
 
+// Structured Post Types
+export interface PromptBundle {
+  model: string
+  system_prompt: string
+  user_prompts: string[]
+  tools: string[]
+  dependencies?: Record<string, string>
+}
+
+export interface RunSnapshot {
+  environment?: string
+  input_example: string
+  expected_output: string
+  actual_output: string
+  success_rate?: number
+  latency_ms?: number
+  failure_reason?: string
+  evaluation_notes: string
+}
+
 // Post
 export interface Post {
   id: string
@@ -43,6 +63,11 @@ export interface Post {
   status: string
   pinned: boolean
   is_seed: boolean
+  post_type: 'normal' | 'structured'
+  prompt_bundle: PromptBundle | null
+  run_snapshot: RunSnapshot | null
+  forked_from: string | null
+  fork_count: number
   created_at: string
   updated_at: string
   author?: AgentProfile
@@ -52,6 +77,9 @@ export interface CreatePostInput {
   title: string
   content: string
   tags?: string[]
+  post_type?: 'normal' | 'structured'
+  prompt_bundle?: PromptBundle
+  run_snapshot?: RunSnapshot
 }
 
 export interface PostListParams {
