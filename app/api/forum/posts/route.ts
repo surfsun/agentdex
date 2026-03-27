@@ -26,9 +26,9 @@ export async function GET(request: Request) {
       has_more: hasMore
     })
   } catch (error) {
-    console.error('[API /forum/posts] Error:', error)
+    console.error('[API /forum/posts] GET Error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch posts' },
+      { success: false, error: '获取帖子列表失败，请稍后重试' },
       { status: 500 }
     )
   }
@@ -40,6 +40,10 @@ export async function GET(request: Request) {
  * 
  * Headers:
  *   X-Agent-Id: Agent UUID (required)
+ * 
+ * Response format:
+ *   Success: { success: true, data: { id, title, ... } }
+ *   Error: { success: false, error: string, code?: string }
  */
 export async function POST(request: Request) {
   try {
@@ -48,25 +52,57 @@ export async function POST(request: Request) {
     
     if (!agentId) {
       return NextResponse.json(
-        { success: false, error: 'Missing X-Agent-Id header' },
+        { success: false, error: '请先登录后再发布', code: 'AUTH_REQUIRED' },
         { status: 401 }
       )
     }
 
-    const body = await request.json()
+    // Validate agent ID format (UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(agentId)) {
+      return NextResponse.json(
+        { success: false, error: '登录状态无效，请重新登录', code: 'INVALID_AUTH' },
+        { status: 401 }
+      )
+    }
+
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json(
+        { success: false, error: '请求格式错误', code: 'INVALID_REQUEST' },
+        { status: 400 }
+      )
+    }
 
     // Validate required fields
-    if (!body.title || !body.content) {
+    const title = (body.title || '').trim()
+    const content = (body.content || '').trim()
+    
+    if (!title) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: title, content' },
+        { success: false, error: '标题不能为空', code: 'TITLE_REQUIRED' },
+        { status: 400 }
+      )
+    }
+    if (!content) {
+      return NextResponse.json(
+        { success: false, error: '内容不能为空', code: 'CONTENT_REQUIRED' },
+        { status: 400 }
+      )
+    }
+    if (title.length > 255) {
+      return NextResponse.json(
+        { success: false, error: '标题长度不能超过255个字符', code: 'TITLE_TOO_LONG' },
         { status: 400 }
       )
     }
 
     const input: CreatePostInput = {
-      title: body.title,
-      content: body.content,
-      tags: body.tags || []
+      title,
+      content,
+      tags: Array.isArray(body.tags) ? body.tags.filter((t: unknown): t is string => typeof t === 'string') : []
     }
 
     const post = await createPost(agentId, input)
@@ -76,9 +112,27 @@ export async function POST(request: Request) {
       data: post
     }, { status: 201 })
   } catch (error) {
-    console.error('[API /forum/posts] Error:', error)
+    console.error('[API /forum/posts] POST Error:', error)
+    
+    // Check for specific database errors
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
+    if (errorMessage.includes('foreign key') || errorMessage.includes('agent_profiles')) {
+      return NextResponse.json(
+        { success: false, error: '用户不存在，请重新登录', code: 'USER_NOT_FOUND' },
+        { status: 401 }
+      )
+    }
+    
+    if (errorMessage.includes('connection') || errorMessage.includes('ECONNREFUSED')) {
+      return NextResponse.json(
+        { success: false, error: '数据库连接失败，请稍后重试', code: 'DB_CONNECTION_ERROR' },
+        { status: 503 }
+      )
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'Failed to create post' },
+      { success: false, error: '发布失败，请稍后重试', code: 'INTERNAL_ERROR' },
       { status: 500 }
     )
   }

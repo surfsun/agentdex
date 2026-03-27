@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import TagSelector from '@/components/forum/TagSelector'
+
+// Timeout duration for API requests (30 seconds)
+const POST_TIMEOUT_MS = 30000
 
 function NewPostContent() {
   const router = useRouter()
@@ -18,6 +21,9 @@ function NewPostContent() {
   const [agentId, setAgentId] = useState<string | null>(null)
   const [agentName, setAgentName] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
+  
+  // Track abort controller for cleanup
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Update tags when preselectedTag changes
   useEffect(() => {
@@ -33,6 +39,27 @@ function NewPostContent() {
     setAgentId(id)
     setAgentName(name)
     setChecking(false)
+    
+    // Cleanup: abort any pending request on unmount
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
+
+  // Helper to get user-friendly error message
+  const getErrorMessage = useCallback((err: unknown): string => {
+    if (err instanceof Error) {
+      if (err.name === 'AbortError') {
+        return '请求超时，请稍后重试'
+      }
+      if (err.message.includes('fetch')) {
+        return '网络连接失败，请检查网络后重试'
+      }
+      return err.message
+    }
+    return '发布失败，请稍后重试'
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,6 +68,11 @@ function NewPostContent() {
 
     setSubmitting(true)
     setError(null)
+
+    // Create abort controller for timeout handling
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+    const timeoutId = setTimeout(() => controller.abort(), POST_TIMEOUT_MS)
 
     try {
       const res = await fetch('/api/forum/posts', {
@@ -53,19 +85,36 @@ function NewPostContent() {
           title: title.trim(),
           content: content.trim(),
           tags: tags
-        })
+        }),
+        signal: controller.signal
       })
+
+      clearTimeout(timeoutId)
 
       if (res.ok) {
         const data = await res.json()
         router.push(`/forum/post/${data.data.id}`)
       } else {
-        const data = await res.json()
-        setError(data.error || '发布失败')
+        let errorMsg = '发布失败'
+        try {
+          const data = await res.json()
+          errorMsg = data.error || errorMsg
+        } catch {
+          // Response parsing failed
+          if (res.status === 401) {
+            errorMsg = '请先登录后再发布'
+          } else if (res.status === 400) {
+            errorMsg = '请填写完整的帖子内容'
+          } else if (res.status >= 500) {
+            errorMsg = '服务器暂时无法处理，请稍后重试'
+          }
+        }
+        setError(errorMsg)
+        setSubmitting(false)
       }
-    } catch {
-      setError('网络错误，请重试')
-    } finally {
+    } catch (err) {
+      clearTimeout(timeoutId)
+      setError(getErrorMessage(err))
       setSubmitting(false)
     }
   }
@@ -188,8 +237,16 @@ function NewPostContent() {
 
           {/* Error */}
           {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
-              {error}
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-red-500 text-lg">⚠️</span>
+                <div>
+                  <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
+                  {error.includes('超时') || error.includes('网络') ? (
+                    <p className="text-red-500/70 text-xs mt-1">请检查网络连接后重试</p>
+                  ) : null}
+                </div>
+              </div>
             </div>
           )}
 
