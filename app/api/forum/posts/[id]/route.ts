@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPostById, incrementPostViews } from '@/lib/forum/queries'
 import { supabaseAdmin } from '@/lib/supabase'
+import { jsonResponse, errorResponse } from '@/lib/api-response'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -18,34 +19,25 @@ export async function GET(
     const { id } = await params
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Post ID is required' },
-        { status: 400 }
-      )
+      return errorResponse('Post ID is required', { status: 400 })
     }
 
     const post = await getPostById(id)
 
     if (!post) {
-      return NextResponse.json(
-        { success: false, error: 'Post not found' },
-        { status: 404 }
-      )
+      return errorResponse('Post not found', { status: 404 })
     }
 
     // Increment views
     await incrementPostViews(id)
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       data: post
     })
   } catch (error) {
     console.error('[API /forum/posts/[id]] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch post' },
-      { status: 500 }
-    )
+    return errorResponse('Failed to fetch post', { status: 500 })
   }
 }
 
@@ -65,26 +57,17 @@ export async function PATCH(
     const agentId = request.headers.get('X-Agent-Id')
 
     if (!agentId) {
-      return NextResponse.json(
-        { success: false, error: 'Missing X-Agent-Id header' },
-        { status: 401 }
-      )
+      return errorResponse('Missing X-Agent-Id header', { status: 401 })
     }
 
     // Check if post exists and belongs to agent
     const post = await getPostById(id)
     if (!post) {
-      return NextResponse.json(
-        { success: false, error: 'Post not found' },
-        { status: 404 }
-      )
+      return errorResponse('Post not found', { status: 404 })
     }
 
     if (post.author_id !== agentId) {
-      return NextResponse.json(
-        { success: false, error: 'You can only edit your own posts' },
-        { status: 403 }
-      )
+      return errorResponse('You can only edit your own posts', { status: 403 })
     }
 
     const body = await request.json()
@@ -103,16 +86,13 @@ export async function PATCH(
 
     if (error) throw error
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       data
     })
   } catch (error) {
     console.error('[API /forum/posts/[id]] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to update post' },
-      { status: 500 }
-    )
+    return errorResponse('Failed to update post', { status: 500 })
   }
 }
 
@@ -132,26 +112,17 @@ export async function DELETE(
     const agentId = request.headers.get('X-Agent-Id')
 
     if (!agentId) {
-      return NextResponse.json(
-        { success: false, error: 'Missing X-Agent-Id header' },
-        { status: 401 }
-      )
+      return errorResponse('Missing X-Agent-Id header', { status: 401 })
     }
 
     // Check if post exists and belongs to agent
     const post = await getPostById(id)
     if (!post) {
-      return NextResponse.json(
-        { success: false, error: 'Post not found' },
-        { status: 404 }
-      )
+      return errorResponse('Post not found', { status: 404 })
     }
 
     if (post.author_id !== agentId) {
-      return NextResponse.json(
-        { success: false, error: 'You can only delete your own posts' },
-        { status: 403 }
-      )
+      return errorResponse('You can only delete your own posts', { status: 403 })
     }
 
     // Delete post (comments will be cascade deleted)
@@ -162,15 +133,12 @@ export async function DELETE(
 
     if (error) throw error
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       message: 'Post deleted'
     })
   } catch (error) {
     console.error('[API /forum/posts/[id]] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to delete post' },
-      { status: 500 }
-    )
+    return errorResponse('Failed to delete post', { status: 500 })
   }
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createPost, listPosts } from '@/lib/forum/queries'
+import { jsonResponse, errorResponse } from '@/lib/api-response'
 import type { CreatePostInput, PromptBundle, RunSnapshot } from '@/lib/forum/types'
 
 /**
@@ -61,7 +62,7 @@ export async function GET(request: Request) {
     const { posts, total } = await listPosts({ page, limit, sort, tag })
     const hasMore = page * limit < total
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       data: posts,
       total,
@@ -71,10 +72,7 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[API /forum/posts] GET Error:', error)
-    return NextResponse.json(
-      { success: false, error: '获取帖子列表失败，请稍后重试' },
-      { status: 500 }
-    )
+    return errorResponse('获取帖子列表失败，请稍后重试', { status: 500 })
   }
 }
 
@@ -95,29 +93,20 @@ export async function POST(request: Request) {
     const agentId = request.headers.get('X-Agent-Id')
     
     if (!agentId) {
-      return NextResponse.json(
-        { success: false, error: '请先登录后再发布', code: 'AUTH_REQUIRED' },
-        { status: 401 }
-      )
+      return errorResponse('请先登录后再发布', { status: 401, code: 'AUTH_REQUIRED' })
     }
 
     // Validate agent ID format (UUID)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     if (!uuidRegex.test(agentId)) {
-      return NextResponse.json(
-        { success: false, error: '登录状态无效，请重新登录', code: 'INVALID_AUTH' },
-        { status: 401 }
-      )
+      return errorResponse('登录状态无效，请重新登录', { status: 401, code: 'INVALID_AUTH' })
     }
 
     let body
     try {
       body = await request.json()
     } catch {
-      return NextResponse.json(
-        { success: false, error: '请求格式错误', code: 'INVALID_REQUEST' },
-        { status: 400 }
-      )
+      return errorResponse('请求格式错误', { status: 400, code: 'INVALID_REQUEST' })
     }
 
     // Validate required fields
@@ -126,32 +115,20 @@ export async function POST(request: Request) {
     const postType = body.post_type === 'structured' ? 'structured' : 'normal'
     
     if (!title) {
-      return NextResponse.json(
-        { success: false, error: '标题不能为空', code: 'TITLE_REQUIRED' },
-        { status: 400 }
-      )
+      return errorResponse('标题不能为空', { status: 400, code: 'TITLE_REQUIRED' })
     }
     if (!content) {
-      return NextResponse.json(
-        { success: false, error: '内容不能为空', code: 'CONTENT_REQUIRED' },
-        { status: 400 }
-      )
+      return errorResponse('内容不能为空', { status: 400, code: 'CONTENT_REQUIRED' })
     }
     if (title.length > 255) {
-      return NextResponse.json(
-        { success: false, error: '标题长度不能超过255个字符', code: 'TITLE_TOO_LONG' },
-        { status: 400 }
-      )
+      return errorResponse('标题长度不能超过255个字符', { status: 400, code: 'TITLE_TOO_LONG' })
     }
 
     // Validate structured post data
     if (postType === 'structured') {
       const validation = validateStructuredData(body.prompt_bundle, body.run_snapshot)
       if (!validation.valid) {
-        return NextResponse.json(
-          { success: false, error: validation.error, code: 'INVALID_STRUCTURED_DATA' },
-          { status: 400 }
-        )
+        return errorResponse(validation.error!, { status: 400, code: 'INVALID_STRUCTURED_DATA' })
       }
     }
 
@@ -166,7 +143,7 @@ export async function POST(request: Request) {
 
     const post = await createPost(agentId, input)
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       data: post
     }, { status: 201 })
@@ -177,22 +154,13 @@ export async function POST(request: Request) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     
     if (errorMessage.includes('foreign key') || errorMessage.includes('agent_profiles')) {
-      return NextResponse.json(
-        { success: false, error: '用户不存在，请重新登录', code: 'USER_NOT_FOUND' },
-        { status: 401 }
-      )
+      return errorResponse('用户不存在，请重新登录', { status: 401, code: 'USER_NOT_FOUND' })
     }
     
     if (errorMessage.includes('connection') || errorMessage.includes('ECONNREFUSED')) {
-      return NextResponse.json(
-        { success: false, error: '数据库连接失败，请稍后重试', code: 'DB_CONNECTION_ERROR' },
-        { status: 503 }
-      )
+      return errorResponse('数据库连接失败，请稍后重试', { status: 503, code: 'DB_CONNECTION_ERROR' })
     }
     
-    return NextResponse.json(
-      { success: false, error: '发布失败，请稍后重试', code: 'INTERNAL_ERROR' },
-      { status: 500 }
-    )
+    return errorResponse('发布失败，请稍后重试', { status: 500, code: 'INTERNAL_ERROR' })
   }
 }

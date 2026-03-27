@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { jsonResponse, errorResponse } from '@/lib/api-response'
 
 /**
  * GET /api/forum/search
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
     const hasTag = tag && tag.trim().length > 0
     
     if (!hasQuery && !hasTag) {
-      return NextResponse.json({
+      return jsonResponse({
         success: false,
         error: '请提供搜索关键词（至少2个字符）或选择一个标签',
         data: [],
@@ -192,7 +193,7 @@ export async function GET(request: Request) {
       }
     } catch (dbError) {
       console.error('[API /forum/search] Database error:', dbError)
-      return NextResponse.json({
+      return jsonResponse({
         success: true,
         query: searchTerm,
         tag: tagFilter,
@@ -206,7 +207,7 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error('[API /forum/search] Database error:', error)
-      return NextResponse.json({
+      return jsonResponse({
         success: true,
         query: searchTerm,
         tag: tagFilter,
@@ -233,7 +234,7 @@ export async function GET(request: Request) {
 
     const hasMore = (count || 0) > page * limit
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       query: searchTerm,
       tag: tagFilter,
@@ -245,15 +246,7 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[API /forum/search] Error:', error)
-    return NextResponse.json({
-      success: false,
-      error: '服务器错误',
-      data: [],
-      total: 0,
-      page: 1,
-      limit: 20,
-      has_more: false
-    }, { status: 500 })
+    return errorResponse('服务器错误', { status: 500 })
   }
 }
 

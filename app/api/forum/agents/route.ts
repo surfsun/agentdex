@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAgent, listAgents, getAgentByName } from '@/lib/forum/queries'
+import { jsonResponse, errorResponse } from '@/lib/api-response'
 import type { CreateAgentInput } from '@/lib/forum/types'
 
 // 设置最大执行时间
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     const { agents, total } = await listAgents({ page, limit, platform })
     const hasMore = page * limit < total
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
       data: agents,
       total,
@@ -29,10 +30,7 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[API /forum/agents] GET Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch agents' },
-      { status: 500 }
-    )
+    return errorResponse('Failed to fetch agents', { status: 500 })
   }
 }
 
@@ -45,35 +43,23 @@ export async function POST(request: Request) {
     // 验证 Content-Type
     const contentType = request.headers.get('content-type')
     if (!contentType?.includes('application/json')) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid content type' },
-        { status: 400 }
-      )
+      return errorResponse('Invalid content type', { status: 400 })
     }
 
     let body
     try {
       body = await request.json()
     } catch {
-      return NextResponse.json(
-        { success: false, error: 'Invalid JSON body' },
-        { status: 400 }
-      )
+      return errorResponse('Invalid JSON body', { status: 400 })
     }
 
     // Validate required fields
     if (!body.name || typeof body.name !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Missing or invalid field: name' },
-        { status: 400 }
-      )
+      return errorResponse('Missing or invalid field: name', { status: 400 })
     }
 
     if (!body.platform || typeof body.platform !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Missing or invalid field: platform' },
-        { status: 400 }
-      )
+      return errorResponse('Missing or invalid field: platform', { status: 400 })
     }
 
     const trimmedName = body.name.trim()
@@ -81,17 +67,14 @@ export async function POST(request: Request) {
     
     // 验证名称长度
     if (trimmedName.length < 2 || trimmedName.length > 20) {
-      return NextResponse.json(
-        { success: false, error: 'Name must be 2-20 characters' },
-        { status: 400 }
-      )
+      return errorResponse('Name must be 2-20 characters', { status: 400 })
     }
 
     // Check if name already exists
     try {
       const existing = await getAgentByName(trimmedName, platform)
       if (existing) {
-        return NextResponse.json(
+        return jsonResponse(
           {
             success: false,
             error: 'NAME_EXISTS',
@@ -102,10 +85,7 @@ export async function POST(request: Request) {
       }
     } catch (dbError) {
       console.error('[API /forum/agents] DB check error:', dbError)
-      return NextResponse.json(
-        { success: false, error: 'Database connection error' },
-        { status: 503 }
-      )
+      return errorResponse('Database connection error', { status: 503 })
     }
 
     // Create new agent
@@ -120,7 +100,7 @@ export async function POST(request: Request) {
     try {
       const agent = await createAgent(input)
 
-      return NextResponse.json({
+      return jsonResponse({
         success: true,
         data: agent
       })
@@ -130,7 +110,7 @@ export async function POST(request: Request) {
       // 检查是否是唯一约束冲突
       const pgError = createError as { code?: string; message?: string }
       if (pgError.code === '23505') {
-        return NextResponse.json(
+        return jsonResponse(
           {
             success: false,
             error: 'NAME_EXISTS',
@@ -140,16 +120,10 @@ export async function POST(request: Request) {
         )
       }
       
-      return NextResponse.json(
-        { success: false, error: 'Failed to create agent' },
-        { status: 500 }
-      )
+      return errorResponse('Failed to create agent', { status: 500 })
     }
   } catch (error) {
     console.error('[API /forum/agents] POST Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    )
+    return errorResponse('Internal server error', { status: 500 })
   }
 }
