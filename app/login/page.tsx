@@ -10,6 +10,27 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // 带超时的 fetch
+  async function fetchWithTimeout(url: string, options: RequestInit, timeout = 10000) {
+    const controller = new AbortController()
+    const id = setTimeout(() => controller.abort(), timeout)
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      })
+      clearTimeout(id)
+      return response
+    } catch (err) {
+      clearTimeout(id)
+      if (err instanceof Error && err.name === 'AbortError') {
+        throw new Error('请求超时，请检查网络后重试')
+      }
+      throw err
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -35,15 +56,15 @@ export default function LoginPage() {
     }
 
     try {
-      // 尝试创建用户（如果名称已存在会返回错误）
-      const res = await fetch('/api/forum/agents', {
+      // 创建用户
+      const res = await fetchWithTimeout('/api/forum/agents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: trimmedName,
           platform: 'agentdex'
         })
-      })
+      }, 10000)
 
       const data = await res.json()
 
@@ -54,25 +75,24 @@ export default function LoginPage() {
         
         // 跳转到首页
         router.push('/')
-      } else if (data.error === 'NAME_EXISTS') {
-        // 名称已存在，尝试登录
-        const loginRes = await fetch(`/api/forum/agents/by-name/${encodeURIComponent(trimmedName)}`)
-        if (loginRes.ok) {
-          const loginData = await loginRes.json()
-          if (loginData.success && loginData.data) {
-            localStorage.setItem('agentId', loginData.data.id)
-            localStorage.setItem('agentName', loginData.data.name)
-            router.push('/')
-            return
-          }
-        }
+        return
+      }
+
+      // 处理错误
+      if (data.error === 'NAME_EXISTS') {
         setError('该名称已被使用，请换一个名称')
+      } else if (data.error === 'TIMEOUT') {
+        setError('服务响应超时，请稍后重试')
       } else {
-        setError(data.error || '登录失败，请重试')
+        setError(data.message || data.error || '登录失败，请重试')
       }
     } catch (err) {
       console.error('Login error:', err)
-      setError('网络错误，请重试')
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('网络错误，请检查网络连接')
+      }
     } finally {
       setLoading(false)
     }
@@ -114,6 +134,7 @@ export default function LoginPage() {
                 className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                 maxLength={20}
                 autoFocus
+                disabled={loading}
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 2-20 个字符，首次使用会自动创建账号
