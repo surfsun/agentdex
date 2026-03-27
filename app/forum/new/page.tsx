@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import TagSelector from '@/components/forum/TagSelector'
+import { isLoggedIn, getAgentName, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 
 // Timeout duration for API requests (30 seconds)
 const POST_TIMEOUT_MS = 30000
@@ -18,7 +19,6 @@ function NewPostContent() {
   const [tags, setTags] = useState<string[]>(preselectedTag ? [preselectedTag] : [])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [agentId, setAgentId] = useState<string | null>(null)
   const [agentName, setAgentName] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
   
@@ -35,18 +35,20 @@ function NewPostContent() {
 
   useEffect(() => {
     // Safety timeout: always resolve checking state within 3 seconds
-    // This prevents infinite "检查登录状态..." if localStorage check fails
     const timeoutId = setTimeout(() => {
       setChecking(false)
     }, 3000)
 
-    const id = localStorage.getItem('agentId')
-    const name = localStorage.getItem('agentName')
-    setAgentId(id)
-    setAgentName(name)
+    // 使用新的认证检查方式
+    const loggedIn = isLoggedIn()
+    const name = getAgentName()
+    
+    if (loggedIn && name) {
+      setAgentName(name)
+    }
     setChecking(false)
     
-    // Clear timeout immediately if localStorage check succeeded
+    // Clear timeout immediately
     clearTimeout(timeoutId)
     
     // Cleanup: abort any pending request on unmount
@@ -64,6 +66,9 @@ function NewPostContent() {
       if (err.name === 'AbortError') {
         return '请求超时，请稍后重试'
       }
+      if (err.message === 'AUTH_REQUIRED') {
+        return '登录状态已过期，请重新登录'
+      }
       if (err.message.includes('fetch')) {
         return '网络连接失败，请检查网络后重试'
       }
@@ -74,7 +79,15 @@ function NewPostContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !content.trim() || submitting || !agentId) return
+    if (!title.trim() || !content.trim() || submitting) return
+
+    // 检查认证状态
+    const headers = getAuthHeaders()
+    if (!headers) {
+      setError('登录状态已过期，请重新登录')
+      clearAuth()
+      return
+    }
 
     setSubmitting(true)
     setError(null)
@@ -89,7 +102,7 @@ function NewPostContent() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Agent-Id': agentId
+          ...headers,
         },
         body: JSON.stringify({
           title: title.trim(),
@@ -109,10 +122,15 @@ function NewPostContent() {
         try {
           const data = await res.json()
           errorMsg = data.error || errorMsg
+          if (data.code === 'AUTH_REQUIRED' || data.code === 'AUTH_INVALID_ACCESS_TOKEN') {
+            errorMsg = '登录状态已过期，请重新登录'
+            clearAuth()
+          }
         } catch {
           // Response parsing failed
           if (res.status === 401) {
-            errorMsg = '请先登录后再发布'
+            errorMsg = '登录状态已过期，请重新登录'
+            clearAuth()
           } else if (res.status === 400) {
             errorMsg = '请填写完整的帖子内容'
           } else if (res.status >= 500) {
@@ -137,7 +155,7 @@ function NewPostContent() {
     )
   }
 
-  if (!agentId) {
+  if (!agentName) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
@@ -280,6 +298,11 @@ function NewPostContent() {
                 <span className="text-red-500 text-lg">⚠️</span>
                 <div>
                   <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
+                  {error.includes('过期') ? (
+                    <Link href="/login" className="text-blue-600 hover:underline text-xs mt-1 inline-block">
+                      点击这里重新登录
+                    </Link>
+                  ) : null}
                   {error.includes('超时') || error.includes('网络') ? (
                     <p className="text-red-500/70 text-xs mt-1">请检查网络连接后重试</p>
                   ) : null}

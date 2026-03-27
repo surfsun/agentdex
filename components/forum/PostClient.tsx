@@ -5,6 +5,7 @@ import Link from 'next/link'
 import CommentTree from './CommentTree'
 import CommentForm from './CommentForm'
 import StructuredPostDisplay from './StructuredPostDisplay'
+import { isLoggedIn, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Post, Comment } from '@/lib/forum/types'
 
 interface PostClientProps {
@@ -20,18 +21,23 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
   const author = post.author!
 
   const handleLike = async () => {
-    const agentId = localStorage.getItem('agentId')
-    if (!agentId) {
+    // 使用新的认证检查
+    if (!isLoggedIn()) {
       alert('请先登录')
+      return
+    }
+
+    const headers = getAuthHeaders()
+    if (!headers) {
+      alert('登录状态已过期，请重新登录')
+      clearAuth()
       return
     }
 
     try {
       const res = await fetch(`/api/forum/posts/${post.id}/like`, {
         method: 'POST',
-        headers: {
-          'X-Agent-Id': agentId
-        }
+        headers
       })
 
       if (res.ok) {
@@ -42,6 +48,9 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
           ...post,
           likes_count: data.liked ? post.likes_count + 1 : post.likes_count - 1
         })
+      } else if (res.status === 401) {
+        alert('登录状态已过期，请重新登录')
+        clearAuth()
       }
     } catch (error) {
       console.error('Failed to like:', error)

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { isLoggedIn, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 
 interface CommentFormProps {
   postId: string
@@ -16,22 +18,28 @@ export default function CommentForm({ postId, onSubmitted }: CommentFormProps) {
     e.preventDefault()
     if (!content.trim() || submitting) return
 
+    // 使用新的认证检查
+    if (!isLoggedIn()) {
+      setError('请先登录')
+      return
+    }
+
+    const headers = getAuthHeaders()
+    if (!headers) {
+      setError('登录状态已过期，请重新登录')
+      clearAuth()
+      return
+    }
+
     setSubmitting(true)
     setError(null)
 
     try {
-      // Note: In production, agent ID would come from auth context
-      const agentId = localStorage.getItem('agentId')
-      if (!agentId) {
-        setError('请先登录')
-        return
-      }
-
       const res = await fetch(`/api/forum/posts/${postId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Agent-Id': agentId
+          ...headers,
         },
         body: JSON.stringify({ content })
       })
@@ -42,7 +50,12 @@ export default function CommentForm({ postId, onSubmitted }: CommentFormProps) {
         window.location.reload()
       } else {
         const data = await res.json()
-        setError(data.error || '发送失败')
+        if (res.status === 401) {
+          setError('登录状态已过期，请重新登录')
+          clearAuth()
+        } else {
+          setError(data.error || '发送失败')
+        }
       }
     } catch {
       setError('网络错误，请重试')
@@ -67,7 +80,14 @@ export default function CommentForm({ postId, onSubmitted }: CommentFormProps) {
       />
 
       {error && (
-        <p className="mt-2 text-sm text-red-500">{error}</p>
+        <p className="mt-2 text-sm text-red-500">
+          {error}
+          {error.includes('过期') && (
+            <Link href="/login" className="ml-2 text-blue-600 hover:underline">
+              重新登录
+            </Link>
+          )}
+        </p>
       )}
 
       <div className="flex justify-end mt-3">

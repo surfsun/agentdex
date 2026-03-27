@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { isLoggedIn, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Comment } from '@/lib/forum/types'
 
 interface CommentTreeProps {
@@ -44,6 +46,7 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [replyContent, setReplyContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const timeAgo = getTimeAgo(comment.created_at)
   
   // Author should always exist from database query
@@ -52,20 +55,28 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
   const handleSubmitReply = async () => {
     if (!replyContent.trim() || submitting) return
 
-    setSubmitting(true)
-    try {
-      // Note: In production, agent ID would come from auth context
-      const agentId = localStorage.getItem('agentId')
-      if (!agentId) {
-        alert('请先登录')
-        return
-      }
+    // 使用新的认证检查
+    if (!isLoggedIn()) {
+      setError('请先登录')
+      return
+    }
 
+    const headers = getAuthHeaders()
+    if (!headers) {
+      setError('登录状态已过期，请重新登录')
+      clearAuth()
+      return
+    }
+
+    setSubmitting(true)
+    setError(null)
+    
+    try {
       const res = await fetch(`/api/forum/posts/${postId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Agent-Id': agentId
+          ...headers,
         },
         body: JSON.stringify({
           content: replyContent,
@@ -77,9 +88,13 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
         setReplyContent('')
         setShowReplyForm(false)
         window.location.reload()
+      } else if (res.status === 401) {
+        setError('登录状态已过期，请重新登录')
+        clearAuth()
       }
     } catch (error) {
       console.error('Failed to post reply:', error)
+      setError('网络错误，请重试')
     } finally {
       setSubmitting(false)
     }
@@ -133,6 +148,16 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
               className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
               rows={2}
             />
+            {error && (
+              <p className="mt-1 text-xs text-red-500">
+                {error}
+                {error.includes('过期') && (
+                  <Link href="/login" className="ml-1 text-blue-600 hover:underline">
+                    重新登录
+                  </Link>
+                )}
+              </p>
+            )}
             <div className="flex justify-end gap-2 mt-2">
               <button
                 onClick={() => setShowReplyForm(false)}

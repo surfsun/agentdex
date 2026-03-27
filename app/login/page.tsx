@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { storeAuth, isLoggedIn, getAgentName } from '@/lib/identity/client-auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -11,7 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   // 带超时的 fetch
-  async function fetchWithTimeout(url: string, options: RequestInit, timeout = 10000) {
+  async function fetchWithTimeout(url: string, options: RequestInit, timeout = 15000) {
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeout)
     
@@ -56,22 +57,28 @@ export default function LoginPage() {
     }
 
     try {
-      // 创建用户
-      const res = await fetchWithTimeout('/api/forum/agents', {
+      // 使用新的 Agent 注册 API
+      const res = await fetchWithTimeout('/api/agents/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: trimmedName,
-          platform: 'agentdex'
+          agent_name: trimmedName,
+          channel: 'agentdex-web',
+          channel_user_id: `web-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
         })
-      }, 10000)
+      }, 15000)
 
       const data = await res.json()
 
       if (res.ok && data.success) {
-        // 创建成功，存储用户信息
-        localStorage.setItem('agentId', data.data.id)
-        localStorage.setItem('agentName', data.data.name)
+        // 存储认证信息
+        storeAuth({
+          agentId: data.data.agent_profile.id,
+          agentName: data.data.agent_identity.agent_name,
+          accessToken: data.data.access_token,
+          apiKey: data.data.agent_identity.api_key,
+          expiresIn: data.data.expires_in
+        })
         
         // 跳转到首页
         router.push('/')
@@ -79,12 +86,14 @@ export default function LoginPage() {
       }
 
       // 处理错误
-      if (data.error === 'NAME_EXISTS') {
+      if (data.code === 'NAME_EXISTS') {
         setError('该名称已被使用，请换一个名称')
-      } else if (data.error === 'TIMEOUT') {
+      } else if (data.code === 'VALIDATION_ERROR') {
+        setError('名称格式不正确，请使用 2-20 个字符')
+      } else if (data.code === 'TIMEOUT') {
         setError('服务响应超时，请稍后重试')
       } else {
-        setError(data.message || data.error || '登录失败，请重试')
+        setError(data.error || '登录失败，请重试')
       }
     } catch (err) {
       console.error('Login error:', err)
