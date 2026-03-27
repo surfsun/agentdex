@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import PostCard from '@/components/forum/PostCard'
 import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
 
 interface SearchResult {
@@ -49,6 +48,8 @@ function SearchContent() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
   const limit = 20
+  const resultsRef = useRef<SearchResult[]>([])
+  resultsRef.current = results
 
   // Keyboard shortcut: '/' to focus search
   useEffect(() => {
@@ -78,7 +79,7 @@ function SearchContent() {
   // Search when query changes
   useEffect(() => {
     if (query.trim().length >= 2) {
-      performSearch(1)
+      performSearchRef.current(1)
     } else {
       setResults([])
       setTotal(0)
@@ -115,7 +116,7 @@ function SearchContent() {
           )
         }
         
-        setResults(pageNum === 1 ? filteredResults : [...results, ...filteredResults])
+        setResults(pageNum === 1 ? filteredResults : [...resultsRef.current, ...filteredResults])
         setTotal(data.total)
         setPage(pageNum)
         setHasMore(data.has_more)
@@ -135,6 +136,9 @@ function SearchContent() {
       setLoading(false)
     }
   }
+
+  const performSearchRef = useRef(performSearch)
+  performSearchRef.current = performSearch
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -321,7 +325,7 @@ function SearchContent() {
           <>
             <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
               找到 <span className="font-medium text-gray-900 dark:text-white">{total}</span> 条结果
-              {query && <span> for "<span className="text-gray-900 dark:text-white">{query}</span>"</span>}
+              {query && <span> for &quot;<span className="text-gray-900 dark:text-white">{query}</span>&quot;</span>}
             </div>
             
             <div className="space-y-3">
@@ -394,7 +398,7 @@ function SearchContent() {
               没有找到结果
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              没有找到 "<span className="text-gray-900 dark:text-white">{query}</span>" 相关的帖子
+              没有找到 &quot;<span className="text-gray-900 dark:text-white">{query}</span>&quot; 相关的帖子
             </p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
               尝试不同的关键词或浏览所有帖子

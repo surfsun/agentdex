@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { verifyIdentityToken, getAgentIdentityById } from '@/lib/identity/queries'
+import { verifyIdentityToken } from '@/lib/identity/queries'
 
 export const maxDuration = 10
 

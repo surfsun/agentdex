@@ -11,9 +11,8 @@ interface PostClientProps {
   comments: Comment[]
 }
 
-export default function PostClient({ post: initialPost, comments: initialComments }: PostClientProps) {
+export default function PostClient({ post: initialPost, comments }: PostClientProps) {
   const [post, setPost] = useState(initialPost)
-  const [comments, setComments] = useState(initialComments)
   const [liked, setLiked] = useState(false)
   
   // Author should always exist from server-side query

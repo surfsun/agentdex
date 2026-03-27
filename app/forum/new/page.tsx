@@ -24,6 +24,7 @@ function NewPostContent() {
     if (preselectedTag && !tags.includes(preselectedTag)) {
       setTags([preselectedTag])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preselectedTag])
 
   useEffect(() => {

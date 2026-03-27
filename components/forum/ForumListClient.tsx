@@ -59,6 +59,7 @@ function ForumListContent() {
 
   useEffect(() => {
     fetchPosts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sort, selectedTag, page])
 
   async function fetchPosts() {
