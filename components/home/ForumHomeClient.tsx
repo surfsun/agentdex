@@ -3,25 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { PRESET_TAGS, getTagColorClasses, type TagConfig } from '@/lib/forum/tags'
-
-interface Post {
-  id: string
-  title: string
-  title_highlighted?: string
-  content: string
-  content_snippet?: string
-  tags: string[]
-  likes_count: number
-  comments_count: number
-  views_count: number
-  created_at: string
-  author: {
-    id: string
-    name: string
-    platform: string
-    avatar_url: string | null
-  }
-}
+import type { Post } from '@/lib/forum/types'
 
 // 话题建议
 const TOPIC_SUGGESTIONS = [
@@ -31,62 +13,59 @@ const TOPIC_SUGGESTIONS = [
   { icon: '❓', title: '提问遇到的开发难题', tag: '问答求助' },
 ]
 
-export default function ForumHomeClient() {
-  const [hotPosts, setHotPosts] = useState<Post[]>([])
-  const [newPosts, setNewPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
-  const [totalPosts, setTotalPosts] = useState(0)
+interface ForumHomeClientProps {
+  initialTotal: number
+  initialHotPosts: Post[]
+  initialNewPosts: Post[]
+}
+
+export default function ForumHomeClient({
+  initialTotal,
+  initialHotPosts,
+  initialNewPosts
+}: ForumHomeClientProps) {
+  const [hotPosts, setHotPosts] = useState<Post[]>(initialHotPosts)
+  const [newPosts, setNewPosts] = useState<Post[]>(initialNewPosts)
+  const [loading, setLoading] = useState(false)
+  const [totalPosts, setTotalPosts] = useState(initialTotal)
   const [activeTab, setActiveTab] = useState<'hot' | 'new'>('hot')
 
+  // Only fetch updates when user interacts (tab change)
   useEffect(() => {
-    fetchStats()
-    fetchPosts()
+    // No initial fetch - data already provided via SSR
   }, [])
 
-  async function fetchStats() {
-    try {
-      const res = await fetch('/api/forum/posts?limit=1')
-      if (res.ok) {
-        const json = await res.json()
-        // Validate response and extract total
-        if (json.success && typeof json.total === 'number') {
-          setTotalPosts(json.total)
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch stats:', err)
-    }
-  }
-
-  async function fetchPosts() {
+  async function refreshPosts(tab: 'hot' | 'new') {
     setLoading(true)
     try {
-      const hotRes = await fetch('/api/forum/posts?sort=hot&limit=5')
-      if (hotRes.ok) {
-        const json = await hotRes.json()
-        // Validate response and extract posts array
-        if (json.success && Array.isArray(json.data)) {
-          setHotPosts(json.data)
-        } else {
-          setHotPosts([])
+      if (tab === 'hot') {
+        const res = await fetch('/api/forum/posts?sort=hot&limit=5')
+        if (res.ok) {
+          const json = await res.json()
+          if (json.success && Array.isArray(json.data)) {
+            setHotPosts(json.data)
+          }
         }
-      }
-      
-      const newRes = await fetch('/api/forum/posts?sort=new&limit=10')
-      if (newRes.ok) {
-        const json = await newRes.json()
-        // Validate response and extract posts array
-        if (json.success && Array.isArray(json.data)) {
-          setNewPosts(json.data)
-        } else {
-          setNewPosts([])
+      } else {
+        const res = await fetch('/api/forum/posts?sort=new&limit=10')
+        if (res.ok) {
+          const json = await res.json()
+          if (json.success && Array.isArray(json.data)) {
+            setNewPosts(json.data)
+          }
         }
       }
     } catch (err) {
-      console.error('Failed to fetch posts:', err)
+      console.error('Failed to refresh posts:', err)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleTabChange = (tab: 'hot' | 'new') => {
+    setActiveTab(tab)
+    // Optionally refresh data when user changes tab
+    // refreshPosts(tab)
   }
 
   const displayPosts = activeTab === 'hot' ? hotPosts : newPosts
@@ -159,7 +138,7 @@ export default function ForumHomeClient() {
           {/* Tabs */}
           <div className="flex items-center gap-4 mb-6">
             <button
-              onClick={() => setActiveTab('hot')}
+              onClick={() => handleTabChange('hot')}
               className={`text-lg font-semibold transition ${
                 activeTab === 'hot'
                   ? 'text-gray-900 dark:text-white'
@@ -169,7 +148,7 @@ export default function ForumHomeClient() {
               🔥 热门帖子
             </button>
             <button
-              onClick={() => setActiveTab('new')}
+              onClick={() => handleTabChange('new')}
               className={`text-lg font-semibold transition ${
                 activeTab === 'new'
                   ? 'text-gray-900 dark:text-white'

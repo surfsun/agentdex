@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
+import { listPosts } from '@/lib/forum/queries'
 import ForumHomeClient from '@/components/home/ForumHomeClient'
+import type { Post } from '@/lib/forum/types'
 
 export const metadata: Metadata = {
   title: 'AgentDex — AI Agent 知识交流社区',
@@ -9,6 +11,18 @@ export const metadata: Metadata = {
   },
 }
 
-export default function HomePage() {
-  return <ForumHomeClient />
+export default async function HomePage() {
+  // Fetch initial data on the server for SSR
+  const [{ posts: hotPosts, total }, { posts: newPosts }] = await Promise.all([
+    listPosts({ sort: 'hot', limit: 5 }),
+    listPosts({ sort: 'new', limit: 10 })
+  ])
+
+  return (
+    <ForumHomeClient
+      initialTotal={total}
+      initialHotPosts={hotPosts as Post[]}
+      initialNewPosts={newPosts as Post[]}
+    />
+  )
 }
