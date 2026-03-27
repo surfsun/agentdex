@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, Suspense, useRef } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
 
@@ -21,7 +21,7 @@ interface SearchResult {
     name: string
     platform: string
     avatar_url: string | null
-  }
+  } | null
 }
 
 interface SearchResponse {
@@ -35,21 +35,36 @@ interface SearchResponse {
   error?: string
 }
 
-function SearchContent() {
-  const searchParams = useSearchParams()
+interface SearchClientProps {
+  initialQuery?: string
+  initialTag?: string
+  initialSort?: 'relevance' | 'new'
+  initialResults?: SearchResult[]
+  initialTotal?: number
+  initialHasMore?: boolean
+}
+
+function SearchContent({
+  initialQuery = '',
+  initialTag = '',
+  initialSort = 'relevance' as 'relevance' | 'new',
+  initialResults = [],
+  initialTotal = 0,
+  initialHasMore = false
+}: SearchClientProps) {
   const router = useRouter()
+  const pathname = usePathname()
   
-  const [query, setQuery] = useState('')
-  const [selectedTag, setSelectedTag] = useState('')
-  const [sort, setSort] = useState<'relevance' | 'new'>('relevance')
-  const [results, setResults] = useState<SearchResult[]>([])
+  const [query, setQuery] = useState(initialQuery)
+  const [selectedTag, setSelectedTag] = useState(initialTag)
+  const [sort, setSort] = useState<'relevance' | 'new'>(initialSort)
+  const [results, setResults] = useState<SearchResult[]>(initialResults)
   const [loading, setLoading] = useState(false)
-  const [total, setTotal] = useState(0)
+  const [total, setTotal] = useState(initialTotal)
   const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(false)
-  const [initialSearchDone, setInitialSearchDone] = useState(false)
+  const [hasMore, setHasMore] = useState(initialHasMore)
   const limit = 20
-  const resultsRef = useRef<SearchResult[]>([])
+  const resultsRef = useRef<SearchResult[]>(results)
   resultsRef.current = results
 
   // Keyboard shortcut: '/' to focus search
@@ -66,98 +81,7 @@ function SearchContent() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Track if we've already performed a search with the current URL params
-  const lastSearchParamsRef = useRef<string>('')
-
-  // Sync state with URL params and trigger initial search
-  useEffect(() => {
-    const q = searchParams.get('q') || ''
-    const tag = searchParams.get('tag') || ''
-    const sortBy = (searchParams.get('sort') as 'relevance' | 'new') || 'relevance'
-    
-    setQuery(q)
-    setSelectedTag(tag)
-    setSort(sortBy)
-    
-    // Create a unique key for the current search params
-    const paramsKey = `${q}|${tag}|${sortBy}`
-    
-    // Trigger search if we have valid params AND we haven't searched with these params yet
-    const hasQuery = q.trim().length >= 2
-    const hasTag = tag.trim().length > 0
-    
-    if ((hasQuery || hasTag) && lastSearchParamsRef.current !== paramsKey) {
-      lastSearchParamsRef.current = paramsKey
-      setInitialSearchDone(true)
-      // Directly call search with URL params (no setTimeout needed)
-      performSearchWithParams(q, tag, sortBy, 1)
-    }
-  }, [searchParams])
-
-  // Search when query/tag/sort changes (after initial load)
-  useEffect(() => {
-    // Skip if initial search hasn't been processed yet
-    if (!initialSearchDone) return
-    
-    const hasQuery = query.trim().length >= 2
-    const hasTag = selectedTag.trim().length > 0
-    
-    if (hasQuery || hasTag) {
-      performSearchRef.current(1)
-    } else {
-      setResults([])
-      setTotal(0)
-    }
-  }, [query, selectedTag, sort, initialSearchDone])
-
-  // Perform search with explicit params (for initial load)
-  const performSearchWithParams = async (searchQuery: string, tag: string, sortBy: string, pageNum: number) => {
-    // 验证：至少提供 query (>=2 chars) 或 tag
-    const hasQuery = searchQuery.trim().length >= 2
-    const hasTag = tag.trim().length > 0
-    
-    if (!hasQuery && !hasTag) return
-    
-    setLoading(true)
-    if (pageNum === 1) {
-      setResults([])
-      setTotal(0)
-    }
-    
-    try {
-      const params = new URLSearchParams()
-      if (hasQuery) params.set('q', searchQuery.trim())
-      if (hasTag) params.set('tag', tag.trim())
-      params.set('sort', sortBy)
-      params.set('page', String(pageNum))
-      params.set('limit', String(limit))
-      
-      const res = await fetch(`/api/forum/search?${params.toString()}`)
-      const json: SearchResponse = await res.json()
-      
-      if (!res.ok || !json.success) {
-        setResults([])
-        setTotal(0)
-        setHasMore(false)
-        return
-      }
-      
-      const resultsData = Array.isArray(json.data) ? json.data : []
-      
-      setResults(resultsData)
-      setTotal(typeof json.total === 'number' ? json.total : 0)
-      setPage(pageNum)
-      setHasMore(json.has_more || false)
-    } catch (err) {
-      console.error('Search failed:', err)
-      setResults([])
-      setTotal(0)
-      setHasMore(false)
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  // Perform search function
   const performSearch = async (pageNum: number) => {
     // 验证：至少提供 query (>=2 chars) 或 tag
     const hasQuery = query.trim().length >= 2
@@ -515,14 +439,8 @@ function SearchContent() {
   )
 }
 
-export default function SearchClient() {
+export default function SearchClient(props: SearchClientProps) {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-400">加载中...</div>
-      </div>
-    }>
-      <SearchContent />
-    </Suspense>
+    <SearchContent {...props} />
   )
 }
