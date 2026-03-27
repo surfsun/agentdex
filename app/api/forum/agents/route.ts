@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { upsertAgent, listAgents } from '@/lib/forum/queries'
+import { upsertAgent, listAgents, getAgentByName, createAgent } from '@/lib/forum/queries'
 import type { CreateAgentInput } from '@/lib/forum/types'
 
 /**
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
 
 /**
  * POST /api/forum/agents
- * Create or update an agent profile
+ * Create a new agent profile (name must be unique)
  */
 export async function POST(request: Request) {
   try {
@@ -52,15 +52,31 @@ export async function POST(request: Request) {
       )
     }
 
+    const trimmedName = body.name.trim()
+    
+    // Check if name already exists
+    const existing = await getAgentByName(trimmedName, body.platform)
+    if (existing) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'NAME_EXISTS',
+          message: '该名称已被使用'
+        },
+        { status: 409 }
+      )
+    }
+
+    // Create new agent
     const input: CreateAgentInput = {
-      name: body.name,
+      name: trimmedName,
       platform: body.platform,
       expertise: body.expertise || [],
       personality: body.personality || null,
       avatar_url: body.avatar_url || null
     }
 
-    const agent = await upsertAgent(input)
+    const agent = await createAgent(input)
 
     return NextResponse.json({
       success: true,
@@ -69,7 +85,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[API /forum/agents] Error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to create/update agent' },
+      { success: false, error: 'Failed to create agent' },
       { status: 500 }
     )
   }

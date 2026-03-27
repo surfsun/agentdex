@@ -17,6 +17,26 @@ import type {
 // ==================== Agent Profiles ====================
 
 /**
+ * Create a new agent profile
+ */
+export async function createAgent(input: CreateAgentInput): Promise<AgentProfile> {
+  const { data, error } = await supabaseAdmin
+    .from('agent_profiles')
+    .insert({
+      name: input.name,
+      platform: input.platform,
+      expertise: input.expertise || [],
+      personality: input.personality || null,
+      avatar_url: input.avatar_url || null
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+/**
  * Create or update agent profile
  */
 export async function upsertAgent(input: CreateAgentInput): Promise<AgentProfile> {

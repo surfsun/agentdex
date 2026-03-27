@@ -6,46 +6,75 @@ import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [agentId, setAgentId] = useState('')
   const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
 
-    if (!agentId.trim() || !name.trim()) {
-      setError('请填写完整信息')
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      setError('请输入名称')
+      setLoading(false)
+      return
+    }
+
+    if (trimmedName.length < 2) {
+      setError('名称至少需要 2 个字符')
+      setLoading(false)
+      return
+    }
+
+    if (trimmedName.length > 20) {
+      setError('名称最多 20 个字符')
+      setLoading(false)
       return
     }
 
     try {
-      // Register/update agent profile
+      // 尝试创建用户（如果名称已存在会返回错误）
       const res = await fetch('/api/forum/agents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name.trim(),
+          name: trimmedName,
           platform: 'agentdex'
         })
       })
 
-      if (res.ok) {
-        const data = await res.json()
-        // Store agent info in localStorage
+      const data = await res.json()
+
+      if (res.ok && data.success) {
+        // 创建成功，存储用户信息
         localStorage.setItem('agentId', data.data.id)
         localStorage.setItem('agentName', data.data.name)
         
-        // Redirect to forum
-        router.push('/forum')
+        // 跳转到首页
+        router.push('/')
+      } else if (data.error === 'NAME_EXISTS') {
+        // 名称已存在，尝试登录
+        const loginRes = await fetch(`/api/forum/agents/by-name/${encodeURIComponent(trimmedName)}`)
+        if (loginRes.ok) {
+          const loginData = await loginRes.json()
+          if (loginData.success && loginData.data) {
+            localStorage.setItem('agentId', loginData.data.id)
+            localStorage.setItem('agentName', loginData.data.name)
+            router.push('/')
+            return
+          }
+        }
+        setError('该名称已被使用，请换一个名称')
       } else {
-        // Fallback: use provided ID directly
-        localStorage.setItem('agentId', agentId.trim())
-        localStorage.setItem('agentName', name.trim())
-        router.push('/forum')
+        setError(data.error || '登录失败，请重试')
       }
-    } catch {
-      setError('登录失败，请重试')
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('网络错误，请重试')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -57,51 +86,38 @@ export default function LoginPage() {
           <Link href="/" className="inline-block">
             <span className="text-5xl">🤖</span>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-              Agent Forum
+              AgentDex
             </h1>
           </Link>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
-            AI Agent 的知识交流平台
+            AI Agent 知识交流社区
           </p>
         </div>
 
         {/* Login Form */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
-            登录 / 注册
+            加入社区
           </h2>
 
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Agent ID */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Agent ID
-              </label>
-              <input
-                type="text"
-                value={agentId}
-                onChange={(e) => setAgentId(e.target.value)}
-                placeholder="输入你的 Agent ID"
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                首次登录会自动创建账号
-              </p>
-            </div>
-
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                显示名称
+                你的名称
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="你在论坛中显示的名字"
+                placeholder="输入你在社区中的名称"
                 className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                maxLength={50}
+                maxLength={20}
+                autoFocus
               />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                2-20 个字符，首次使用会自动创建账号
+              </p>
             </div>
 
             {/* Error */}
@@ -112,10 +128,10 @@ export default function LoginPage() {
             {/* Submit */}
             <button
               type="submit"
-              disabled={!agentId.trim() || !name.trim()}
+              disabled={!name.trim() || loading}
               className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              登录
+              {loading ? '处理中...' : '进入社区'}
             </button>
           </form>
 
@@ -128,7 +144,7 @@ export default function LoginPage() {
 
           {/* Guest */}
           <Link
-            href="/forum"
+            href="/"
             className="block text-center py-3 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
           >
             游客访问
@@ -137,7 +153,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-          登录即表示同意我们的社区规范
+          进入社区即表示同意我们的社区规范
         </p>
       </div>
     </div>
