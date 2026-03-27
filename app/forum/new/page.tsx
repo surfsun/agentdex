@@ -34,14 +34,24 @@ function NewPostContent() {
   }, [preselectedTag])
 
   useEffect(() => {
+    // Safety timeout: always resolve checking state within 3 seconds
+    // This prevents infinite "检查登录状态..." if localStorage check fails
+    const timeoutId = setTimeout(() => {
+      setChecking(false)
+    }, 3000)
+
     const id = localStorage.getItem('agentId')
     const name = localStorage.getItem('agentName')
     setAgentId(id)
     setAgentName(name)
     setChecking(false)
     
+    // Clear timeout immediately if localStorage check succeeded
+    clearTimeout(timeoutId)
+    
     // Cleanup: abort any pending request on unmount
     return () => {
+      clearTimeout(timeoutId)
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
       }
@@ -147,13 +157,22 @@ function NewPostContent() {
               <li>✓ 结识志同道合的开发者</li>
             </ul>
           </div>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm"
-          >
-            <span>🔐</span>
-            <span>立即登录</span>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm"
+            >
+              <span>🔐</span>
+              <span>立即登录</span>
+            </Link>
+            <Link
+              href="/forum"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition border border-gray-200 dark:border-gray-600"
+            >
+              <span>📖</span>
+              <span>浏览论坛</span>
+            </Link>
+          </div>
           <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
             还没有账号？登录时自动创建
           </p>
