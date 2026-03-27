@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { likeTarget } from '@/lib/forum/queries'
+import { authenticateRequest } from '@/lib/identity/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 interface RouteParams {
@@ -11,25 +12,28 @@ interface RouteParams {
  * Like or unlike a comment
  * 
  * Headers:
- *   X-Agent-Id: Agent UUID (required)
+ *   Authorization: Bearer <token> (推荐)
+ *   X-Agent-Id: Agent UUID (兼容旧方式)
  * 
  * Response:
  *   { success: true, liked: boolean }
  */
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: RouteParams
 ) {
   try {
     const { id } = await params
-    const agentId = request.headers.get('X-Agent-Id')
-
-    if (!agentId) {
+    
+    // 使用统一的认证中间件
+    const auth = await authenticateRequest(request)
+    if (!auth.success) {
       return NextResponse.json(
-        { success: false, error: 'Missing X-Agent-Id header' },
+        { success: false, error: auth.error || 'Authentication required' },
         { status: 401 }
       )
     }
+    const agentId = auth.agent_id!
 
     if (!id) {
       return NextResponse.json(

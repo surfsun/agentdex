@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
-import { verifyApiKey, createIdentityToken } from '@/lib/identity/queries'
+import { NextRequest, NextResponse } from 'next/server'
+import { authenticateRequest } from '@/lib/identity/auth'
+import { createIdentityToken } from '@/lib/identity/queries'
 
 export const maxDuration = 10
 
@@ -8,7 +9,7 @@ export const maxDuration = 10
  * 创建临时身份令牌（用于第三方服务认证）
  * 
  * 请求头:
- * - Authorization: Bearer <api_key>
+ * - Authorization: Bearer <token> (ak_xxx 或 at_xxx)
  * 
  * 请求体:
  * - service: 目标服务名称 (可选)
@@ -18,31 +19,14 @@ export const maxDuration = 10
  * - token: 临时身份令牌
  * - expires_at: 过期时间
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    // 验证 API Key
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader) {
+    // 使用统一的认证中间件
+    const auth = await authenticateRequest(request)
+    
+    if (!auth.success || !auth.agent_identity) {
       return NextResponse.json(
-        { success: false, error: 'Missing Authorization header' },
-        { status: 401 }
-      )
-    }
-
-    const parts = authHeader.split(' ')
-    if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
-      return NextResponse.json(
-        { success: false, error: 'Invalid Authorization format' },
-        { status: 401 }
-      )
-    }
-
-    const apiKey = parts[1]
-    const verifyResult = await verifyApiKey(apiKey)
-
-    if (!verifyResult.valid || !verifyResult.agent_identity) {
-      return NextResponse.json(
-        { success: false, error: verifyResult.error || 'Invalid API key' },
+        { success: false, error: auth.error || 'Authentication required' },
         { status: 401 }
       )
     }
@@ -64,7 +48,7 @@ export async function POST(request: Request) {
 
     // 创建令牌
     const token = await createIdentityToken(
-      verifyResult.agent_identity.id,
+      auth.agent_identity.id,
       expiresInHours,
       body.service
     )

@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { authenticateRequest } from '@/lib/identity/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 interface RouteParams {
@@ -57,22 +58,25 @@ export async function GET(
  * Update a comment (only by author)
  * 
  * Headers:
- *   X-Agent-Id: Agent UUID (required)
+ *   Authorization: Bearer <token> (推荐)
+ *   X-Agent-Id: Agent UUID (兼容旧方式)
  */
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: RouteParams
 ) {
   try {
     const { id } = await params
-    const agentId = request.headers.get('X-Agent-Id')
-
-    if (!agentId) {
+    
+    // 使用统一的认证中间件
+    const auth = await authenticateRequest(request)
+    if (!auth.success) {
       return NextResponse.json(
-        { success: false, error: 'Missing X-Agent-Id header' },
+        { success: false, error: auth.error || 'Authentication required' },
         { status: 401 }
       )
     }
+    const agentId = auth.agent_id!
 
     if (!id) {
       return NextResponse.json(
@@ -135,22 +139,25 @@ export async function PATCH(
  * Delete a comment (only by author)
  * 
  * Headers:
- *   X-Agent-Id: Agent UUID (required)
+ *   Authorization: Bearer <token> (推荐)
+ *   X-Agent-Id: Agent UUID (兼容旧方式)
  */
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: RouteParams
 ) {
   try {
     const { id } = await params
-    const agentId = request.headers.get('X-Agent-Id')
-
-    if (!agentId) {
+    
+    // 使用统一的认证中间件
+    const auth = await authenticateRequest(request)
+    if (!auth.success) {
       return NextResponse.json(
-        { success: false, error: 'Missing X-Agent-Id header' },
+        { success: false, error: auth.error || 'Authentication required' },
         { status: 401 }
       )
     }
+    const agentId = auth.agent_id!
 
     if (!id) {
       return NextResponse.json(

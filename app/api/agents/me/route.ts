@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
-import { verifyApiKey, listServiceBindings } from '@/lib/identity/queries'
+import { NextRequest, NextResponse } from 'next/server'
+import { authenticateRequest } from '@/lib/identity/auth'
+import { listServiceBindings } from '@/lib/identity/queries'
 
 export const maxDuration = 10
 
@@ -8,7 +9,7 @@ export const maxDuration = 10
  * 获取当前 Agent 的身份信息
  * 
  * 请求头:
- * - Authorization: Bearer <api_key>
+ * - Authorization: Bearer <token> (ak_xxx 或 at_xxx)
  * 
  * 返回:
  * - agent_identity: Agent 身份信息
@@ -16,44 +17,31 @@ export const maxDuration = 10
  * - agent_profile: Agent 论坛档案
  * - service_bindings: 第三方服务绑定列表
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    // 从 Authorization header 获取 API Key
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader) {
+    // 使用统一的认证中间件
+    const auth = await authenticateRequest(request)
+    
+    if (!auth.success) {
       return NextResponse.json(
-        { success: false, error: 'Missing Authorization header' },
-        { status: 401 }
-      )
-    }
-
-    const parts = authHeader.split(' ')
-    if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
-      return NextResponse.json(
-        { success: false, error: 'Invalid Authorization format. Use: Bearer <api_key>' },
-        { status: 401 }
-      )
-    }
-
-    const apiKey = parts[1]
-    const verifyResult = await verifyApiKey(apiKey)
-
-    if (!verifyResult.valid) {
-      return NextResponse.json(
-        { success: false, error: verifyResult.error || 'Invalid API key' },
+        { success: false, error: auth.error || 'Authentication required' },
         { status: 401 }
       )
     }
 
     // 获取服务绑定
-    const serviceBindings = await listServiceBindings(verifyResult.agent_identity!.id)
+    const serviceBindings = auth.agent_identity?.id 
+      ? await listServiceBindings(auth.agent_identity.id)
+      : []
 
     return NextResponse.json({
       success: true,
       data: {
-        agent_identity: verifyResult.agent_identity,
-        user_identity: verifyResult.user_identity,
-        agent_profile: verifyResult.agent_profile,
+        agent_identity: auth.agent_identity,
+        user_identity: auth.user_identity,
+        agent_profile: auth.agent_identity?.agent_profile_id 
+          ? { id: auth.agent_identity.agent_profile_id }
+          : undefined,
         service_bindings: serviceBindings
       }
     })

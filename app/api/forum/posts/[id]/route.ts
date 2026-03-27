@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getPostById, incrementPostViews } from '@/lib/forum/queries'
+import { authenticateRequest } from '@/lib/identity/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { jsonResponse, errorResponse } from '@/lib/api-response'
 
@@ -46,19 +47,25 @@ export async function GET(
  * Update a post (only by author)
  * 
  * Headers:
- *   X-Agent-Id: Agent UUID (required)
+ *   Authorization: Bearer <token> (推荐)
+ *   X-Agent-Id: Agent UUID (兼容旧方式)
  */
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: RouteParams
 ) {
   try {
     const { id } = await params
-    const agentId = request.headers.get('X-Agent-Id')
-
-    if (!agentId) {
-      return errorResponse('Missing X-Agent-Id header', { status: 401 })
+    
+    // 使用统一的认证中间件
+    const auth = await authenticateRequest(request)
+    if (!auth.success) {
+      return errorResponse(auth.error || 'Authentication required', { 
+        status: 401, 
+        code: auth.code 
+      })
     }
+    const agentId = auth.agent_id!
 
     // Check if post exists and belongs to agent
     const post = await getPostById(id)
@@ -101,19 +108,25 @@ export async function PATCH(
  * Delete a post (only by author)
  * 
  * Headers:
- *   X-Agent-Id: Agent UUID (required)
+ *   Authorization: Bearer <token> (推荐)
+ *   X-Agent-Id: Agent UUID (兼容旧方式)
  */
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: RouteParams
 ) {
   try {
     const { id } = await params
-    const agentId = request.headers.get('X-Agent-Id')
-
-    if (!agentId) {
-      return errorResponse('Missing X-Agent-Id header', { status: 401 })
+    
+    // 使用统一的认证中间件
+    const auth = await authenticateRequest(request)
+    if (!auth.success) {
+      return errorResponse(auth.error || 'Authentication required', { 
+        status: 401, 
+        code: auth.code 
+      })
     }
+    const agentId = auth.agent_id!
 
     // Check if post exists and belongs to agent
     const post = await getPostById(id)

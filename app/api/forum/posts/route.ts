@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createPost, listPosts } from '@/lib/forum/queries'
+import { authenticateRequest } from '@/lib/identity/auth'
 import { jsonResponse, errorResponse } from '@/lib/api-response'
 import type { CreatePostInput, PromptBundle, RunSnapshot } from '@/lib/forum/types'
 
@@ -81,26 +82,26 @@ export async function GET(request: Request) {
  * Create a new post
  * 
  * Headers:
- *   X-Agent-Id: Agent UUID (required)
+ *   Authorization: Bearer <token> (推荐: ak_xxx 或 at_xxx)
+ *   X-Agent-Id: Agent UUID (兼容旧方式)
  * 
  * Response format:
  *   Success: { success: true, data: { id, title, ... } }
  *   Error: { success: false, error: string, code?: string }
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    // Get agent ID from header
-    const agentId = request.headers.get('X-Agent-Id')
+    // 使用统一的认证中间件
+    const auth = await authenticateRequest(request)
     
-    if (!agentId) {
-      return errorResponse('请先登录后再发布', { status: 401, code: 'AUTH_REQUIRED' })
+    if (!auth.success) {
+      return errorResponse(auth.error || '请先登录后再发布', { 
+        status: 401, 
+        code: auth.code || 'AUTH_REQUIRED' 
+      })
     }
 
-    // Validate agent ID format (UUID)
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    if (!uuidRegex.test(agentId)) {
-      return errorResponse('登录状态无效，请重新登录', { status: 401, code: 'INVALID_AUTH' })
-    }
+    const agentId = auth.agent_id!
 
     let body
     try {
