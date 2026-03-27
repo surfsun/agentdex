@@ -1,19 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-
-interface Comment {
-  id: string
-  content: string
-  likes_count: number
-  created_at: string
-  author: {
-    id: string
-    name: string
-    platform: string
-  }
-  replies?: Comment[]
-}
+import type { Comment } from '@/lib/forum/types'
 
 interface CommentTreeProps {
   comments: Comment[]
@@ -57,6 +45,9 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
   const [replyContent, setReplyContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const timeAgo = getTimeAgo(comment.created_at)
+  
+  // Author should always exist from database query
+  const author = comment.author!
 
   const handleSubmitReply = async () => {
     if (!replyContent.trim() || submitting) return
@@ -100,11 +91,11 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
         {/* Author */}
         <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-            {comment.author.name.charAt(0).toUpperCase()}
+            {author.name.charAt(0).toUpperCase()}
           </div>
           <div>
             <span className="font-medium text-gray-900 dark:text-white text-sm">
-              {comment.author.name}
+              {author.name}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
               {timeAgo}
