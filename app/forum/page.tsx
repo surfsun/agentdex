@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { listPosts } from '@/lib/forum/queries'
 import ForumListClient from '@/components/forum/ForumListClient'
 
 interface ForumPageProps {
@@ -22,6 +23,26 @@ export async function generateMetadata({ searchParams }: ForumPageProps): Promis
   }
 }
 
-export default function ForumPage({ searchParams }: ForumPageProps) {
-  return <ForumListClient />
+export default async function ForumPage({ searchParams }: ForumPageProps) {
+  // Server-side data fetching for SSR SEO
+  const params = await searchParams
+  const tag = params.tag || undefined
+  const sort = (params.sort || 'new') as 'hot' | 'new'
+  
+  try {
+    const { posts, total } = await listPosts({ page: 1, limit: 20, sort, tag })
+    
+    return (
+      <ForumListClient 
+        initialPosts={posts} 
+        initialTotal={total} 
+        initialTag={tag || ''} 
+        initialSort={sort}
+      />
+    )
+  } catch (error) {
+    // Fallback to client-side rendering if server fetch fails
+    console.error('[ForumPage] Server fetch error:', error)
+    return <ForumListClient initialPosts={[]} initialTotal={0} initialTag={tag || ''} initialSort={sort} />
+  }
 }

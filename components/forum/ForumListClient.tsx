@@ -4,25 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
-
-interface Post {
-  id: string
-  title: string
-  content: string
-  tags: string[]
-  likes_count: number
-  comments_count: number
-  views_count: number
-  pinned?: boolean
-  post_type?: 'normal' | 'structured'
-  created_at: string
-  author: {
-    id: string
-    name: string
-    platform: string
-    avatar_url: string | null
-  }
-}
+import type { Post } from '@/lib/forum/types'
 
 // Quick action buttons for empty state - link to /forum/new with pre-selected tag
 const QUICK_ACTIONS = [
@@ -31,31 +13,51 @@ const QUICK_ACTIONS = [
   { icon: '💡', text: '发布教程', tag: '学习笔记', description: '分享学习心得' },
 ]
 
-function ForumListContent() {
+interface ForumListClientProps {
+  initialPosts: Post[]
+  initialTotal: number
+  initialTag: string
+  initialSort: 'hot' | 'new'
+}
+
+function ForumListContent({ initialPosts, initialTotal, initialTag, initialSort }: ForumListClientProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
+  // Use initial data from SSR for first render, then allow client updates
+  const [posts, setPosts] = useState<Post[]>(initialPosts)
+  const [loading, setLoading] = useState(false) // Start with loaded state if we have initial data
   const [error, setError] = useState<string | null>(null)
-  const [total, setTotal] = useState(0)
+  const [total, setTotal] = useState(initialTotal)
   const [page, setPage] = useState(1)
-  const [sort, setSort] = useState<'hot' | 'new'>(searchParams.get('sort') as 'hot' | 'new' || 'new')
-  const [selectedTag, setSelectedTag] = useState<string>(searchParams.get('tag') || '')
+  const [sort, setSort] = useState<'hot' | 'new'>(initialSort)
+  const [selectedTag, setSelectedTag] = useState<string>(initialTag)
   const [hoveredTag, setHoveredTag] = useState<string | null>(null)
   const pageSize = 20
+  
+  // Track if we need to fetch fresh data after initial SSR
+  const [needsFetch, setNeedsFetch] = useState(false)
 
+  // Sync with URL params after hydration
   useEffect(() => {
     const tag = searchParams.get('tag') || ''
     const sortBy = searchParams.get('sort') as 'hot' | 'new' || 'new'
-    setSelectedTag(tag)
-    setSort(sortBy)
-  }, [searchParams])
+    
+    // If URL params differ from initial SSR params, fetch fresh data
+    if (tag !== initialTag || sortBy !== initialSort) {
+      setSelectedTag(tag)
+      setSort(sortBy)
+      setNeedsFetch(true)
+    }
+  }, [searchParams, initialTag, initialSort])
 
+  // Fetch posts when sort/tag/page changes (client-side navigation)
   useEffect(() => {
-    fetchPosts()
+    if (needsFetch || page > 1) {
+      fetchPosts()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sort, selectedTag, page])
+  }, [sort, selectedTag, page, needsFetch])
 
   async function fetchPosts() {
     setLoading(true)
@@ -382,14 +384,14 @@ function ForumListContent() {
   )
 }
 
-export default function ForumListClient() {
+export default function ForumListClient(props: ForumListClientProps) {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-gray-400">加载中...</div>
       </div>
     }>
-      <ForumListContent />
+      <ForumListContent {...props} />
     </Suspense>
   )
 }
