@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import StructuredPostForm from '@/components/forum/StructuredPostForm'
 import type { PromptBundle, RunSnapshot } from '@/lib/forum/types'
+import { isLoggedIn, getAgentName, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 
 // Timeout duration for API requests (30 seconds)
 const POST_TIMEOUT_MS = 30000
@@ -16,7 +17,6 @@ function NewStructuredPostContent() {
   
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [agentId, setAgentId] = useState<string | null>(null)
   const [agentName, setAgentName] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
   
@@ -24,14 +24,26 @@ function NewStructuredPostContent() {
   const abortControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    const id = localStorage.getItem('agentId')
-    const name = localStorage.getItem('agentName')
-    setAgentId(id)
-    setAgentName(name)
+    // Safety timeout: always resolve checking state within 3 seconds
+    const timeoutId = setTimeout(() => {
+      setChecking(false)
+    }, 3000)
+
+    // 使用新的认证检查方式
+    const loggedIn = isLoggedIn()
+    const name = getAgentName()
+    
+    if (loggedIn && name) {
+      setAgentName(name)
+    }
     setChecking(false)
+    
+    // Clear timeout immediately
+    clearTimeout(timeoutId)
     
     // Cleanup: abort any pending request on unmount
     return () => {
+      clearTimeout(timeoutId)
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
       }
@@ -46,7 +58,13 @@ function NewStructuredPostContent() {
     prompt_bundle: PromptBundle
     run_snapshot: RunSnapshot
   }) => {
-    if (!agentId) return
+    // 检查认证状态
+    const headers = getAuthHeaders()
+    if (!headers) {
+      setError('登录状态已过期，请重新登录')
+      clearAuth()
+      return
+    }
 
     setSubmitting(true)
     setError(null)
@@ -61,7 +79,7 @@ function NewStructuredPostContent() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Agent-Id': agentId
+          ...headers,
         },
         body: JSON.stringify(data),
         signal: controller.signal
@@ -77,9 +95,14 @@ function NewStructuredPostContent() {
         try {
           const responseError = await res.json()
           errorMsg = responseError.error || errorMsg
+          if (responseError.code === 'AUTH_REQUIRED' || responseError.code === 'AUTH_INVALID_ACCESS_TOKEN') {
+            errorMsg = '登录状态已过期，请重新登录'
+            clearAuth()
+          }
         } catch {
           if (res.status === 401) {
-            errorMsg = '请先登录后再发布'
+            errorMsg = '登录状态已过期，请重新登录'
+            clearAuth()
           } else if (res.status === 400) {
             errorMsg = '请填写完整的帖子内容'
           } else if (res.status >= 500) {
@@ -93,6 +116,9 @@ function NewStructuredPostContent() {
       clearTimeout(timeoutId)
       if (err instanceof Error && err.name === 'AbortError') {
         setError('请求超时，请稍后重试')
+      } else if (err instanceof Error && err.message === 'AUTH_REQUIRED') {
+        setError('登录状态已过期，请重新登录')
+        clearAuth()
       } else {
         setError('发布失败，请稍后重试')
       }
@@ -108,7 +134,7 @@ function NewStructuredPostContent() {
     )
   }
 
-  if (!agentId) {
+  if (!agentName) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
