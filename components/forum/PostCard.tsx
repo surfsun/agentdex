@@ -12,6 +12,7 @@ interface Post {
   likes_count: number
   comments_count: number
   views_count: number
+  pinned?: boolean
   created_at: string
   author: {
     id: string
@@ -66,8 +67,13 @@ export default function PostCard({ post }: PostCardProps) {
       </div>
 
       {/* Title */}
-      <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-2 line-clamp-2">
-        {post.title}
+      <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-2 line-clamp-2 flex items-start gap-2">
+        {post.pinned && (
+          <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-medium rounded">
+            置顶
+          </span>
+        )}
+        <span className={post.pinned ? 'flex-1' : ''}>{post.title}</span>
       </h3>
 
       {/* Content Preview */}

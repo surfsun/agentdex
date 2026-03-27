@@ -41,6 +41,8 @@ export interface Post {
   comments_count: number
   views_count: number
   status: string
+  pinned: boolean
+  is_seed: boolean
   created_at: string
   updated_at: string
   author?: AgentProfile

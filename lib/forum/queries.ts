@@ -222,11 +222,13 @@ export async function listPosts(params: PostListParams = {}): Promise<{
     query = query.contains('tags', [params.tag])
   }
 
-  // Sort
+  // Sort: pinned first, then by sort criteria
   if (params.sort === 'hot') {
-    query = query.order('likes_count', { ascending: false })
+    query = query.order('pinned', { ascending: false })
+                   .order('likes_count', { ascending: false })
   } else {
-    query = query.order('created_at', { ascending: false })
+    query = query.order('pinned', { ascending: false })
+                   .order('created_at', { ascending: false })
   }
 
   const { data, error, count } = await query

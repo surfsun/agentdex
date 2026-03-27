@@ -71,19 +71,32 @@ export default function NewPostPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
-          <div className="text-4xl mb-4">🔒</div>
+          <div className="text-5xl mb-4">👋</div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            需要登录
+            登录后发布帖子
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
-            请先登录后再发布帖子
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
+            加入 AI Agent 知识社区，分享你的发现与观点
           </p>
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6 text-left">
+            <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">成为社区成员，你可以：</h3>
+            <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+              <li>✓ 发布帖子和评论</li>
+              <li>✓ 分享你的 AI Agent 使用经验</li>
+              <li>✓ 获取社区帮助和建议</li>
+              <li>✓ 结识志同道合的开发者</li>
+            </ul>
+          </div>
           <Link
             href="/login"
-            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm"
           >
-            去登录
+            <span>🔐</span>
+            <span>立即登录</span>
           </Link>
+          <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
+            还没有账号？登录时自动创建
+          </p>
         </div>
       </div>
     )

@@ -13,6 +13,7 @@ interface Post {
   likes_count: number
   comments_count: number
   views_count: number
+  pinned?: boolean
   created_at: string
   author: {
     id: string
@@ -29,6 +30,14 @@ interface PostsResponse {
   pageSize: number
 }
 
+// Topic suggestions for empty state
+const TOPIC_SUGGESTIONS = [
+  { icon: '🔧', text: '分享你常用的 AI 工具' },
+  { icon: '💡', text: '讨论一个技术方案' },
+  { icon: '🚀', text: '展示你的项目' },
+  { icon: '❓', text: '提出你的问题' },
+]
+
 function ForumListContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -39,6 +48,7 @@ function ForumListContent() {
   const [page, setPage] = useState(1)
   const [sort, setSort] = useState<'hot' | 'new'>(searchParams.get('sort') as 'hot' | 'new' || 'new')
   const [selectedTag, setSelectedTag] = useState<string>(searchParams.get('tag') || '')
+  const [hoveredTag, setHoveredTag] = useState<string | null>(null)
   const pageSize = 20
 
   useEffect(() => {
@@ -110,7 +120,7 @@ function ForumListContent() {
                 <span>💬</span> 论坛
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                共 {total} 篇帖子
+                AI Agent 知识交流社区 · 共 {total} 篇帖子
               </p>
             </div>
             <Link
@@ -148,7 +158,7 @@ function ForumListContent() {
         </div>
       </div>
 
-      {/* Tag Filter */}
+      {/* Tag Filter with Tooltips */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-5xl mx-auto px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -156,19 +166,31 @@ function ForumListContent() {
             {PRESET_TAGS.map(tag => {
               const colors = getTagColorClasses(tag.id)
               const isSelected = selectedTag === tag.name
+              const isHovered = hoveredTag === tag.id
               return (
-                <button
-                  key={tag.id}
-                  onClick={() => handleTagClick(tag.name)}
-                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition ${
-                    isSelected
-                      ? 'ring-2 ring-blue-500 ring-offset-1'
-                      : 'hover:opacity-80'
-                  } ${colors.bg} ${colors.text}`}
-                >
-                  <span>{tag.icon}</span>
-                  <span>{tag.name}</span>
-                </button>
+                <div key={tag.id} className="relative">
+                  <button
+                    onClick={() => handleTagClick(tag.name)}
+                    onMouseEnter={() => setHoveredTag(tag.id)}
+                    onMouseLeave={() => setHoveredTag(null)}
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition ${
+                      isSelected
+                        ? 'ring-2 ring-blue-500 ring-offset-1'
+                        : 'hover:opacity-80'
+                    } ${colors.bg} ${colors.text}`}
+                  >
+                    <span>{tag.icon}</span>
+                    <span>{tag.name}</span>
+                  </button>
+                  {/* Tag Description Tooltip */}
+                  {isHovered && (
+                    <div className="absolute z-10 top-full left-0 mt-1 p-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg whitespace-nowrap">
+                      <div className="font-medium mb-1">{tag.name}</div>
+                      <div className="text-gray-300">{tag.description}</div>
+                      <div className="text-gray-400 mt-1 text-[10px]">点击筛选</div>
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>
@@ -187,19 +209,37 @@ function ForumListContent() {
             ))}
           </div>
         ) : posts.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
-            <div className="text-4xl mb-4">📭</div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              暂无帖子
+          // Improved Empty State UI
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+            <div className="text-5xl mb-4">🌱</div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              {selectedTag ? `「${selectedTag}」还没有帖子` : '还没有帖子，成为第一个发帖的人！'}
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
-              {selectedTag ? `标签「${selectedTag}」下还没有帖子` : '还没有人发布帖子'}
+            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              {selectedTag 
+                ? `来分享一篇关于「${selectedTag}」的内容吧`
+                : '这是一个全新的论坛，你的分享将帮助更多人了解 AI Agent'}
             </p>
+            
+            {/* Topic Suggestions */}
+            <div className="flex flex-wrap justify-center gap-3 mb-6">
+              {TOPIC_SUGGESTIONS.map((topic, i) => (
+                <div 
+                  key={i}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm text-gray-600 dark:text-gray-400"
+                >
+                  <span>{topic.icon}</span>
+                  <span>{topic.text}</span>
+                </div>
+              ))}
+            </div>
+            
             <Link
               href="/forum/new"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition shadow-sm"
             >
-              发布第一篇帖子
+              <span>✍️</span>
+              <span>发布第一篇帖子</span>
             </Link>
           </div>
         ) : (
@@ -211,8 +251,14 @@ function ForumListContent() {
                   className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:border-gray-300 dark:hover:border-gray-600 transition"
                 >
                   <Link href={`/forum/post/${post.id}`}>
-                    <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2">
-                      {post.title}
+                    <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-2 hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2 flex items-start gap-2">
+                      {/* Pinned Badge */}
+                      {post.pinned && (
+                        <span className="inline-flex items-center shrink-0 px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-medium rounded">
+                          置顶
+                        </span>
+                      )}
+                      <span className={post.pinned ? 'flex-1' : ''}>{post.title}</span>
                     </h2>
                   </Link>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
