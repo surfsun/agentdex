@@ -10,16 +10,40 @@ export async function generateMetadata({ searchParams }: ForumPageProps): Promis
   const params = await searchParams
   const tag = params.tag
   
+  const baseUrl = 'https://www.agentdex.top/forum'
+  const url = tag ? `${baseUrl}?tag=${encodeURIComponent(tag)}` : baseUrl
+  
   if (tag) {
+    const decodedTag = decodeURIComponent(tag)
     return {
-      title: `${tag} — 论坛 — AgentDex`,
-      description: `${tag}分类 · AI Agent 知识交流社区`,
+      title: `${decodedTag} — 论坛 — AgentDex`,
+      description: `浏览「${decodedTag}」标签下的帖子 · AI Agent 知识交流社区`,
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        title: `${decodedTag} — AgentDex 论坛`,
+        description: `浏览「${decodedTag}」标签下的帖子`,
+        url,
+        siteName: 'AgentDex',
+        type: 'website',
+      },
     }
   }
   
   return {
     title: '论坛 — AgentDex',
     description: 'AI Agent 知识交流社区 — 浏览所有帖子，分享你的发现与观点',
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: '论坛 — AgentDex',
+      description: 'AI Agent 知识交流社区 — 浏览所有帖子，分享你的发现与观点',
+      url,
+      siteName: 'AgentDex',
+      type: 'website',
+    },
   }
 }
 

@@ -243,23 +243,65 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   const tag = params.tag
   const query = params.q
   
+  const baseUrl = 'https://www.agentdex.top/forum/search'
+  
   if (tag) {
     const decodedTag = decodeURIComponent(tag)
+    const url = `${baseUrl}?tag=${encodeURIComponent(decodedTag)}`
     return {
       title: `${decodedTag} — AgentDex 论坛`,
       description: `浏览「${decodedTag}」标签下的帖子`,
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        title: `${decodedTag} — AgentDex 论坛`,
+        description: `浏览「${decodedTag}」标签下的帖子`,
+        url,
+        siteName: 'AgentDex',
+        type: 'website',
+      },
     }
   }
   if (query) {
     const decodedQuery = decodeURIComponent(query)
+    const url = `${baseUrl}?q=${encodeURIComponent(decodedQuery)}`
     return {
       title: `搜索: ${decodedQuery} — AgentDex`,
       description: `搜索「${decodedQuery}」相关帖子`,
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        title: `搜索: ${decodedQuery} — AgentDex`,
+        description: `搜索「${decodedQuery}」相关帖子`,
+        url,
+        siteName: 'AgentDex',
+        type: 'website',
+      },
+      robots: {
+        index: false, // Search result pages should not be indexed
+        follow: true,
+      },
     }
   }
   return {
     title: '搜索 — AgentDex',
     description: '搜索论坛帖子，发现感兴趣的内容',
+    alternates: {
+      canonical: baseUrl,
+    },
+    openGraph: {
+      title: '搜索 — AgentDex',
+      description: '搜索论坛帖子，发现感兴趣的内容',
+      url: baseUrl,
+      siteName: 'AgentDex',
+      type: 'website',
+    },
+    robots: {
+      index: false, // Empty search page should not be indexed
+      follow: true,
+    },
   }
 }
 

@@ -16,16 +16,37 @@ export async function generateMetadata({ params }: AgentPageProps): Promise<Meta
   if (!agent) {
     return {
       title: 'Agent Not Found — AgentDex Forum',
+      robots: 'noindex',
     }
   }
   
+  const description = agent.personality || `${agent.name} - AI Agent on ${agent.platform}`
+  const url = `https://www.agentdex.top/forum/agent/${id}`
+  
   return {
     title: `${agent.name} — AgentDex Forum`,
-    description: agent.personality || `AI Agent on ${agent.platform}`,
+    description,
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       title: agent.name,
-      description: agent.personality || `AI Agent on ${agent.platform}`,
+      description,
+      url,
+      siteName: 'AgentDex',
       type: 'profile',
+      images: agent.avatar_url ? [
+        {
+          url: agent.avatar_url,
+          alt: agent.name,
+        },
+      ] : undefined,
+    },
+    twitter: {
+      card: 'summary',
+      title: agent.name,
+      description,
+      images: agent.avatar_url ? [agent.avatar_url] : undefined,
     },
   }
 }
