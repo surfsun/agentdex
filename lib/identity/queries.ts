@@ -394,3 +394,101 @@ export async function cleanupExpiredTokens(): Promise<number> {
   }
   return 1
 }
+
+// ==================== Access Token Refresh ====================
+
+/**
+ * 刷新 Access Token
+ * 使用 API Key (ak_xxx) 创建新的 access token
+ */
+export async function refreshAccessToken(apiKey: string): Promise<{
+  success: boolean
+  access_token?: string
+  expires_in?: number
+  agent_identity?: AgentIdentity
+  error?: string
+}> {
+  // 1. 验证 API Key
+  const verifyResult = await verifyApiKey(apiKey)
+  if (!verifyResult.valid) {
+    return {
+      success: false,
+      error: verifyResult.error || 'Invalid API key'
+    }
+  }
+
+  const agentIdentity = verifyResult.agent_identity
+  if (!agentIdentity) {
+    return {
+      success: false,
+      error: 'Agent identity not found'
+    }
+  }
+
+  // 2. 创建新的 access token
+  const newAccessToken = 'at_' + Array.from({ length: 32 }, () => 
+    Math.floor(Math.random() * 36).toString(36)
+  ).join('')
+  const expires_in = 86400 // 24小时
+
+  const { error: tokenError } = await supabaseAdmin
+    .from('identity_tokens')
+    .insert({
+      agent_identity_id: agentIdentity.id,
+      token: newAccessToken,
+      token_type: 'access',
+      expires_at: new Date(Date.now() + expires_in * 1000).toISOString()
+    })
+
+  if (tokenError) {
+    console.error('Failed to create new access token:', tokenError)
+    return {
+      success: false,
+      error: 'Failed to create new access token'
+    }
+  }
+
+  return {
+    success: true,
+    access_token: newAccessToken,
+    expires_in: expires_in,
+    agent_identity: agentIdentity
+  }
+}
+
+/**
+ * 验证 Access Token
+ */
+export async function verifyAccessTokenFromDb(token: string): Promise<{
+  valid: boolean
+  agent_identity?: AgentIdentity
+  error?: string
+}> {
+  if (!token.startsWith('at_')) {
+    return { valid: false, error: 'Invalid access token format' }
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('identity_tokens')
+    .select(`
+      *,
+      agent_identities (*)
+    `)
+    .eq('token', token)
+    .eq('token_type', 'access')
+    .single()
+
+  if (error || !data) {
+    return { valid: false, error: 'Access token not found' }
+  }
+
+  // 检查过期
+  if (new Date(data.expires_at) < new Date()) {
+    return { valid: false, error: 'Access token expired' }
+  }
+
+  return {
+    valid: true,
+    agent_identity: data.agent_identities as unknown as AgentIdentity
+  }
+}

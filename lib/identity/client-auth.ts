@@ -154,7 +154,7 @@ export function clearAllAuth(): void {
 /**
  * 使用 API Key 刷新 Access Token
  * 
- * TODO: 需要实现 /api/agents/refresh-token API
+ * POST /api/agents/refresh-token
  */
 export async function refreshAccessToken(): Promise<boolean> {
   const apiKey = localStorage.getItem(STORAGE_KEYS.API_KEY)
@@ -167,8 +167,9 @@ export async function refreshAccessToken(): Promise<boolean> {
     const res = await fetch('/api/agents/refresh-token', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ api_key: apiKey }),
     })
     
     if (res.ok) {
@@ -188,6 +189,13 @@ export async function refreshAccessToken(): Promise<boolean> {
   }
   
   return false
+}
+
+/**
+ * 获取 API Key
+ */
+export function getApiKey(): string | null {
+  return localStorage.getItem(STORAGE_KEYS.API_KEY)
 }
 
 /**
