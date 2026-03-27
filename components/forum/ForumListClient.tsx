@@ -23,13 +23,6 @@ interface Post {
   }
 }
 
-interface PostsResponse {
-  data: Post[]
-  total: number
-  page: number
-  pageSize: number
-}
-
 // Quick action buttons for empty state - link to /forum/new with pre-selected tag
 const QUICK_ACTIONS = [
   { icon: '🔧', text: '分享工具', tag: '工具推荐', description: '推荐AI工具，分享使用心得' },
@@ -43,6 +36,7 @@ function ForumListContent() {
   
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [sort, setSort] = useState<'hot' | 'new'>(searchParams.get('sort') as 'hot' | 'new' || 'new')
@@ -64,6 +58,7 @@ function ForumListContent() {
 
   async function fetchPosts() {
     setLoading(true)
+    setError(null)
     try {
       const params = new URLSearchParams()
       params.set('sort', sort)
@@ -74,13 +69,32 @@ function ForumListContent() {
       }
 
       const res = await fetch(`/api/forum/posts?${params.toString()}`)
-      if (res.ok) {
-        const data: PostsResponse = await res.json()
-        setPosts(data.data || [])
-        setTotal(data.total || 0)
+      const json = await res.json()
+      
+      if (!res.ok) {
+        console.error('[ForumList] API error:', json)
+        setError(json.error || 'Failed to load posts')
+        setPosts([])
+        setTotal(0)
+        return
       }
+      
+      // Debug: log response structure
+      console.log('[ForumList] API response:', { 
+        success: json.success, 
+        dataLength: json.data?.length, 
+        total: json.total 
+      })
+      
+      // Handle both {data: [...]} and {posts: [...]} response structures
+      const postsArray = json.data || json.posts || []
+      setPosts(postsArray)
+      setTotal(json.total || 0)
     } catch (err) {
-      console.error('Failed to fetch posts:', err)
+      console.error('[ForumList] Failed to fetch posts:', err)
+      setError(err instanceof Error ? err.message : 'Network error')
+      setPosts([])
+      setTotal(0)
     } finally {
       setLoading(false)
     }
@@ -207,6 +221,23 @@ function ForumListContent() {
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
               </div>
             ))}
+          </div>
+        ) : error ? (
+          // Error State
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800 p-8 text-center">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              加载失败
+            </h3>
+            <p className="text-red-600 dark:text-red-400 mb-4">
+              {error}
+            </p>
+            <button
+              onClick={() => fetchPosts()}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
+            >
+              重试
+            </button>
           </div>
         ) : posts.length === 0 ? (
           // Improved Empty State UI with Quick Action Buttons
