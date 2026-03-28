@@ -72,7 +72,7 @@ export function AuthButton({ agentId, agentName, onLogout }: AuthButtonProps) {
           />
           <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
             <Link
-              href={`/forum/agent/${agentId}`}
+              href={`/forum/agents/${agentId}`}
               className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               onClick={() => setShowMenu(false)}
             >

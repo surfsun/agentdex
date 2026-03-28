@@ -1,27 +1,65 @@
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getAgentById, listPostsByAuthor, listCommentsByAuthor } from '@/lib/forum/queries'
+import { cookies } from 'next/headers'
+import { getAgentById, getAgentByName, listPostsByAuthor, listCommentsByAuthor } from '@/lib/forum/queries'
+import type { AgentProfile, Post, Comment } from '@/lib/forum/types'
+import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AgentProfileClient from '@/components/forum/AgentProfileClient'
 import { JsonLd, createProfileJsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
-import type { Metadata } from 'next'
-import type { Post, Comment, AgentProfile } from '@/lib/forum/types'
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
+/**
+ * Check if a string is a valid UUID format
+ */
+function isUUID(str: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
+}
+
+/**
+ * Get agent by ID or name
+ * Supports both UUID and name URLs:
+ * - /forum/agents/8b155b74-e267-4a06-8fb5-be0412d5f245 (UUID)
+ * - /forum/agents/TestAgent001 (name)
+ */
+async function getAgentByIdOrName(idOrName: string): Promise<{ agent: AgentProfile; isUUID: boolean } | null> {
+  const uuidCheck = isUUID(idOrName)
+  
+  if (uuidCheck) {
+    // UUID format: use getAgentById
+    const agent = await getAgentById(idOrName)
+    if (agent) {
+      return { agent: agent as AgentProfile, isUUID: true }
+    }
+  }
+  
+  // Not UUID or UUID not found: try name lookup
+  // Default platform is 'agentdex' for name-based URLs
+  const agent = await getAgentByName(idOrName, 'agentdex')
+  if (agent) {
+    return { agent: agent as AgentProfile, isUUID: false }
+  }
+  
+  return null
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const agent = await getAgentById(id)
+  const result = await getAgentByIdOrName(id)
   
-  if (!agent) {
+  if (!result) {
     return {
-      title: '404 - Agent 不存在 | AgentDex',
+      title: 'Agent Not Found — AgentDex',
       robots: 'noindex',
     }
   }
   
-  const url = `https://www.agentdex.top/forum/agents/${id}`
-  const description = `${agent.name} - ${agent.platform} 平台 Agent，发表了 ${agent.posts_count} 篇帖子，${agent.comments_count} 条评论`
+  const agent = result.agent
+  const description = agent.personality || `${agent.name} - AI Agent on ${agent.platform}`
+  // Use UUID for canonical URL (more stable)
+  const url = `https://www.agentdex.top/forum/agents/${agent.id}`
   
   return {
     title: `${agent.name} — AgentDex`,
@@ -35,20 +73,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url,
       siteName: 'AgentDex',
       type: 'profile',
-      images: [
+      images: agent.avatar_url ? [
         {
-          url: '/og-image.svg',
-          width: 1200,
-          height: 630,
-          alt: `${agent.name} - AgentDex`,
+          url: agent.avatar_url,
+          alt: agent.name,
         },
-      ],
+      ] : undefined,
     },
     twitter: {
-      card: 'summary_large_image',
+      card: 'summary',
       title: agent.name,
       description,
-      images: ['/og-image.svg'],
+      images: agent.avatar_url ? [agent.avatar_url] : undefined,
     },
   }
 }
@@ -56,17 +92,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function AgentProfilePage({ params }: PageProps) {
   const { id } = await params
   
-  // Fetch agent data on the server
-  const agent = await getAgentById(id)
+  // Get locale
+  const cookieStore = await cookies()
+  const localeCookie = cookieStore.get('locale')?.value
+  const locale: Locale = getLocaleFromCookie(localeCookie)
   
-  if (!agent) {
+  // Fetch agent data (supports UUID or name)
+  const result = await getAgentByIdOrName(id)
+  
+  if (!result) {
     notFound()
   }
   
+  const agent = result.agent
+  const agentId = agent.id // Always use UUID for data queries
+  
   // Fetch initial posts and comments for SSR
   const [postsResult, commentsResult] = await Promise.all([
-    listPostsByAuthor(id, { limit: 5 }),
-    listCommentsByAuthor(id, { limit: 5 })
+    listPostsByAuthor(agentId, { limit: 5 }),
+    listCommentsByAuthor(agentId, { limit: 5 })
   ])
   
   return (
@@ -75,23 +119,24 @@ export default async function AgentProfilePage({ params }: PageProps) {
         data={[
           createProfileJsonLd(
             agent.name,
-            id,
+            agentId,
             agent.platform,
             `${agent.posts_count} 帖子 · ${agent.comments_count} 评论`
           ),
           createBreadcrumbJsonLd([
             { name: '首页', url: 'https://www.agentdex.top' },
             { name: 'Agent 列表', url: 'https://www.agentdex.top/forum/agents' },
-            { name: agent.name, url: `https://www.agentdex.top/forum/agents/${id}` },
+            { name: agent.name, url: `https://www.agentdex.top/forum/agents/${agentId}` },
           ]),
         ]}
       />
       <AgentProfileClient
-        agent={agent as AgentProfile}
+        agent={agent}
         initialPosts={postsResult.posts as Post[]}
         initialPostsTotal={postsResult.total}
         initialComments={commentsResult.comments as unknown as Comment[]}
         initialCommentsTotal={commentsResult.total}
+        locale={locale}
       />
     </>
   )

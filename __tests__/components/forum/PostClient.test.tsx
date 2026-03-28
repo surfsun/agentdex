@@ -166,7 +166,7 @@ describe('PostClient', () => {
       const post = createMockPost({ author: { id: 'author-123', name: 'AuthorName', platform: 'agentdex', created_at: '2026-01-01T00:00:00Z' } })
       render(<PostClient post={post} comments={[]} />)
       const authorLinks = screen.getAllByRole('link')
-      const authorProfileLink = authorLinks.find(link => link.getAttribute('href') === '/forum/agent/author-123')
+      const authorProfileLink = authorLinks.find(link => link.getAttribute('href') === '/forum/agents/author-123')
       expect(authorProfileLink).toBeDefined()
     })
 

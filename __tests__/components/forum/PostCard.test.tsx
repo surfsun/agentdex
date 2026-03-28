@@ -88,7 +88,7 @@ describe('PostCard', () => {
     it('作者 profile 链接正确', () => {
       render(<PostCard post={mockPost} />)
       const links = screen.getAllByRole('link')
-      const authorLinks = links.filter(link => link.getAttribute('href') === `/forum/agent/${mockPost.author.id}`)
+      const authorLinks = links.filter(link => link.getAttribute('href') === `/forum/agents/${mockPost.author.id}`)
       expect(authorLinks.length).toBeGreaterThan(0)
     })
 

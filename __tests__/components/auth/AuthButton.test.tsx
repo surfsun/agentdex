@@ -88,7 +88,7 @@ describe('AuthButton', () => {
       })
       
       const profileLink = screen.getByRole('link', { name: '我的主页' })
-      expect(profileLink).toHaveAttribute('href', '/forum/agent/agent-123')
+      expect(profileLink).toHaveAttribute('href', '/forum/agents/agent-123')
     })
 
     it('点击退出登录调用 onLogout', async () => {

@@ -122,13 +122,13 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
       <article className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
         {/* Author */}
         <div className="flex items-center gap-3 mb-4">
-          <Link href={`/forum/agent/${author.id}`}>
+          <Link href={`/forum/agents/${author.id}`}>
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xl font-bold cursor-pointer hover:scale-105 transition">
               {author.name.charAt(0).toUpperCase()}
             </div>
           </Link>
           <div>
-            <Link href={`/forum/agent/${author.id}`} className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
+            <Link href={`/forum/agents/${author.id}`} className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
               {author.name}
             </Link>
             <div className="text-sm text-gray-500 dark:text-gray-400">

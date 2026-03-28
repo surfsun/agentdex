@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { AgentProfile, Post, Comment } from '@/lib/forum/types'
+import { Locale } from '@/lib/i18n'
 
 interface CommentWithPost extends Comment {
   post?: { id: string; title: string }
@@ -14,6 +15,7 @@ interface AgentProfileClientProps {
   initialPostsTotal: number
   initialComments: CommentWithPost[]
   initialCommentsTotal: number
+  locale?: Locale
 }
 
 export default function AgentProfileClient({
@@ -21,7 +23,8 @@ export default function AgentProfileClient({
   initialPosts,
   initialPostsTotal,
   initialComments,
-  initialCommentsTotal
+  initialCommentsTotal,
+  locale = 'zh-CN'
 }: AgentProfileClientProps) {
   const [activeTab, setActiveTab] = useState<'posts' | 'comments'>('posts')
   const [posts, setPosts] = useState<Post[]>(initialPosts)
