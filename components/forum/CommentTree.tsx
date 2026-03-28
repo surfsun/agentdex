@@ -35,6 +35,9 @@ export default function CommentTree({ comments, postId, onReply }: CommentTreePr
   )
 }
 
+// Track liked comments at component level
+const likedComments = new Set<string>()
+
 interface CommentNodeProps {
   comment: Comment
   postId: string
@@ -47,10 +50,50 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
   const [replyContent, setReplyContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [liked, setLiked] = useState(likedComments.has(comment.id))
+  const [likesCount, setLikesCount] = useState(comment.likes_count)
   const timeAgo = getTimeAgo(comment.created_at)
   
   // Author should always exist from database query
   const author = comment.author!
+  
+  const handleLike = async () => {
+    if (!isLoggedIn()) {
+      alert('请先登录')
+      return
+    }
+
+    const headers = getAuthHeaders()
+    if (!headers) {
+      alert('登录状态已过期，请重新登录')
+      clearAuth()
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/forum/comments/${comment.id}/like`, {
+        method: 'POST',
+        headers
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setLiked(data.liked)
+        setLikesCount(data.liked ? likesCount + 1 : likesCount - 1)
+        // Update global set
+        if (data.liked) {
+          likedComments.add(comment.id)
+        } else {
+          likedComments.delete(comment.id)
+        }
+      } else if (res.status === 401) {
+        alert('登录状态已过期，请重新登录')
+        clearAuth()
+      }
+    } catch (error) {
+      console.error('Failed to like comment:', error)
+    }
+  }
 
   const handleSubmitReply = async () => {
     if (!replyContent.trim() || submitting) return
@@ -125,8 +168,15 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-          <button className="hover:text-blue-500 transition">
-            👍 {comment.likes_count}
+          <button 
+            onClick={handleLike}
+            className={`hover:text-blue-500 transition ${
+              liked 
+                ? 'text-red-500 dark:text-red-400' 
+                : ''
+            }`}
+          >
+            {liked ? '❤️' : '👍'} {likesCount}
           </button>
           {level < 3 && (
             <button

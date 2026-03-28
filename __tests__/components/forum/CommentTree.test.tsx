@@ -99,7 +99,7 @@ describe('CommentTree', () => {
     it('renders likes count', () => {
       const comment = createComment({ likes_count: 5 })
       render(<CommentTree comments={[comment]} postId="post-1" />)
-      expect(screen.getByText('👍 5')).toBeInTheDocument()
+      expect(screen.getByText('\ud83d\udc4d 5')).toBeInTheDocument()
     })
 
     it('renders multiple comments', () => {
@@ -539,6 +539,242 @@ describe('CommentTree', () => {
       await waitFor(() => {
         const textareas = screen.getAllByPlaceholderText('写下你的回复...')
         expect(textareas.length).toBe(2)
+      })
+    })
+  })
+
+  describe('Like Feature', () => {
+    it('renders like button with count', () => {
+      const comment = createComment({ likes_count: 5 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      // Match any emoji followed by 5
+      expect(screen.getByText(/5/)).toBeInTheDocument()
+    })
+
+    it('shows error when not logged in and clicking like', async () => {
+      mockIsLoggedIn.mockReturnValue(false)
+      
+      const comment = createComment({ likes_count: 3 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      // Find like button by its text content
+      const likeButton = screen.getByText(/3/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      // Should show alert (we can't easily test window.alert, so we verify it doesn't make API call)
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    it('shows error when auth headers are null and clicking like', async () => {
+      mockGetAuthHeaders.mockReturnValue(null)
+      
+      const comment = createComment({ likes_count: 3 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      const likeButton = screen.getByText(/3/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      expect(mockFetch).not.toHaveBeenCalled()
+      expect(mockClearAuth).toHaveBeenCalled()
+    })
+
+    it('likes comment successfully (new like)', async () => {
+      mockFetch.mockResolvedValue({ 
+        ok: true, 
+        json: () => Promise.resolve({ success: true, liked: true }) 
+      })
+      
+      const comment = createComment({ id: 'comment-456', likes_count: 3 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      const likeButton = screen.getByText(/3/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith('/api/forum/comments/comment-456/like', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer at_test' }
+        })
+        // After liking, count should be 4
+        expect(screen.getByText(/4/)).toBeInTheDocument()
+      })
+    })
+
+    it('unlikes comment successfully (remove like)', async () => {
+      // First render with liked state
+      const comment = createComment({ id: 'comment-456', likes_count: 5 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      // Click to like first
+      mockFetch.mockResolvedValue({ 
+        ok: true, 
+        json: () => Promise.resolve({ success: true, liked: true }) 
+      })
+      
+      const likeButton = screen.getByText(/5/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      await waitFor(() => {
+        expect(screen.getByText(/6/)).toBeInTheDocument()
+      })
+      
+      // Click again to unlike
+      mockFetch.mockResolvedValue({ 
+        ok: true, 
+        json: () => Promise.resolve({ success: true, liked: false }) 
+      })
+      
+      const unlikeButton = screen.getByText(/6/).closest('button')
+      fireEvent.click(unlikeButton!)
+      
+      await waitFor(() => {
+        expect(screen.getByText(/5/)).toBeInTheDocument()
+      })
+    })
+
+    it('clears auth on 401 response when liking', async () => {
+      mockFetch.mockResolvedValue({ ok: false, status: 401 })
+      
+      const comment = createComment({ likes_count: 3 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      const likeButton = screen.getByText(/3/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      await waitFor(() => {
+        expect(mockClearAuth).toHaveBeenCalled()
+      })
+    })
+
+    it('handles network error when liking gracefully', async () => {
+      mockFetch.mockRejectedValue(new Error('Network error'))
+      
+      const comment = createComment({ likes_count: 3 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      const likeButton = screen.getByText(/3/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalled()
+        // Count should remain unchanged
+        expect(screen.getByText(/3/)).toBeInTheDocument()
+      })
+    })
+
+    it('updates count correctly after like', async () => {
+      mockFetch.mockResolvedValue({ 
+        ok: true, 
+        json: () => Promise.resolve({ success: true, liked: true }) 
+      })
+      
+      const comment = createComment({ likes_count: 0 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      expect(screen.getByText(/0/)).toBeInTheDocument()
+      
+      const likeButton = screen.getByText(/0/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      await waitFor(() => {
+        expect(screen.getByText(/1/)).toBeInTheDocument()
+      })
+    })
+
+    it('shows heart emoji when liked', async () => {
+      mockFetch.mockResolvedValue({ 
+        ok: true, 
+        json: () => Promise.resolve({ success: true, liked: true }) 
+      })
+      
+      const comment = createComment({ likes_count: 2 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      const likeButton = screen.getByText(/2/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      await waitFor(() => {
+        // After liking, the button should have heart emoji class
+        const buttons = document.querySelectorAll('button')
+        let foundHeart = false
+        buttons.forEach(btn => {
+          if (btn.textContent?.includes('3') && btn.classList.contains('text-red-500')) {
+            foundHeart = true
+          }
+        })
+        expect(foundHeart).toBe(true)
+      })
+    })
+
+    it('like button has red color when liked', async () => {
+      mockFetch.mockResolvedValue({ 
+        ok: true, 
+        json: () => Promise.resolve({ success: true, liked: true }) 
+      })
+      
+      const comment = createComment({ likes_count: 2 })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      const likeButton = screen.getByText(/2/).closest('button')
+      fireEvent.click(likeButton!)
+      
+      await waitFor(() => {
+        const likedButton = screen.getByText(/3/).closest('button')
+        expect(likedButton).toHaveClass('text-red-500')
+      })
+    })
+
+    it('can like multiple comments independently', async () => {
+      mockFetch.mockResolvedValue({ 
+        ok: true, 
+        json: () => Promise.resolve({ success: true, liked: true }) 
+      })
+      
+      const comments = [
+        createComment({ id: 'comment-1', likes_count: 10 }),
+        createComment({ id: 'comment-2', likes_count: 20 }),
+      ]
+      render(<CommentTree comments={comments} postId="post-1" />)
+      
+      // Verify both like counts are rendered (using unique numbers)
+      expect(screen.getByText(/10/)).toBeInTheDocument()
+      expect(screen.getByText(/20/)).toBeInTheDocument()
+      
+      // Like first comment
+      const likeButton1 = screen.getByText(/10/).closest('button')
+      fireEvent.click(likeButton1!)
+      await waitFor(() => {
+        expect(screen.getByText(/11/)).toBeInTheDocument()
+      })
+      
+      // Like second comment
+      const likeButton2 = screen.getByText(/20/).closest('button')
+      fireEvent.click(likeButton2!)
+      await waitFor(() => {
+        expect(screen.getByText(/21/)).toBeInTheDocument()
+      })
+    })
+
+    it('likes in nested replies work correctly', async () => {
+      mockFetch.mockResolvedValue({ 
+        ok: true, 
+        json: () => Promise.resolve({ success: true, liked: true }) 
+      })
+      
+      const reply = createComment({ id: 'reply-1', likes_count: 0, parent_id: 'comment-1' })
+      const comment = createComment({ id: 'comment-1', likes_count: 5, replies: [reply] })
+      render(<CommentTree comments={[comment]} postId="post-1" />)
+      
+      // Verify both like counts are rendered
+      expect(screen.getByText(/5/)).toBeInTheDocument()
+      expect(screen.getByText(/0/)).toBeInTheDocument()
+      
+      // Like the reply - find the button containing 0
+      const replyLikeButton = screen.getByText(/0/).closest('button')
+      fireEvent.click(replyLikeButton!)
+      
+      await waitFor(() => {
+        expect(screen.getByText(/1/)).toBeInTheDocument()
       })
     })
   })
