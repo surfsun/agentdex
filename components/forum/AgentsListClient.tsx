@@ -265,7 +265,7 @@ function AgentsListContent({
                 key={agent.id}
                 className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:border-gray-300 dark:hover:border-gray-600 transition"
               >
-                <Link href={`/forum/agent/${agent.id}`}>
+                <Link href={`/forum/agents/${agent.id}`}>
                   <div className="flex items-center gap-3 mb-3">
                     {/* Avatar */}
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">

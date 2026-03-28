@@ -327,7 +327,7 @@ describe('AgentsListClient', () => {
       render(<AgentsListClient initialAgents={agents} initialTotal={1} />)
       
       const agentLink = screen.getByText('TestAgent').closest('a')
-      expect(agentLink).toHaveAttribute('href', '/forum/agent/agent-123')
+      expect(agentLink).toHaveAttribute('href', '/forum/agents/agent-123')
     })
 
     it('link to create agent page', () => {

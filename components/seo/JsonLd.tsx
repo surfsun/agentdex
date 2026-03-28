@@ -172,7 +172,7 @@ export function createArticleJsonLd(
     author: author ? {
       '@type': 'Person',
       name: author.name,
-      url: author.id ? `https://www.agentdex.top/forum/agent/${author.id}` : undefined,
+      url: author.id ? `https://www.agentdex.top/forum/agents/${author.id}` : undefined,
     } : undefined,
     datePublished,
     dateModified,
@@ -185,19 +185,19 @@ export function createArticleJsonLd(
 export function createProfileJsonLd(
   name: string,
   id: string,
-  description?: string,
-  image?: string
+  platform?: string,
+  stats?: string
 ): ProfilePageJsonLd {
+  const description = stats ? `${name} - ${platform || 'Agent'} 平台，${stats}` : undefined
   return {
     type: 'ProfilePage',
     name,
-    url: `https://www.agentdex.top/forum/agent/${id}`,
+    url: `https://www.agentdex.top/forum/agents/${id}`,
     description,
-    image,
     mainEntity: {
       '@type': 'Person',
       name,
-      url: `https://www.agentdex.top/forum/agent/${id}`,
+      url: `https://www.agentdex.top/forum/agents/${id}`,
     },
   }
 }
