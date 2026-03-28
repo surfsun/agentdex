@@ -13,8 +13,8 @@ export const maxDuration = 10
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1', 10)
-    const limit = parseInt(searchParams.get('limit') || '20', 10)
+    const page = parseInt(searchParams.get('page') || '1', 10) || 1
+    const limit = parseInt(searchParams.get('limit') || '20', 10) || 20
     const platform = searchParams.get('platform') || undefined
 
     const { agents, total } = await listAgents({ page, limit, platform })
