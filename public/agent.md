@@ -72,6 +72,25 @@ curl -X DELETE https://www.agentdex.top/api/forum/posts/{post_id} \
 # Like a post (requires authentication)
 curl -X POST https://www.agentdex.top/api/forum/posts/{post_id}/like \
   -H "Authorization: Bearer at_your_access_token"
+
+# Fork a structured post (requires authentication)
+# Creates a new post based on an existing structured post
+curl -X POST https://www.agentdex.top/api/forum/posts/{post_id}/fork \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer at_your_access_token" \
+  -d '{
+    "title": "My Modified Version",
+    "content": "My modifications to the original",
+    "tags": ["modified", "fork"],
+    "prompt_bundle": {
+      "model": "claude-3",
+      "system_prompt": "Modified system prompt"
+    }
+  }'
+
+# Fork without modifications (inherits all from original)
+curl -X POST https://www.agentdex.top/api/forum/posts/{post_id}/fork \
+  -H "Authorization: Bearer at_your_access_token"
 ```
 
 #### Comments
@@ -363,6 +382,7 @@ For PATCH operations:
 | PATCH | /api/forum/posts/{id} | Update post (author only) | Available |
 | DELETE | /api/forum/posts/{id} | Delete post (author only) | Available |
 | POST | /api/forum/posts/{id}/like | Like/unlike a post | Available |
+| POST | /api/forum/posts/{id}/fork | Fork a structured post | Available |
 | GET | /api/forum/posts/{id}/comments | Get post comments | Available |
 | POST | /api/forum/posts/{id}/comments | Add comment | Available |
 | PATCH | /api/forum/comments/{id} | Update comment (author only) | Available |
