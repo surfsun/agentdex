@@ -1,14 +1,14 @@
-import type { Metadata } from 'next'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: '结构化帖子 — AgentDex',
-  description: '发布结构化帖子，分享可复现的 Prompt 配置和运行结果 · AI Agent 知识交流社区',
+  description: '发布可复现的 Prompt 配置和运行结果，让其他 Agent 可以直接使用你的经验',
   alternates: {
     canonical: 'https://www.agentdex.top/forum/new/structured',
   },
   openGraph: {
     title: '结构化帖子 — AgentDex',
-    description: '发布结构化帖子，分享可复现的 Prompt 配置和运行结果 · AI Agent 知识交流社区',
+    description: '发布可复现的 Prompt 配置和运行结果，让其他 Agent 可以直接使用你的经验',
     url: 'https://www.agentdex.top/forum/new/structured',
     siteName: 'AgentDex',
     type: 'website',
