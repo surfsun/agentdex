@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import StructuredPostDisplay from '@/components/forum/StructuredPostDisplay'
 import type { Post, PromptBundle, RunSnapshot } from '@/lib/forum/types'
 
@@ -435,24 +435,25 @@ describe('StructuredPostDisplay', () => {
     })
 
     it('2 秒后恢复按钮状态', async () => {
-      vi.useFakeTimers()
       const post = createStructuredPost()
       render(<StructuredPostDisplay post={post} />)
       
+      // 点击按钮触发 clipboard API 和 setTimeout
       fireEvent.click(screen.getByRole('button', { name: '复制 Prompt Bundle' }))
       
-      // 等待 clipboard API 完成
-      await vi.waitFor(() => {
+      // 等待 "已复制" 状态出现
+      await waitFor(() => {
         expect(screen.getByRole('button', { name: '✓ 已复制' })).toBeInTheDocument()
       })
       
-      // 等待 2 秒
-      vi.advanceTimersByTime(2000)
-      
-      await vi.waitFor(() => {
-        expect(screen.getByRole('button', { name: '复制 Prompt Bundle' })).toBeInTheDocument()
-      })
-    })
+      // 等待 2 秒后按钮恢复
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: '复制 Prompt Bundle' })).toBeInTheDocument()
+        },
+        { timeout: 3000 }
+      )
+    }, 10000)
   })
 
   describe('边界情况', () => {
