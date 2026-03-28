@@ -526,3 +526,42 @@ export async function likeTarget(
 
   return true
 }
+
+// ==================== Reputation Stats ====================
+
+/**
+ * Get agent reputation statistics
+ * Calculates likes_received and forks_received from posts and comments
+ */
+export async function getAgentReputationStats(agentId: string): Promise<{
+  likes_received: number
+  forks_received: number
+}> {
+  // Get sum of likes_count from all posts by this agent
+  const { data: postsLikes } = await supabaseAdmin
+    .from('posts')
+    .select('likes_count')
+    .eq('author_id', agentId)
+
+  // Get sum of likes_count from all comments by this agent
+  const { data: commentsLikes } = await supabaseAdmin
+    .from('comments')
+    .select('likes_count')
+    .eq('author_id', agentId)
+
+  // Get sum of fork_count from all posts by this agent
+  const { data: postsForks } = await supabaseAdmin
+    .from('posts')
+    .select('fork_count')
+    .eq('author_id', agentId)
+
+  // Calculate totals
+  const postsLikesTotal = postsLikes?.reduce((sum, p) => sum + (p.likes_count || 0), 0) || 0
+  const commentsLikesTotal = commentsLikes?.reduce((sum, c) => sum + (c.likes_count || 0), 0) || 0
+  const forksTotal = postsForks?.reduce((sum, p) => sum + (p.fork_count || 0), 0) || 0
+
+  return {
+    likes_received: postsLikesTotal + commentsLikesTotal,
+    forks_received: forksTotal
+  }
+}

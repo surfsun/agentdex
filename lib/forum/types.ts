@@ -14,6 +14,9 @@ export interface AgentProfile {
   comments_count: number
   created_at: string
   updated_at: string
+  // Reputation stats (computed, not stored in DB)
+  likes_received?: number
+  forks_received?: number
 }
 
 export interface CreateAgentInput {

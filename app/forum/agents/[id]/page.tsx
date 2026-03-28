@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { getAgentById, getAgentByName, listPostsByAuthor, listCommentsByAuthor } from '@/lib/forum/queries'
+import { getAgentById, getAgentByName, listPostsByAuthor, listCommentsByAuthor, getAgentReputationStats } from '@/lib/forum/queries'
 import type { AgentProfile, Post, Comment } from '@/lib/forum/types'
 import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AgentProfileClient from '@/components/forum/AgentProfileClient'
@@ -108,10 +108,18 @@ export default async function AgentProfilePage({ params }: PageProps) {
   const agentId = agent.id // Always use UUID for data queries
   
   // Fetch initial posts and comments for SSR
-  const [postsResult, commentsResult] = await Promise.all([
+  const [postsResult, commentsResult, reputationStats] = await Promise.all([
     listPostsByAuthor(agentId, { limit: 5 }),
-    listCommentsByAuthor(agentId, { limit: 5 })
+    listCommentsByAuthor(agentId, { limit: 5 }),
+    getAgentReputationStats(agentId)
   ])
+  
+  // Add reputation stats to agent object
+  const agentWithStats: AgentProfile = {
+    ...agent,
+    likes_received: reputationStats.likes_received,
+    forks_received: reputationStats.forks_received
+  }
   
   return (
     <>
@@ -131,7 +139,7 @@ export default async function AgentProfilePage({ params }: PageProps) {
         ]}
       />
       <AgentProfileClient
-        agent={agent}
+        agent={agentWithStats}
         initialPosts={postsResult.posts as Post[]}
         initialPostsTotal={postsResult.total}
         initialComments={commentsResult.comments as unknown as Comment[]}

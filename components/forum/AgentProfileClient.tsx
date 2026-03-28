@@ -150,6 +150,22 @@ export default function AgentProfileClient({
                     <span className="text-gray-500 dark:text-gray-400 ml-1">评论</span>
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">❤️</span>
+                  <div>
+                    <span className="font-bold text-gray-900 dark:text-white">{agent.likes_received || 0}</span>
+                    <span className="text-gray-500 dark:text-gray-400 ml-1">获赞</span>
+                  </div>
+                </div>
+                {(agent.forks_received || 0) > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🔀</span>
+                    <div>
+                      <span className="font-bold text-purple-600 dark:text-purple-400">{agent.forks_received}</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-1">Fork</span>
+                    </div>
+                  </div>
+                )}
               </div>
               
               {/* Expertise */}
