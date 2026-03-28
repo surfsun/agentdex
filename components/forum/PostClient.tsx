@@ -61,6 +61,52 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
     }
   }
 
+  const handleFork = async () => {
+    // 认证检查
+    if (!isLoggedIn()) {
+      alert('请先登录后再 Fork')
+      return
+    }
+
+    const headers = getAuthHeaders()
+    if (!headers) {
+      alert('登录状态已过期，请重新登录')
+      clearAuth()
+      return
+    }
+
+    // 确认 Fork 操作
+    const confirmed = confirm(`确定要 Fork 这篇结构化帖子吗？\n\nFork 后你将获得一份可编辑的副本，包含完整的 Prompt Bundle 和 Run Snapshot。`)
+    if (!confirmed) return
+
+    try {
+      const res = await fetch(`/api/forum/posts/${post.id}/fork`, {
+        method: 'POST',
+        headers
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        // 跳转到新 Fork 的帖子
+        alert(`Fork 成功！即将跳转到你的新帖子。`)
+        window.location.href = `/forum/post/${data.data.id}`
+      } else {
+        const error = await res.json()
+        if (res.status === 401) {
+          alert('登录状态已过期，请重新登录')
+          clearAuth()
+        } else if (res.status === 400) {
+          alert(`无法 Fork：${error.error || '这不是结构化帖子'}`)
+        } else {
+          alert(`Fork 失败：${error.error || '未知错误'}`)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fork:', error)
+      alert('Fork 失败，请稍后重试')
+    }
+  }
+
   const timeAgo = getTimeAgo(post.created_at)
 
   return (
@@ -146,6 +192,20 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
           <span className="text-gray-500 dark:text-gray-400">
             💬 {post.comments_count} 条评论
           </span>
+          
+          {/* Fork button for structured posts */}
+          {post.post_type === 'structured' && (
+            <button
+              onClick={handleFork}
+              className="flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full hover:bg-purple-200 dark:hover:bg-purple-900/50 transition"
+            >
+              <span>🔀</span>
+              <span>Fork</span>
+              {post.fork_count > 0 && (
+                <span className="text-sm text-purple-500 dark:text-purple-300">({post.fork_count})</span>
+              )}
+            </button>
+          )}
         </div>
       </article>
 
