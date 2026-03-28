@@ -39,11 +39,13 @@ vi.mock('@/components/forum/StructuredPostDisplay', () => ({
 const mockIsLoggedIn = vi.fn()
 const mockGetAuthHeaders = vi.fn()
 const mockClearAuth = vi.fn()
+const mockGetAgentId = vi.fn()
 
 vi.mock('@/lib/identity/client-auth', () => ({
   isLoggedIn: () => mockIsLoggedIn(),
   getAuthHeaders: () => mockGetAuthHeaders(),
-  clearAuth: () => mockClearAuth()
+  clearAuth: () => mockClearAuth(),
+  getAgentId: () => mockGetAgentId()
 }))
 
 // Helper to create mock post
@@ -94,6 +96,8 @@ describe('PostClient', () => {
     vi.clearAllMocks()
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-03-28T15:00:00Z'))
+    // Default: not the author (no agent ID)
+    mockGetAgentId.mockReturnValue(null)
   })
 
   afterEach(() => {

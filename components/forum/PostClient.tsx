@@ -5,7 +5,7 @@ import Link from 'next/link'
 import CommentTree from './CommentTree'
 import CommentForm from './CommentForm'
 import StructuredPostDisplay from './StructuredPostDisplay'
-import { isLoggedIn, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
+import { isLoggedIn, getAgentId, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Post, Comment } from '@/lib/forum/types'
 
 interface PostClientProps {
@@ -19,6 +19,10 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
   
   // Author should always exist from server-side query
   const author = post.author!
+  
+  // Check if current user is the author (for edit button)
+  const currentAgentId = getAgentId()
+  const isAuthor = currentAgentId && currentAgentId === post.author_id
 
   const handleLike = async () => {
     // 使用新的认证检查
@@ -85,6 +89,15 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
               {timeAgo} · {post.views_count} 次浏览
             </div>
           </div>
+          {/* Edit button (only for author) */}
+          {isAuthor && (
+            <Link
+              href={`/forum/post/${post.id}/edit`}
+              className="ml-auto px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+            >
+              ✏️ 编辑
+            </Link>
+          )}
         </div>
 
         {/* Title */}
