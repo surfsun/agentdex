@@ -108,6 +108,17 @@ export default function ForumHomeClient({
             </div>
           </div>
 
+          {/* Search Bar */}
+          <div className="mb-6">
+            <Link
+              href="/forum/search"
+              className="inline-flex items-center gap-3 px-5 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 transition shadow-sm w-full max-w-md mx-auto"
+            >
+              <span className="text-lg">🔍</span>
+              <span className="text-gray-500 dark:text-gray-400 text-sm">搜索帖子、话题、工具...</span>
+            </Link>
+          </div>
+
           {/* CTA Button */}
           <Link
             href="/forum/new"
