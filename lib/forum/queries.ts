@@ -3,6 +3,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase'
+import { calculateHotScore } from '@/lib/forum/utils'
 import type {
   AgentProfile,
   CreateAgentInput,
@@ -232,6 +233,13 @@ export async function getPostById(id: string): Promise<Post | null> {
 
 /**
  * List posts with pagination
+ * 
+ * Sorting modes:
+ * - 'hot': Uses Hacker News-style algorithm with time decay
+ *   Formula: (likes + comments * 2) / (hours + 2)^1.5
+ *   Pinned posts always appear first regardless of hot score
+ * - 'new': Sorts by creation time (most recent first)
+ *   Pinned posts appear first, then by created_at DESC
  */
 export async function listPosts(params: PostListParams = {}): Promise<{
   posts: Post[]
@@ -241,28 +249,71 @@ export async function listPosts(params: PostListParams = {}): Promise<{
   const limit = Math.min(params.limit || 20, 100)
   const offset = (page - 1) * limit
 
-  let query = supabaseAdmin
+  // Base query with author data
+  let baseQuery = supabaseAdmin
     .from('posts')
     .select(`
       *,
       author:agent_profiles(*)
     `, { count: 'exact' })
+    .eq('status', 'published')
 
   if (params.tag) {
-    query = query.contains('tags', [params.tag])
+    baseQuery = baseQuery.contains('tags', [params.tag])
   }
 
-  // Sort: pinned first, then by sort criteria
+  // Hot sort: use time-decay algorithm instead of simple likes_count
   if (params.sort === 'hot') {
-    query = query.order('pinned', { ascending: false })
-                   .order('likes_count', { ascending: false })
-  } else {
-    query = query.order('pinned', { ascending: false })
-                   .order('created_at', { ascending: false })
+    // Fetch enough candidates for hot score calculation and pagination
+    // Upper bound of 500 ensures reasonable performance while covering most pages
+    const candidateLimit = 500
+    const candidateOffset = 0
+    
+    // Get candidates ordered by pinned first, then engagement score as rough proxy
+    const { data: candidates, error: candidateError, count } = await supabaseAdmin
+      .from('posts')
+      .select(`
+        *,
+        author:agent_profiles(*)
+      `, { count: 'exact' })
+      .eq('status', 'published')
+      .order('pinned', { ascending: false })
+      .order('likes_count', { ascending: false })
+      .contains('tags', [params.tag || []])
+      .range(candidateOffset, candidateLimit - 1)
+
+    if (candidateError) throw candidateError
+
+    // Calculate hot scores for all candidates
+    const postsWithScores = (candidates || []).map(post => ({
+      post,
+      hotScore: calculateHotScore(post.likes_count, post.comments_count, post.created_at)
+    }))
+
+    // Sort: pinned posts first, then by hot score (descending)
+    postsWithScores.sort((a, b) => {
+      // Pinned posts always appear first
+      if (a.post.pinned !== b.post.pinned) {
+        return b.post.pinned ? 1 : -1
+      }
+      // Then by hot score
+      return b.hotScore - a.hotScore
+    })
+
+    // Apply pagination to sorted results
+    const paginatedResults = postsWithScores.slice(offset, offset + limit)
+    const posts = paginatedResults.map(item => item.post)
+
+    return {
+      posts,
+      total: count || 0
+    }
   }
 
-  const { data, error, count } = await query
-    .eq('status', 'published')
+  // New sort (default): pinned first, then by creation time
+  const { data, error, count } = await baseQuery
+    .order('pinned', { ascending: false })
+    .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
   if (error) throw error
