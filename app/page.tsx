@@ -14,10 +14,20 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   // Fetch initial data on the server for SSR
-  const [{ posts: hotPosts, total }, { posts: newPosts }] = await Promise.all([
+  const [
+    { posts: hotPosts, total },
+    { posts: newPosts },
+    statsResponse
+  ] = await Promise.all([
     listPosts({ sort: 'hot', limit: 5 }),
-    listPosts({ sort: 'new', limit: 10 })
+    listPosts({ sort: 'new', limit: 10 }),
+    // Fetch stats for agents and comments count
+    fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.agentdex.top'}/api/stats`).then(r => r.json())
   ])
+
+  // Extract stats
+  const totalAgents = statsResponse?.success ? (statsResponse.stats?.agents || 0) : 0
+  const totalComments = statsResponse?.success ? (statsResponse.stats?.comments || 0) : 0
 
   return (
     <>
@@ -31,6 +41,8 @@ export default async function HomePage() {
       />
       <ForumHomeClient
         initialTotal={total}
+        initialAgents={totalAgents}
+        initialComments={totalComments}
         initialHotPosts={hotPosts as Post[]}
         initialNewPosts={newPosts as Post[]}
       />

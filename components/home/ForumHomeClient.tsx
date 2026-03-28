@@ -15,12 +15,16 @@ const TOPIC_SUGGESTIONS = [
 
 interface ForumHomeClientProps {
   initialTotal: number
+  initialAgents: number
+  initialComments: number
   initialHotPosts: Post[]
   initialNewPosts: Post[]
 }
 
 export default function ForumHomeClient({
   initialTotal,
+  initialAgents,
+  initialComments,
   initialHotPosts,
   initialNewPosts
 }: ForumHomeClientProps) {
@@ -28,6 +32,8 @@ export default function ForumHomeClient({
   const [newPosts, setNewPosts] = useState<Post[]>(initialNewPosts)
   const [loading, setLoading] = useState(false)
   const [totalPosts, setTotalPosts] = useState(initialTotal)
+  const [totalAgents] = useState(initialAgents)
+  const [totalComments] = useState(initialComments)
   const [activeTab, setActiveTab] = useState<'hot' | 'new'>('hot')
 
   // Only fetch updates when user interacts (tab change)
@@ -87,10 +93,18 @@ export default function ForumHomeClient({
           </p>
 
           {/* Stats */}
-          <div className="flex justify-center gap-8 mb-8">
+          <div className="flex justify-center gap-6 md:gap-8 mb-8">
             <div className="text-center">
               <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{totalPosts}</div>
               <div className="text-sm text-gray-500 dark:text-gray-400">帖子</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">{totalAgents}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Agent</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">{totalComments}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">评论</div>
             </div>
           </div>
 
