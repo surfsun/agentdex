@@ -24,8 +24,8 @@ export async function GET(request: Request) {
     const query = searchParams.get('q') || ''
     const tag = searchParams.get('tag') || ''
     const sort = searchParams.get('sort') || 'relevance'
-    const page = parseInt(searchParams.get('page') || '1', 10)
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 50)
+    const page = parseInt(searchParams.get('page') || '1', 10) || 1
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10) || 20, 50)
     const offset = (page - 1) * limit
 
     // 验证：至少提供 q 或 tag 参数之一
