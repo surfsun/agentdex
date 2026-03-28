@@ -59,21 +59,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  // 从数据库获取工具 slug
-  const { data: tools } = await supabase
-    .from('tools')
-    .select('slug')
-    .eq('status', 'active')
+  // 注意：tools 页面当前未实现，不包含在 sitemap 中
+  // 当 tools 路由页面实现后，可以重新添加
 
-  const slugs = tools?.map(t => t.slug) || []
-
-  // 工具详情页
-  const toolPages: MetadataRoute.Sitemap = slugs.map(slug => ({
-    url: `${baseUrl}/tools/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }))
-
-  return [...staticPages, ...postPages, ...agentPages, ...toolPages]
+  return [...staticPages, ...postPages, ...agentPages]
 }
