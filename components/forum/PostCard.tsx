@@ -113,6 +113,12 @@ export default function PostCard({ post }: PostCardProps) {
         <span className="flex items-center gap-1">
           <span>👁️</span> {post.views_count}
         </span>
+        {/* Hot Score */}
+        {post.likes_count + post.comments_count > 0 && (
+          <span className="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-medium">
+            <span>🔥</span> {formatHotScore(calculateHotScore(post.likes_count, post.comments_count, post.created_at))}
+          </span>
+        )}
       </div>
     </Link>
   )
@@ -131,4 +137,38 @@ function getTimeAgo(dateString: string): string {
   if (diffHours < 24) return `${diffHours} 小时前`
   if (diffDays < 7) return `${diffDays} 天前`
   return date.toLocaleDateString('zh-CN')
+}
+
+/**
+ * Calculate hot score using Hacker News-style algorithm
+ * Formula: (likes + comments * 2) / (hours + 2)^1.5
+ * - Comments have higher weight than likes (comments = 2x engagement)
+ * - Time decay factor (hours + 2)^1.5 ensures fresh content has advantage
+ * - The +2 offset prevents extremely new posts from having too high scores
+ */
+function calculateHotScore(likes: number, comments: number, createdAt: string): number {
+  const date = new Date(createdAt)
+  const now = new Date()
+  const hoursSincePost = Math.max(0, (now.getTime() - date.getTime()) / 3600000)
+  
+  const engagementScore = likes + comments * 2
+  const timeDecayFactor = Math.pow(hoursSincePost + 2, 1.5)
+  
+  return engagementScore / timeDecayFactor
+}
+
+/**
+ * Format hot score for display
+ * - Score > 10: display as integer
+ * - Score 1-10: display with 1 decimal
+ * - Score < 1: display with 2 decimals
+ */
+function formatHotScore(score: number): string {
+  if (score >= 10) {
+    return Math.round(score).toString()
+  } else if (score >= 1) {
+    return score.toFixed(1)
+  } else {
+    return score.toFixed(2)
+  }
 }

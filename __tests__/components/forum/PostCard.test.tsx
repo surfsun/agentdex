@@ -219,4 +219,81 @@ describe('PostCard', () => {
       expect(screen.getByText('👁️')).toBeInTheDocument()
     })
   })
+
+  describe('热度分数', () => {
+    it('有互动的帖子显示热度分数', () => {
+      // 10 likes + 5 comments = 20 engagement
+      // Created at now, hours = 0
+      // hot_score = 20 / (0 + 2)^1.5 = 20 / 2.83 ≈ 7.07
+      render(<PostCard post={{ 
+        ...mockPost, 
+        likes_count: 10, 
+        comments_count: 5,
+        created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
+      }} />)
+      expect(screen.getByText('🔥')).toBeInTheDocument()
+      expect(screen.getByText('7.1')).toBeInTheDocument()
+    })
+
+    it('无互动的帖子不显示热度分数', () => {
+      render(<PostCard post={{ 
+        ...mockPost, 
+        likes_count: 0, 
+        comments_count: 0 
+      }} />)
+      expect(screen.queryByText('🔥')).not.toBeInTheDocument()
+    })
+
+    it('高热度帖子显示整数分数', () => {
+      // 100 likes + 50 comments = 200 engagement
+      // Created at now, hours = 0
+      // hot_score = 200 / (0 + 2)^1.5 = 200 / 2.83 ≈ 70.7
+      render(<PostCard post={{ 
+        ...mockPost, 
+        likes_count: 100, 
+        comments_count: 50,
+        created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
+      }} />)
+      expect(screen.getByText('🔥')).toBeInTheDocument()
+      expect(screen.getByText('71')).toBeInTheDocument()
+    })
+
+    it('时间衰减降低热度分数', () => {
+      // 10 likes + 5 comments = 20 engagement
+      // Created 24 hours ago
+      // hot_score = 20 / (24 + 2)^1.5 = 20 / 132.8 ≈ 0.15
+      render(<PostCard post={{ 
+        ...mockPost, 
+        likes_count: 10, 
+        comments_count: 5,
+        created_at: new Date('2026-03-27T13:35:00+08:00').toISOString()
+      }} />)
+      expect(screen.getByText('🔥')).toBeInTheDocument()
+      expect(screen.getByText('0.15')).toBeInTheDocument()
+    })
+
+    it('评论权重高于点赞（2x）', () => {
+      // Post A: 20 likes + 0 comments = 20 engagement
+      // Post B: 0 likes + 10 comments = 20 engagement (10 * 2 = 20)
+      // Both have same hot_score if same time
+      const { rerender } = render(<PostCard post={{ 
+        ...mockPost, 
+        likes_count: 20, 
+        comments_count: 0,
+        created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
+      }} />)
+      
+      const scoreA = screen.getByText('7.1')
+      expect(scoreA).toBeInTheDocument()
+      
+      rerender(<PostCard post={{ 
+        ...mockPost, 
+        likes_count: 0, 
+        comments_count: 10,
+        created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
+      }} />)
+      
+      expect(screen.getByText('7.1')).toBeInTheDocument()
+    })
+  })
 })
