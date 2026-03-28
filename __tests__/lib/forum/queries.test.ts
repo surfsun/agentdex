@@ -12,12 +12,27 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock Supabase - must use factory function without top-level variables
 vi.mock('@/lib/supabase', () => {
+  // Type for the mock chain
+  interface MockChain {
+    insert: () => MockChain
+    select: () => MockChain
+    update: () => MockChain
+    delete: () => MockChain
+    eq: () => MockChain
+    contains: () => MockChain
+    order: () => MockChain
+    upsert: () => MockChain
+    single: () => Promise<{ data: null; error: null }>
+    range: () => Promise<{ data: never[]; error: null; count: 0 }>
+    then: (resolve: (value: { data: never[]; error: null }) => void) => void
+  }
+
   // Create a flexible mock chain that supports all methods
-  const createChain = () => {
-    const chain: Record<string, any> = {}
+  const createChain = (): MockChain => {
+    const chain = {} as MockChain
     
     // Chainable methods that return the chain
-    const chainableMethods = ['insert', 'select', 'update', 'delete', 'eq', 'contains', 'order', 'upsert']
+    const chainableMethods = ['insert', 'select', 'update', 'delete', 'eq', 'contains', 'order', 'upsert'] as const
     
     chainableMethods.forEach(method => {
       chain[method] = vi.fn(() => chain)
@@ -28,7 +43,7 @@ vi.mock('@/lib/supabase', () => {
     chain.range = vi.fn(() => Promise.resolve({ data: [], error: null, count: 0 }))
     
     // Make the chain thenable (awaitable) - returns a Promise when awaited
-    chain.then = (resolve: any) => resolve({ data: [], error: null })
+    chain.then = (resolve: (value: { data: never[]; error: null }) => void) => resolve({ data: [], error: null })
     
     return chain
   }
@@ -58,12 +73,34 @@ import {
 } from '@/lib/forum/queries'
 import { supabaseAdmin } from '@/lib/supabase'
 
+// Type for resolved chain values
+interface ResolvedValue {
+  data: unknown
+  error: { message: string } | null
+  count?: number
+}
+
+// Type for the resolved mock chain
+interface ResolvedMockChain {
+  insert: () => ResolvedMockChain
+  select: () => ResolvedMockChain
+  update: () => ResolvedMockChain
+  delete: () => ResolvedMockChain
+  eq: () => ResolvedMockChain
+  contains: () => ResolvedMockChain
+  order: () => ResolvedMockChain
+  upsert: () => ResolvedMockChain
+  single: () => Promise<ResolvedValue>
+  range: () => Promise<ResolvedValue>
+  then: (resolve: (value: ResolvedValue) => void) => void
+}
+
 // Helper to create a custom chain with resolved values
-function createResolvedChain(resolvedValue: any, terminalMethod: 'single' | 'range' = 'single') {
-  const chain: Record<string, any> = {}
+function createResolvedChain(resolvedValue: ResolvedValue, terminalMethod: 'single' | 'range' = 'single'): ResolvedMockChain {
+  const chain = {} as ResolvedMockChain
   
   // Chainable methods that return the chain
-  const chainableMethods = ['insert', 'select', 'update', 'delete', 'eq', 'contains', 'order', 'upsert']
+  const chainableMethods = ['insert', 'select', 'update', 'delete', 'eq', 'contains', 'order', 'upsert'] as const
   
   chainableMethods.forEach(method => {
     chain[method] = vi.fn(() => chain)
@@ -74,13 +111,13 @@ function createResolvedChain(resolvedValue: any, terminalMethod: 'single' | 'ran
   chain.range = vi.fn(() => Promise.resolve(resolvedValue))
   
   // Make the chain thenable (awaitable) - returns a Promise when awaited
-  chain.then = (resolve: any) => resolve(resolvedValue)
+  chain.then = (resolve: (value: ResolvedValue) => void) => resolve(resolvedValue)
   
   return chain
 }
 
 // Get the mocked functions
-const mockFrom = supabaseAdmin.from as ReturnType<typeof vi.fn>
+const mockFrom = supabaseAdmin.from as ReturnType<typeof vi.fn<[], ResolvedMockChain>>
 const mockRpc = supabaseAdmin.rpc as ReturnType<typeof vi.fn>
 
 describe('Forum Queries', () => {

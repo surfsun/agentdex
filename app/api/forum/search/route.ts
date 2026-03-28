@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { jsonResponse, errorResponse } from '@/lib/api-response'
+import type { Post } from '@/lib/forum/types'
 
 /**
  * GET /api/forum/search
@@ -47,7 +48,9 @@ export async function GET(request: Request) {
     const searchTerm = hasQuery ? query.trim().slice(0, 100) : ''
     const tagFilter = hasTag ? decodeURIComponent(tag.trim()) : ''
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let data: any[] | null = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let error: any = null
     let count: number | null = null
 

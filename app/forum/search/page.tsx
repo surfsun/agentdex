@@ -43,7 +43,9 @@ async function performServerSearch(query: string, tag: string, sort: string): Pr
   const tagFilter = hasTag ? decodeURIComponent(tag.trim()) : ''
   
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let data: any[] | null = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let error: any = null
     let count: number | null = null
     
