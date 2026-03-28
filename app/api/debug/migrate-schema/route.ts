@@ -1,12 +1,27 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { authenticateRequest } from '@/lib/identity/auth'
 
 /**
  * POST /api/debug/migrate-schema
  * 手动执行数据库 schema 修复（添加缺失的列）
  * 仅用于修复线上数据库 migration 未同步的问题
+ * 
+ * Security: Requires Bearer token authentication
+ * Headers: Authorization: Bearer <token> (ak_xxx 或 at_xxx)
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // 认证检查 - 只有有效认证的用户才能访问 debug API
+  const auth = await authenticateRequest(request)
+  
+  if (!auth.success) {
+    return NextResponse.json({
+      success: false,
+      error: '认证失败，Debug API 需要有效认证',
+      code: auth.code || 'AUTH_REQUIRED'
+    }, { status: 401 })
+  }
+
   const results: { step: string; success: boolean; error?: string }[] = []
   
   // 1. 添加 post_type 列
@@ -75,6 +90,7 @@ export async function POST() {
   return NextResponse.json({
     success: results.every(r => r.success),
     timestamp: new Date().toISOString(),
+    authenticated_agent: auth.agent_id,
     results,
     note: 'This API is for debugging purposes. The proper fix is to run migrations on the production database.'
   })
@@ -83,8 +99,22 @@ export async function POST() {
 /**
  * GET /api/debug/migrate-schema
  * 检查当前 schema 状态
+ * 
+ * Security: Requires Bearer token authentication
+ * Headers: Authorization: Bearer <token> (ak_xxx 或 at_xxx)
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // 认证检查 - 只有有效认证的用户才能访问 debug API
+  const auth = await authenticateRequest(request)
+  
+  if (!auth.success) {
+    return NextResponse.json({
+      success: false,
+      error: '认证失败，Debug API 需要有效认证',
+      code: auth.code || 'AUTH_REQUIRED'
+    }, { status: 401 })
+  }
+
   // 检查哪些列存在
   const columnTests = {
     post_type: false,
@@ -114,6 +144,7 @@ export async function GET() {
   return NextResponse.json({
     success: true,
     timestamp: new Date().toISOString(),
+    authenticated_agent: auth.agent_id,
     columns_status: columnTests,
     missing_columns: Object.entries(columnTests)
       .filter(([_, exists]) => !exists)

@@ -1,11 +1,26 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { authenticateRequest } from '@/lib/identity/auth'
 
 /**
  * GET /api/debug/supabase-test
  * 测试 Supabase 连接和写入能力
+ * 
+ * Security: Requires Bearer token authentication
+ * Headers: Authorization: Bearer <token> (ak_xxx 或 at_xxx)
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // 认证检查 - 只有有效认证的用户才能访问 debug API
+  const auth = await authenticateRequest(request)
+  
+  if (!auth.success) {
+    return NextResponse.json({
+      success: false,
+      error: '认证失败，Debug API 需要有效认证',
+      code: auth.code || 'AUTH_REQUIRED'
+    }, { status: 401 })
+  }
+
   const results: {
     connection_test: { success: boolean; error?: string; time_ms?: number }
     read_test: { success: boolean; error?: string; count?: number }
@@ -102,6 +117,7 @@ export async function GET() {
   return NextResponse.json({
     success: allSuccess,
     timestamp: new Date().toISOString(),
+    authenticated_agent: auth.agent_id,
     results,
     summary: {
       can_connect: results.connection_test.success,
