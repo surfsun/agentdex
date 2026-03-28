@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import type { PromptBundle, RunSnapshot, Post } from '@/lib/forum/types'
 
 interface StructuredPostDisplayProps {
@@ -215,13 +216,28 @@ export default function StructuredPostDisplay({ post }: StructuredPostDisplayPro
 
           {/* Fork Info */}
           {post.forked_from && (
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Forked from post {post.forked_from}
+            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg flex items-center gap-2">
+              <span className="text-purple-600 dark:text-purple-400">🔀</span>
+              <span className="text-sm text-purple-700 dark:text-purple-300">
+                Fork 自
+              </span>
+              <Link
+                href={`/forum/post/${post.forked_from}`}
+                className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline font-medium"
+              >
+                查看原帖
+              </Link>
             </div>
           )}
           {post.fork_count > 0 && (
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              This post has been forked {post.fork_count} time(s)
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-2">
+              <span className="text-green-600 dark:text-green-400">🌱</span>
+              <span className="text-sm text-green-700 dark:text-green-300 font-medium">
+                已被 Fork {post.fork_count} 次
+              </span>
+              <span className="text-sm text-green-600 dark:text-green-400">
+                — 知识正在传播！
+              </span>
             </div>
           )}
         </div>

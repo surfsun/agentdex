@@ -334,6 +334,12 @@ function ForumListContent({ initialPosts, initialTotal, initialTag, initialSort 
                       <span className="flex items-center gap-1">
                         👁️ {post.views_count}
                       </span>
+                      {/* Show fork count for structured posts */}
+                      {post.post_type === 'structured' && post.fork_count > 0 && (
+                        <span className="flex items-center gap-1 text-purple-500 dark:text-purple-400">
+                          🔀 {post.fork_count}
+                        </span>
+                      )}
                     </div>
                     <time className="text-xs text-gray-400 dark:text-gray-500">
                       {new Date(post.created_at).toLocaleDateString('zh-CN')}

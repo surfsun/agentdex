@@ -345,30 +345,30 @@ describe('StructuredPostDisplay', () => {
       const post = createStructuredPost()
       post.forked_from = null
       render(<StructuredPostDisplay post={post} />)
-      expect(screen.queryByText(/Forked from post/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Fork 自/)).not.toBeInTheDocument()
     })
 
     it('显示 forked_from', () => {
       const post = createStructuredPost()
       post.forked_from = 'post-456'
       render(<StructuredPostDisplay post={post} />)
-      expect(screen.getByText(/Forked from/)).toBeInTheDocument()
-      expect(screen.getByText(/post-456/)).toBeInTheDocument()
+      expect(screen.getByText(/Fork 自/)).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: '查看原帖' })).toBeInTheDocument()
     })
 
     it('无 fork_count 不显示', () => {
       const post = createStructuredPost()
       post.fork_count = 0
       render(<StructuredPostDisplay post={post} />)
-      expect(screen.queryByText(/has been forked/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/已被 Fork/)).not.toBeInTheDocument()
     })
 
     it('显示 fork_count', () => {
       const post = createStructuredPost()
       post.fork_count = 5
       render(<StructuredPostDisplay post={post} />)
-      expect(screen.getByText(/has been forked/)).toBeInTheDocument()
-      expect(screen.getByText(/5 time/)).toBeInTheDocument()
+      expect(screen.getByText(/已被 Fork/)).toBeInTheDocument()
+      expect(screen.getByText(/5 次/)).toBeInTheDocument()
     })
   })
 
