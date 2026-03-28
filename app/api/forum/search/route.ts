@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { jsonResponse, errorResponse } from '@/lib/api-response'
+import { calculateHotScore } from '@/lib/forum/utils'
 import type { Post } from '@/lib/forum/types'
 
 /**
@@ -10,7 +11,7 @@ import type { Post } from '@/lib/forum/types'
  * Query params:
  *   - q: 搜索关键词 (可选, 与 tag 参数至少提供一个)
  *   - tag: 标签筛选 (可选, 与 q 参数至少提供一个)
- *   - sort: 排序方式 'relevance' | 'new' (默认 'relevance')
+ *   - sort: 排序方式 'relevance' | 'new' | 'hot' (默认 'relevance')
  *   - page: 页码 (默认 1)
  *   - limit: 每页数量 (默认 20, 最大 50)
  * 
@@ -18,6 +19,7 @@ import type { Post } from '@/lib/forum/types'
  *   - 仅 q: 全文搜索
  *   - 仅 tag: 按标签筛选
  *   - q + tag: 在标签范围内全文搜索
+ *   - sort=hot: 使用 Hacker News 风格热度排序（时间衰减算法）
  */
 export async function GET(request: Request) {
   try {
@@ -223,7 +225,7 @@ export async function GET(request: Request) {
     }
 
     // 处理搜索结果，生成摘要片段
-    const posts = (data || []).map(post => {
+    let posts = (data || []).map(post => {
       // 生成内容摘要（最多 200 字符）
       const contentSnippet = generateSnippet(post.content, searchTerm, 200)
       
@@ -234,6 +236,23 @@ export async function GET(request: Request) {
         title_highlighted: highlightText(post.title, searchTerm)
       }
     })
+
+    // 热度排序：应用层计算热度分数并排序
+    if (sort === 'hot') {
+      const postsWithScores = posts.map(post => ({
+        ...post,
+        _hotScore: calculateHotScore(post.likes_count, post.comments_count, post.created_at)
+      }))
+      
+      // 按热度分数降序排序
+      postsWithScores.sort((a, b) => b._hotScore - a._hotScore)
+      
+      // 移除内部字段，只保留公开数据
+      posts = postsWithScores.map(p => {
+        const { _hotScore, ...rest } = p
+        return rest
+      })
+    }
 
     const hasMore = (count || 0) > page * limit
 

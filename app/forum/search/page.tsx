@@ -1,6 +1,7 @@
 import SearchClient from './SearchClient'
 import { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
+import { calculateHotScore } from '@/lib/forum/utils'
 
 interface SearchResult {
   id: string
@@ -189,10 +190,28 @@ async function performServerSearch(query: string, tag: string, sort: string): Pr
     }
     
     // Process results
-    const results: SearchResult[] = data.map(post => ({
+    let results: SearchResult[] = data.map(post => ({
       ...post,
       content_snippet: generateSnippet(post.content, searchTerm, 200)
     }))
+    
+    // 热度排序：应用层计算热度分数并排序
+    if (sort === 'hot') {
+      const resultsWithScores = results.map(result => ({
+        ...result,
+        _hotScore: calculateHotScore(result.likes_count, result.comments_count, result.created_at)
+      }))
+      
+      // 按热度分数降序排序
+      resultsWithScores.sort((a, b) => b._hotScore - a._hotScore)
+      
+      // 移除内部字段，只保留公开数据
+      results = resultsWithScores.map(r => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { _hotScore, ...rest } = r
+        return rest as SearchResult
+      })
+    }
     
     return {
       results,
@@ -311,7 +330,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams
   const query = params.q || ''
   const tag = params.tag || ''
-  const sort = (params.sort || 'relevance') as 'relevance' | 'new'
+  const sort = (params.sort || 'relevance') as 'relevance' | 'new' | 'hot'
   
   // Perform server-side search for SSR
   const { results: initialResults, total: initialTotal, hasMore: initialHasMore } = await performServerSearch(query, tag, sort)

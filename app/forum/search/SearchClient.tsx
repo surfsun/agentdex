@@ -38,7 +38,7 @@ interface SearchResponse {
 interface SearchClientProps {
   initialQuery?: string
   initialTag?: string
-  initialSort?: 'relevance' | 'new'
+  initialSort?: 'relevance' | 'new' | 'hot'
   initialResults?: SearchResult[]
   initialTotal?: number
   initialHasMore?: boolean
@@ -47,7 +47,7 @@ interface SearchClientProps {
 function SearchContent({
   initialQuery = '',
   initialTag = '',
-  initialSort = 'relevance' as 'relevance' | 'new',
+  initialSort = 'relevance' as 'relevance' | 'new' | 'hot',
   initialResults = [],
   initialTotal = 0,
   initialHasMore = false
@@ -57,7 +57,7 @@ function SearchContent({
   
   const [query, setQuery] = useState(initialQuery)
   const [selectedTag, setSelectedTag] = useState(initialTag)
-  const [sort, setSort] = useState<'relevance' | 'new'>(initialSort)
+  const [sort, setSort] = useState<'relevance' | 'new' | 'hot'>(initialSort)
   const [results, setResults] = useState<SearchResult[]>(initialResults)
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(initialTotal)
@@ -160,7 +160,7 @@ function SearchContent({
     updateUrl(query, newTag, sort)
   }
 
-  const handleSortChange = (newSort: 'relevance' | 'new') => {
+  const handleSortChange = (newSort: 'relevance' | 'new' | 'hot') => {
     setSort(newSort)
     updateUrl(query, selectedTag, newSort)
   }
@@ -270,6 +270,16 @@ function SearchContent({
                   }`}
                 >
                   相关性
+                </button>
+                <button
+                  onClick={() => handleSortChange('hot')}
+                  className={`text-sm font-medium transition ${
+                    sort === 'hot'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  🔥 热度
                 </button>
                 <button
                   onClick={() => handleSortChange('new')}
