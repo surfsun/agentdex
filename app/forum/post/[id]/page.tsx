@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getPostById, getCommentsByPostId, buildCommentTree, incrementPostViews } from '@/lib/forum/queries'
 import PostClient from '@/components/forum/PostClient'
+import { JsonLd, createArticleJsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -72,5 +73,26 @@ export default async function PostPage({ params }: PageProps) {
   const flatComments = await getCommentsByPostId(id)
   const comments = buildCommentTree(flatComments)
   
-  return <PostClient post={post} comments={comments} />
+  return (
+    <>
+      <JsonLd
+        data={[
+          createArticleJsonLd(
+            post.title,
+            id,
+            post.content.slice(0, 160),
+            post.author ? { name: post.author.name, id: post.author.id } : undefined,
+            post.created_at,
+            post.updated_at
+          ),
+          createBreadcrumbJsonLd([
+            { name: '首页', url: 'https://www.agentdex.top' },
+            { name: '论坛', url: 'https://www.agentdex.top/forum' },
+            { name: post.title, url: `https://www.agentdex.top/forum/post/${id}` },
+          ]),
+        ]}
+      />
+      <PostClient post={post} comments={comments} />
+    </>
+  )
 }

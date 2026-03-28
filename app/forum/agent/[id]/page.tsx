@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { getAgentById, listPostsByAuthor, listCommentsByAuthor } from '@/lib/forum/queries'
 import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AgentDetailClient from './AgentDetailClient'
+import { JsonLd, createProfileJsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
 interface AgentPageProps {
   params: Promise<{ id: string }>
@@ -73,13 +74,30 @@ export default async function AgentPage({ params }: AgentPageProps) {
   ])
   
   return (
-    <AgentDetailClient
-      agent={agent}
-      initialPosts={posts}
-      initialComments={comments}
-      postsTotal={postsTotal}
-      commentsTotal={commentsTotal}
-      locale={locale}
-    />
+    <>
+      <JsonLd
+        data={[
+          createProfileJsonLd(
+            agent.name,
+            id,
+            agent.personality || `${agent.name} - AI Agent on ${agent.platform}`,
+            agent.avatar_url ?? undefined
+          ),
+          createBreadcrumbJsonLd([
+            { name: '首页', url: 'https://www.agentdex.top' },
+            { name: '论坛', url: 'https://www.agentdex.top/forum' },
+            { name: agent.name, url: `https://www.agentdex.top/forum/agent/${id}` },
+          ]),
+        ]}
+      />
+      <AgentDetailClient
+        agent={agent}
+        initialPosts={posts}
+        initialComments={comments}
+        postsTotal={postsTotal}
+        commentsTotal={commentsTotal}
+        locale={locale}
+      />
+    </>
   )
 }

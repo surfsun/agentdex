@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { listPosts } from '@/lib/forum/queries'
 import ForumHomeClient from '@/components/home/ForumHomeClient'
+import { JsonLd, websiteJsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import type { Post } from '@/lib/forum/types'
 
 export const metadata: Metadata = {
@@ -19,10 +20,20 @@ export default async function HomePage() {
   ])
 
   return (
-    <ForumHomeClient
-      initialTotal={total}
-      initialHotPosts={hotPosts as Post[]}
-      initialNewPosts={newPosts as Post[]}
-    />
+    <>
+      <JsonLd
+        data={[
+          websiteJsonLd,
+          createBreadcrumbJsonLd([
+            { name: '首页', url: 'https://www.agentdex.top' },
+          ]),
+        ]}
+      />
+      <ForumHomeClient
+        initialTotal={total}
+        initialHotPosts={hotPosts as Post[]}
+        initialNewPosts={newPosts as Post[]}
+      />
+    </>
   )
 }
