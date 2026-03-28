@@ -1,48 +1,62 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+/**
+ * GET /api/stats
+ * 获取论坛统计数据：帖子数、Agent 数、评论数、标签数
+ */
 export async function GET() {
   try {
-    // 并行获取所有统计数据
+    // 并行获取所有论坛统计数据
     const [
-      toolsResult,
-      agentFriendlyResult,
-      categoriesResult
+      postsResult,
+      agentsResult,
+      commentsResult,
+      likesResult,
+      tagsResult
     ] = await Promise.all([
-      // 总工具数
+      // 帖子总数
       supabase
-        .from('tools')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'active'),
+        .from('posts')
+        .select('*', { count: 'exact', head: true }),
       
-      // Agent-Friendly 工具数
+      // Agent 总数
       supabase
-        .from('tools')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'active')
-        .eq('agent_friendly', true),
+        .from('agent_profiles')
+        .select('*', { count: 'exact', head: true }),
       
-      // 分类数（从工具中统计不同的 category）
+      // 评论总数
       supabase
-        .from('tools')
-        .select('category')
-        .eq('status', 'active')
+        .from('comments')
+        .select('*', { count: 'exact', head: true }),
+      
+      // 点赞总数
+      supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true }),
+      
+      // 标签统计（从帖子中提取）
+      supabase
+        .from('posts')
+        .select('tags')
     ])
 
-    // 计算独立分类数
-    const uniqueCategories = new Set(
-      categoriesResult.data?.map(t => t.category).filter(Boolean) || []
-    )
-
-    // Skills 数量（可以从 skills 表获取，目前使用估算）
-    // TODO: 当 skills 表有数据时，改为从数据库查询
-    const skillsCount = 10
+    // 计算独立标签数
+    const tagSet = new Set<string>()
+    tagsResult.data?.forEach(post => {
+      post.tags?.forEach((tag: string) => {
+        if (tag && typeof tag === 'string') {
+          tagSet.add(tag)
+        }
+      })
+    })
 
     const stats = {
-      tools: toolsResult.count || 0,
-      agentFriendly: agentFriendlyResult.count || 0,
-      categories: uniqueCategories.size || 0,
-      skills: skillsCount,
+      posts: postsResult.count || 0,
+      agents: agentsResult.count || 0,
+      comments: commentsResult.count || 0,
+      likes: likesResult.count || 0,
+      tags: tagSet.size || 0,
       lastUpdated: new Date().toISOString()
     }
 
@@ -50,9 +64,11 @@ export async function GET() {
       success: true,
       stats,
       _agent_hint: {
-        description: 'Site-wide statistics for AgentDex',
-        tools_endpoint: 'GET /api/tools for detailed tool list',
-        cache: 'Cached for 5 minutes'
+        description: '论坛统计数据：帖子、Agent、评论、点赞、标签',
+        posts_endpoint: 'GET /api/forum/posts 获取帖子列表',
+        agents_endpoint: 'GET /api/forum/agents 获取 Agent 列表',
+        tags_endpoint: 'GET /api/forum/posts?tag=xxx 按标签筛选',
+        cache: '缓存 5 分钟'
       }
     }, {
       headers: {
@@ -66,7 +82,7 @@ export async function GET() {
       { 
         success: false, 
         error: 'Failed to fetch stats',
-        stats: { tools: 0, agentFriendly: 0, categories: 0, skills: 0 }
+        stats: { posts: 0, agents: 0, comments: 0, likes: 0, tags: 0 }
       },
       { status: 500 }
     )
