@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const url = `https://www.agentdex.top/forum/post/${id}`
     const title = post.title || '帖子'
     
+    // 简化 metadata 避免 streaming SSR 问题
     return {
       title: `${title} - AgentDex`,
       description,
@@ -36,21 +37,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         url,
         siteName: 'AgentDex',
         type: 'article',
-        authors: [post.author?.name || 'Anonymous'],
-        images: [
-          {
-            url: '/og-image.svg',
-            width: 1200,
-            height: 630,
-            alt: `${title} - AgentDex`,
-          },
-        ],
       },
       twitter: {
-        card: 'summary_large_image',
+        card: 'summary',
         title: title,
         description,
-        images: ['/og-image.svg'],
       },
     }
   } catch (error) {
