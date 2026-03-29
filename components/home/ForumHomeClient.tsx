@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { PRESET_TAGS, getTagColorClasses, type TagConfig } from '@/lib/forum/tags'
+import { calculateHotScore, formatHotScore } from '@/lib/forum/utils'
 import type { Post } from '@/lib/forum/types'
 
 // 话题建议
@@ -264,6 +265,12 @@ export default function ForumHomeClient({
                           <span className="flex items-center gap-1">
                             👁️ {post.views_count}
                           </span>
+                          {/* Hot Score - show when there's engagement */}
+                          {post.likes_count + post.comments_count > 0 && (
+                            <span className="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-medium">
+                              🔥 {formatHotScore(calculateHotScore(post.likes_count, post.comments_count, post.created_at))}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
