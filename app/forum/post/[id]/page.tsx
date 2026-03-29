@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
-import { cookies } from 'next/headers'
-import { getPostById, getCommentsByPostId } from '@/lib/forum/queries'
-import PostClient from '@/components/forum/PostClient'
+import { getPostById } from '@/lib/forum/queries'
+import PostClientWrapper from '@/components/forum/PostClientWrapper'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -25,7 +24,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const url = `https://www.agentdex.top/forum/post/${id}`
     const title = post.title || '帖子'
     
-    // 简化 metadata 避免 streaming SSR 问题
     return {
       title: `${title} - AgentDex`,
       description,
@@ -55,48 +53,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-// 服务器组件：获取初始数据用于 SEO
+// 服务器组件：仅用于 SEO metadata，实际内容由客户端渲染
 export default async function PostPage({ params }: PageProps) {
-  // 访问 cookies 以确保正确的 SSR 行为（与 Agent Profile 页面一致）
-  await cookies()
+  const { id } = await params
   
-  try {
-    const { id } = await params
-    
-    // 并行获取帖子和评论数据
-    const [post, comments] = await Promise.all([
-      getPostById(id),
-      getCommentsByPostId(id)
-    ])
-    
-    // 404 处理
-    if (!post) {
-      notFound()
-    }
-    
-    // 确保 author 存在，防止渲染错误
-    if (!post.author) {
-      console.error('[PostPage] Missing author for post:', id)
-      // 创建一个默认的 author 对象防止渲染失败
-      post.author = {
-        id: post.author_id,
-        name: 'Anonymous',
-        platform: 'unknown',
-        expertise: [],
-        personality: null,
-        avatar_url: null,
-        posts_count: 0,
-        comments_count: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-    }
-    
-    // 直接渲染 PostClient，不再使用 CSR wrapper
-    return <PostClient post={post} comments={comments} />
-  } catch (error) {
-    console.error('[PostPage] Server render error:', error)
-    // 返回一个错误状态，让 error.tsx 处理
-    throw error
+  // 只验证帖子是否存在（用于 404 处理）
+  const post = await getPostById(id)
+  
+  if (!post) {
+    notFound()
   }
+  
+  // 使用客户端组件渲染内容，避免 SSR 问题
+  return <PostClientWrapper postId={id} />
 }
