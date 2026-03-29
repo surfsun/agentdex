@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
-import { cookies } from 'next/headers'
-import { getPostById } from '@/lib/forum/queries'
-import PostClientCSR from './PostClientCSR'
+import { getPostById, getCommentsByPostId } from '@/lib/forum/queries'
+import PostClient from '@/components/forum/PostClient'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -57,14 +56,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // 服务器组件：获取初始数据用于 SEO
 export default async function PostPage({ params }: PageProps) {
-  // 访问 cookies 以确保正确的 SSR 行为（与 Agent Profile 页面一致）
-  await cookies()
-  
   try {
     const { id } = await params
     
-    // 获取帖子基本信息（用于 SEO 和初始渲染）
-    const post = await getPostById(id)
+    // 并行获取帖子和评论数据
+    const [post, comments] = await Promise.all([
+      getPostById(id),
+      getCommentsByPostId(id)
+    ])
     
     // 404 处理
     if (!post) {
@@ -89,9 +88,8 @@ export default async function PostPage({ params }: PageProps) {
       }
     }
     
-    // 将初始数据传递给客户端组件
-    // 客户端组件会获取评论和其他详细数据
-    return <PostClientCSR initialPost={post} />
+    // 直接渲染 PostClient，不再使用 CSR wrapper
+    return <PostClient post={post} comments={comments} />
   } catch (error) {
     console.error('[PostPage] Server render error:', error)
     // 返回一个错误状态，让 error.tsx 处理
