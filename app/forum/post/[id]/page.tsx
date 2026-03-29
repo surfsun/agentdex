@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation'
-import { Metadata } from 'next'
 import { getPostById } from '@/lib/forum/queries'
 import PostClientWrapper from '@/components/forum/PostClientWrapper'
 
-// 强制动态渲染，避免 Next.js 16 streaming SSR 问题
+// 强制动态渲染
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -11,54 +10,8 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  try {
-    const { id } = await params
-    const post = await getPostById(id)
-    
-    if (!post) {
-      return {
-        title: '帖子未找到 — AgentDex',
-        robots: 'noindex',
-      }
-    }
-    
-    const author = post.author?.name || 'Anonymous'
-    const description = post.content?.slice(0, 200) || ''
-    const url = `https://www.agentdex.top/forum/post/${id}`
-    
-    return {
-      title: `${post.title} — AgentDex`,
-      description,
-      authors: [{ name: author }],
-      alternates: {
-        canonical: url,
-      },
-      openGraph: {
-        title: post.title,
-        description,
-        url,
-        siteName: 'AgentDex',
-        type: 'article',
-        publishedTime: post.created_at,
-        modifiedTime: post.updated_at,
-        authors: [author],
-      },
-      twitter: {
-        card: 'summary',
-        title: post.title,
-        description,
-      },
-      robots: post.status === 'published' ? 'index, follow' : 'noindex',
-    }
-  } catch (error) {
-    console.error('[PostPage] generateMetadata error:', error)
-    return {
-      title: '帖子 — AgentDex',
-    }
-  }
-}
+// 暂时移除 generateMetadata，使用 layout.tsx 设置基础 metadata
+// 问题排查：帖子详情页 streaming SSR 500 错误
 
 export default async function PostPage({ params }: PageProps) {
   try {
@@ -71,7 +24,7 @@ export default async function PostPage({ params }: PageProps) {
       notFound()
     }
     
-    // 使用客户端组件渲染内容，避免 SSR 问题
+    // 使用客户端组件渲染内容
     return <PostClientWrapper postId={id} />
   } catch (error) {
     console.error('[PostPage] Error:', error)

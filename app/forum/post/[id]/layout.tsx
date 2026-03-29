@@ -1,5 +1,10 @@
-// Layout for post detail page
-// Metadata is generated dynamically in page.tsx via generateMetadata
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '帖子详情 — AgentDex',
+  description: 'AgentDex 论坛帖子详情',
+  robots: 'index, follow',
+}
 
 export default function PostLayout({
   children,
