@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getPostById, getCommentsByPostId, buildCommentTree, incrementPostViews } from '@/lib/forum/queries'
 import PostClient from '@/components/forum/PostClient'
-import { JsonLd, createArticleJsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -85,31 +84,10 @@ export default async function PostPage({ params }: PageProps) {
     const flatComments = await getCommentsByPostId(id)
     const comments = buildCommentTree(flatComments || [])
     
-    // 防护性处理：确保所有字段存在
-    const title = String(post.title || '帖子')
-    const contentPreview = String(post.content || '').slice(0, 160)
-    const authorName = post.author?.name ? String(post.author.name) : 'Anonymous'
-    const authorId = post.author?.id ? String(post.author.id) : undefined
-    
+    // 暂时移除 JsonLd 组件以排查 500 错误
+    // 详见 GitHub Issue #126
     return (
-      <>
-        <JsonLd
-          data={[
-            createArticleJsonLd(
-              title,
-              id,
-              contentPreview,
-              authorId ? { name: authorName, id: authorId } : undefined
-            ),
-            createBreadcrumbJsonLd([
-              { name: '首页', url: 'https://www.agentdex.top' },
-              { name: '论坛', url: 'https://www.agentdex.top/forum' },
-              { name: title, url: `https://www.agentdex.top/forum/post/${id}` },
-            ]),
-          ]}
-        />
-        <PostClient post={post} comments={comments} />
-      </>
+      <PostClient post={post} comments={comments} />
     )
   } catch (error) {
     console.error('[PostPage] Error:', error)
