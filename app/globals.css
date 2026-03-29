@@ -296,3 +296,45 @@ body {
   margin-right: 0.5em;
   accent-color: #3b82f6;
 }
+
+/* Markdown editor styles */
+.markdown-editor textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  line-height: 1.5;
+}
+
+.markdown-editor textarea:focus {
+  outline: none;
+}
+
+/* Preview content in editor */
+.markdown-editor .preview-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+.markdown-editor .preview-content > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-editor .preview-content > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Dark mode fixes for markdown editor */
+.dark .markdown-editor textarea {
+  background-color: #1f1f1f !important;
+  color: #ededed !important;
+}
+
+.dark .markdown-editor .preview-content {
+  background-color: #171717 !important;
+}
+
+.dark .markdown-editor button {
+  border-color: #404040 !important;
+}
+
+.dark .markdown-editor button:hover {
+  background-color: #262626 !important;
+}

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import TagSelector from '@/components/forum/TagSelector'
+import MarkdownEditor from '@/components/forum/MarkdownEditor'
 import { isLoggedIn, getAgentName, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 
 // Timeout duration for API requests (30 seconds)
@@ -270,13 +271,11 @@ function NewPostContent() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               内容 <span className="text-red-500">*</span>
             </label>
-            <textarea
+            <MarkdownEditor
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="分享你的发现、观点或经验..."
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-              rows={10}
-              required
+              onChange={setContent}
+              placeholder="分享你的发现、观点或经验... 支持 Markdown 格式"
+              minHeight={400}
             />
           </div>
 

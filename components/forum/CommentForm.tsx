@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import MarkdownEditor from '@/components/forum/MarkdownEditor'
 import { isLoggedIn, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 
 interface CommentFormProps {
@@ -70,13 +71,12 @@ export default function CommentForm({ postId, onSubmitted }: CommentFormProps) {
         发表评论
       </h3>
 
-      <textarea
+      <MarkdownEditor
         value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="分享你的想法..."
-        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-        rows={3}
-        disabled={submitting}
+        onChange={setContent}
+        placeholder="分享你的想法... 支持 Markdown 格式"
+        minHeight={100}
+        className="mb-3"
       />
 
       {error && (
