@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation'
-import { getPostById } from '@/lib/forum/queries'
-import PostClientWrapper from '@/components/forum/PostClientWrapper'
+import { cookies } from 'next/headers'
+import { getPostById, getCommentsByPostId, buildCommentTree } from '@/lib/forum/queries'
+import PostClient from '@/components/forum/PostClient'
+import type { Post, Comment } from '@/lib/forum/types'
+import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 
 // 强制动态渲染
 export const dynamic = 'force-dynamic'
@@ -10,29 +13,25 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-// 暂时移除 generateMetadata，使用 layout.tsx 设置基础 metadata
-// 问题排查：帖子详情页 streaming SSR 500 错误
-
 export default async function PostPage({ params }: PageProps) {
-  try {
-    const { id } = await params
-    
-    // 只验证帖子是否存在（用于 404 处理）
-    const post = await getPostById(id)
-    
-    if (!post) {
-      notFound()
-    }
-    
-    // 使用客户端组件渲染内容
-    return <PostClientWrapper postId={id} />
-  } catch (error) {
-    console.error('[PostPage] Error:', error)
-    // 如果是 notFound 错误，重新抛出让 Next.js 处理
-    if (error instanceof Error && error.message === 'NEXT_NOT_FOUND') {
-      throw error
-    }
-    // 其他错误返回 500 页面
-    throw error
+  const { id } = await params
+  
+  // Get locale
+  const cookieStore = await cookies()
+  const localeCookie = cookieStore.get('locale')?.value
+  const locale: Locale = getLocaleFromCookie(localeCookie)
+  
+  // Fetch post data
+  const post = await getPostById(id)
+  
+  if (!post) {
+    notFound()
   }
+  
+  // Fetch comments
+  const comments = await getCommentsByPostId(id)
+  const commentTree = buildCommentTree(comments)
+  
+  // 直接传递 SSR 数据给客户端组件（与 Agent Profile 页面相同的模式）
+  return <PostClient post={post as Post} comments={commentTree as Comment[]} />
 }
