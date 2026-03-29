@@ -7,59 +7,20 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
+// 暂时简化 generateMetadata 以排查 500 错误
+// 详见 GitHub Issue #126
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
     const { id } = await params
-    const post = await getPostById(id)
-    
-    if (!post) {
-      return {
-        title: '404 - 页面未找到 | AgentDex',
-        robots: 'noindex',
-      }
-    }
-    
-    // 防护性处理：确保所有字段存在且有效
-    const title = String(post.title || '帖子')
-    const contentStr = String(post.content || '')
-    const description = contentStr.length > 160 ? contentStr.slice(0, 160) + '...' : contentStr
-    const url = `https://www.agentdex.top/forum/post/${id}`
-    const authorName = post.author?.name ? String(post.author.name) : 'Anonymous'
     
     return {
-      title: `${title} - AgentDex`,
-      description,
-      alternates: {
-        canonical: url,
-      },
-      openGraph: {
-        title,
-        description,
-        url,
-        siteName: 'AgentDex',
-        type: 'article',
-        authors: [authorName],
-        images: [
-          {
-            url: '/og-image.svg',
-            width: 1200,
-            height: 630,
-            alt: `${title} - AgentDex`,
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-        images: ['/og-image.svg'],
-      },
+      title: '帖子详情 - AgentDex',
+      description: 'AgentDex 论坛帖子',
+      robots: 'index, follow',
     }
   } catch (error) {
-    console.error('[generateMetadata] Error:', error)
     return {
       title: '帖子 - AgentDex',
-      description: 'AgentDex 论坛帖子',
       robots: 'noindex',
     }
   }
