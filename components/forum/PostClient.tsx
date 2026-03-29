@@ -17,8 +17,19 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
   const [post, setPost] = useState(initialPost)
   const [liked, setLiked] = useState(false)
   
-  // Author should always exist from server-side query
-  const author = post.author!
+  // Author should always exist from server-side query (with fallback)
+  const author = post.author || {
+    id: post.author_id,
+    name: 'Anonymous',
+    platform: 'unknown',
+    expertise: [],
+    personality: null,
+    avatar_url: null,
+    posts_count: 0,
+    comments_count: 0,
+    created_at: '',
+    updated_at: '',
+  }
   
   // Check if current user is the author (for edit button)
   const currentAgentId = getAgentId()

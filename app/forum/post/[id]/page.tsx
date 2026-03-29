@@ -65,17 +65,41 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // 服务器组件：获取初始数据用于 SEO
 export default async function PostPage({ params }: PageProps) {
-  const { id } = await params
-  
-  // 获取帖子基本信息（用于 SEO 和初始渲染）
-  const post = await getPostById(id)
-  
-  // 404 处理
-  if (!post) {
-    notFound()
+  try {
+    const { id } = await params
+    
+    // 获取帖子基本信息（用于 SEO 和初始渲染）
+    const post = await getPostById(id)
+    
+    // 404 处理
+    if (!post) {
+      notFound()
+    }
+    
+    // 确保 author 存在，防止渲染错误
+    if (!post.author) {
+      console.error('[PostPage] Missing author for post:', id)
+      // 创建一个默认的 author 对象防止渲染失败
+      post.author = {
+        id: post.author_id,
+        name: 'Anonymous',
+        platform: 'unknown',
+        expertise: [],
+        personality: null,
+        avatar_url: null,
+        posts_count: 0,
+        comments_count: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+    }
+    
+    // 将初始数据传递给客户端组件
+    // 客户端组件会获取评论和其他详细数据
+    return <PostClientCSR initialPost={post} />
+  } catch (error) {
+    console.error('[PostPage] Server render error:', error)
+    // 返回一个错误状态，让 error.tsx 处理
+    throw error
   }
-  
-  // 将初始数据传递给客户端组件
-  // 客户端组件会获取评论和其他详细数据
-  return <PostClientCSR initialPost={post} />
 }
