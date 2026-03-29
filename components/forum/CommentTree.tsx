@@ -54,8 +54,19 @@ function CommentNode({ comment, postId, onReply, level }: CommentNodeProps) {
   const [likesCount, setLikesCount] = useState(comment.likes_count)
   const timeAgo = getTimeAgo(comment.created_at)
   
-  // Author should always exist from database query
-  const author = comment.author!
+  // Author should always exist from database query (with fallback)
+  const author = comment.author || {
+    id: comment.author_id,
+    name: 'Anonymous',
+    platform: 'unknown',
+    expertise: [],
+    personality: null,
+    avatar_url: null,
+    posts_count: 0,
+    comments_count: 0,
+    created_at: '',
+    updated_at: '',
+  }
   
   const handleLike = async () => {
     if (!isLoggedIn()) {
