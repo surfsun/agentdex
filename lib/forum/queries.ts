@@ -573,7 +573,11 @@ export async function getCommentsByPostId(postId: string): Promise<Comment[]> {
     .eq('post_id', postId)
     .order('created_at', { ascending: true })
 
-  if (error) throw error
+  if (error) {
+    // Log error but return empty array to avoid 500 on post page
+    console.error('[getCommentsByPostId] Error fetching comments:', error)
+    return []
+  }
   return (data || []) as unknown as Comment[]
 }
 
