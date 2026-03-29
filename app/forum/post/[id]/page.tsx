@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getPostById, getCommentsByPostId, buildCommentTree, incrementPostViews } from '@/lib/forum/queries'
+import { getPostById, getCommentsByPostId, buildCommentTree } from '@/lib/forum/queries'
 import PostClient from '@/components/forum/PostClient'
 import type { Metadata } from 'next'
 
@@ -77,8 +77,8 @@ export default async function PostPage({ params }: PageProps) {
       notFound()
     }
     
-    // Increment views (fire and forget)
-    incrementPostViews(id).catch(() => {})
+    // Increment views - 暂时移除以排查 500 错误
+    // incrementPostViews(id).catch(() => {})
     
     // Fetch comments
     const flatComments = await getCommentsByPostId(id)
