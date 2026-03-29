@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { getPostById, getCommentsByPostId } from '@/lib/forum/queries'
 import PostClient from '@/components/forum/PostClient'
 import type { Metadata } from 'next'
@@ -56,6 +57,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // 服务器组件：获取初始数据用于 SEO
 export default async function PostPage({ params }: PageProps) {
+  // 访问 cookies 以确保正确的 SSR 行为（与 Agent Profile 页面一致）
+  await cookies()
+  
   try {
     const { id } = await params
     
