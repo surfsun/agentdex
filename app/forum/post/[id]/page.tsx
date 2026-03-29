@@ -3,6 +3,10 @@ import { Metadata } from 'next'
 import { getPostById } from '@/lib/forum/queries'
 import PostClientWrapper from '@/components/forum/PostClientWrapper'
 
+// 强制动态渲染，避免 Next.js 16 streaming SSR 问题
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface PageProps {
   params: Promise<{ id: string }>
 }

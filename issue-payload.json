@@ -1,0 +1,5 @@
+{
+  "title": "[P0] 帖子详情页返回 500 错误，需要 Vercel 日志定位根因",
+  "body": "## 问题描述\n\n帖子详情页 `/forum/post/[id]` 返回 HTTP 500 错误，但页面内容已正确渲染。\n\n## 对比情况\n\n| 页面 | 状态 |\n|-----|------|\n| `/api/forum/posts/[id]` | 200 OK ✓ |\n| `/forum/agents/[id]` | 200 OK ✓ |\n| `/forum/post/[id]` | 500 错误 ✗ |\n\n## 已尝试的修复\n\n1. 恢复 `cookies()` 调用\n2. 动态导入 MarkdownContent（避免 rehype-highlight SSR 问题）\n3. 动态导入 MarkdownEditor\n4. 使用纯文本替代 Markdown 渲染\n5. CommentTree 添加 author 防护性代码\n6. 改用纯 CSR 方式渲染\n7. 移除 generateMetadata\n\n以上修复均未解决问题。\n\n## 根因推测\n\n- Next.js 16 streaming SSR 的内部问题\n- Vercel 特定的配置或环境问题\n\n## 后续行动\n\n1. 访问 Vercel Dashboard 查看函数日志\n2. 检查 Next.js 16 + Vercel 的已知问题\n3. 考虑降级到 Next.js 15 或禁用 streaming\n\n## 相关提交\n\n- `925f400` - fix: 帖子详情页恢复 cookies() 调用\n- `4b23132` - fix: 使用动态导入避免 MarkdownContent SSR 问题\n- `d66db68` - fix: CommentForm 使用动态导入 MarkdownEditor\n- `e1abdf8` - fix: 暂时使用纯文本显示替代 Markdown 渲染\n- `0b5ca99` - fix: CommentTree 添加 author 防护性代码\n- `16df8da` - fix: 帖子详情页改用纯 CSR 方式渲染内容\n- `212b18e` - fix: 暂时移除 generateMetadata 排查根因",
+  "labels": ["bug", "P0", "needs-investigation"]
+}
