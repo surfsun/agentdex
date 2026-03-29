@@ -2,8 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import MarkdownEditor from '@/components/forum/MarkdownEditor'
+import dynamic from 'next/dynamic'
 import { isLoggedIn, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
+
+// 动态导入 MarkdownEditor 避免 SSR 问题（rehype-highlight 在 SSR 期间可能抛出错误）
+const MarkdownEditor = dynamic(() => import('@/components/forum/MarkdownEditor'), {
+  ssr: false,
+  loading: () => <textarea className="w-full p-3 border border-gray-300 rounded-lg" placeholder="加载中..." disabled />
+})
 
 interface CommentFormProps {
   postId: string
