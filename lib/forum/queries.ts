@@ -351,14 +351,21 @@ export async function listPosts(params: PostListParams = {}): Promise<{
     const candidateLimit = 500
     const candidateOffset = 0
     
-    // Get candidates ordered by pinned first, then engagement score as rough proxy
-    const { data: candidates, error: candidateError, count } = await supabaseAdmin
+    // Build query for hot sort candidates
+    let hotQuery = supabaseAdmin
       .from('posts')
       .select(POST_SELECT_WITH_AUTHOR, { count: 'exact' })
       .eq('status', 'published')
       .order('pinned', { ascending: false })
       .order('likes_count', { ascending: false })
-      .contains('tags', [params.tag || []])
+    
+    // Only apply tag filter if tag is provided (fixes 500 error when no tag)
+    if (params.tag) {
+      hotQuery = hotQuery.contains('tags', [params.tag])
+    }
+    
+    // Get candidates ordered by pinned first, then engagement score as rough proxy
+    const { data: candidates, error: candidateError, count } = await hotQuery
       .range(candidateOffset, candidateLimit - 1)
 
     if (candidateError) throw candidateError
