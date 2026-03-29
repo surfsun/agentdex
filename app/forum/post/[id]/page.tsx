@@ -20,45 +20,44 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }
     }
     
-    // 防护性处理：确保 content 是字符串
-    const contentStr = post.content || ''
-    const description = contentStr.length > 160 ? contentStr.slice(0, 160) : contentStr
+    // 防护性处理：确保所有字段存在且有效
+    const title = String(post.title || '帖子')
+    const contentStr = String(post.content || '')
+    const description = contentStr.length > 160 ? contentStr.slice(0, 160) + '...' : contentStr
     const url = `https://www.agentdex.top/forum/post/${id}`
+    const authorName = post.author?.name ? String(post.author.name) : 'Anonymous'
     
     return {
-      title: `${post.title || '帖子'} - AgentDex`,
+      title: `${title} - AgentDex`,
       description,
       alternates: {
         canonical: url,
       },
       openGraph: {
-        title: post.title || '帖子',
+        title,
         description,
         url,
         siteName: 'AgentDex',
         type: 'article',
-        authors: [post.author?.name || 'Anonymous'],
-        publishedTime: post.created_at || undefined,
-        modifiedTime: post.updated_at || undefined,
+        authors: [authorName],
         images: [
           {
             url: '/og-image.svg',
             width: 1200,
             height: 630,
-            alt: `${post.title || '帖子'} - AgentDex`,
+            alt: `${title} - AgentDex`,
           },
         ],
       },
       twitter: {
         card: 'summary_large_image',
-        title: post.title || '帖子',
+        title,
         description,
         images: ['/og-image.svg'],
       },
     }
   } catch (error) {
     console.error('[generateMetadata] Error:', error)
-    // 返回默认 metadata，避免页面完全失败
     return {
       title: '帖子 - AgentDex',
       description: 'AgentDex 论坛帖子',
@@ -68,47 +67,53 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PostPage({ params }: PageProps) {
-  const { id } = await params
-  
-  // Fetch post data on the server
-  const post = await getPostById(id)
-  
-  // Return 404 if post doesn't exist
-  if (!post) {
-    notFound()
+  try {
+    const { id } = await params
+    
+    // Fetch post data on the server
+    const post = await getPostById(id)
+    
+    // Return 404 if post doesn't exist
+    if (!post) {
+      notFound()
+    }
+    
+    // Increment views (fire and forget)
+    incrementPostViews(id).catch(() => {})
+    
+    // Fetch comments
+    const flatComments = await getCommentsByPostId(id)
+    const comments = buildCommentTree(flatComments || [])
+    
+    // 防护性处理：确保所有字段存在
+    const title = String(post.title || '帖子')
+    const contentPreview = String(post.content || '').slice(0, 160)
+    const authorName = post.author?.name ? String(post.author.name) : 'Anonymous'
+    const authorId = post.author?.id ? String(post.author.id) : undefined
+    
+    return (
+      <>
+        <JsonLd
+          data={[
+            createArticleJsonLd(
+              title,
+              id,
+              contentPreview,
+              authorId ? { name: authorName, id: authorId } : undefined
+            ),
+            createBreadcrumbJsonLd([
+              { name: '首页', url: 'https://www.agentdex.top' },
+              { name: '论坛', url: 'https://www.agentdex.top/forum' },
+              { name: title, url: `https://www.agentdex.top/forum/post/${id}` },
+            ]),
+          ]}
+        />
+        <PostClient post={post} comments={comments} />
+      </>
+    )
+  } catch (error) {
+    console.error('[PostPage] Error:', error)
+    // 这个错误会被 error.tsx 捕获
+    throw error
   }
-  
-  // Increment views (fire and forget)
-  incrementPostViews(id).catch(() => {})
-  
-  // Fetch comments
-  const flatComments = await getCommentsByPostId(id)
-  const comments = buildCommentTree(flatComments || [])
-  
-  // 防护性处理：确保所有字段存在
-  const title = post.title || '帖子'
-  const contentPreview = (post.content || '').slice(0, 160)
-  
-  return (
-    <>
-      <JsonLd
-        data={[
-          createArticleJsonLd(
-            title,
-            id,
-            contentPreview,
-            post.author ? { name: post.author.name || 'Anonymous', id: post.author.id } : undefined,
-            post.created_at || undefined,
-            post.updated_at || undefined
-          ),
-          createBreadcrumbJsonLd([
-            { name: '首页', url: 'https://www.agentdex.top' },
-            { name: '论坛', url: 'https://www.agentdex.top/forum' },
-            { name: title, url: `https://www.agentdex.top/forum/post/${id}` },
-          ]),
-        ]}
-      />
-      <PostClient post={post} comments={comments} />
-    </>
-  )
 }
