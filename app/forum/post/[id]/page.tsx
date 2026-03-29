@@ -1,58 +1,84 @@
-import { notFound } from 'next/navigation'
-import { getPostById, getCommentsByPostId, buildCommentTree } from '@/lib/forum/queries'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams, notFound } from 'next/navigation'
 import PostClient from '@/components/forum/PostClient'
-import type { Metadata } from 'next'
+import type { Post, Comment } from '@/lib/forum/types'
 
-interface PageProps {
-  params: Promise<{ id: string }>
-}
-
-// 暂时简化 generateMetadata 以排查 500 错误
+// 完全客户端渲染以排查 SSR 500 错误
 // 详见 GitHub Issue #126
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  try {
-    const { id } = await params
-    
-    return {
-      title: '帖子详情 - AgentDex',
-      description: 'AgentDex 论坛帖子',
-      robots: 'index, follow',
-    }
-  } catch (error) {
-    return {
-      title: '帖子 - AgentDex',
-      robots: 'noindex',
-    }
-  }
-}
 
-export default async function PostPage({ params }: PageProps) {
-  try {
-    const { id } = await params
-    
-    // Fetch post data on the server
-    const post = await getPostById(id)
-    
-    // Return 404 if post doesn't exist
-    if (!post) {
-      notFound()
+export default function PostPageCSR() {
+  const params = useParams()
+  const id = params.id as string
+  
+  const [loading, setLoading] = useState(true)
+  const [post, setPost] = useState<Post | null>(null)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [error, setError] = useState(false)
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch post
+        const postRes = await fetch(`/api/forum/posts/${id}`)
+        if (!postRes.ok) {
+          setError(true)
+          setLoading(false)
+          return
+        }
+        const postData = await postRes.json()
+        setPost(postData.data)
+        
+        // Fetch comments
+        const commentsRes = await fetch(`/api/forum/posts/${id}/comments`)
+        if (commentsRes.ok) {
+          const commentsData = await commentsRes.json()
+          setComments(commentsData.data || [])
+        }
+        
+        setLoading(false)
+      } catch (err) {
+        console.error('[PostPageCSR] Error:', err)
+        setError(true)
+        setLoading(false)
+      }
     }
     
-    // Increment views - 暂时移除以排查 500 错误
-    // incrementPostViews(id).catch(() => {})
-    
-    // Fetch comments
-    const flatComments = await getCommentsByPostId(id)
-    const comments = buildCommentTree(flatComments || [])
-    
-    // 暂时移除 JsonLd 组件以排查 500 错误
-    // 详见 GitHub Issue #126
+    fetchData()
+  }, [id])
+  
+  if (loading) {
     return (
-      <PostClient post={post} comments={comments} />
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+        </div>
+      </div>
     )
-  } catch (error) {
-    console.error('[PostPage] Error:', error)
-    // 这个错误会被 error.tsx 捕获
-    throw error
   }
+  
+  if (error || !post) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center py-20">
+          <div className="text-6xl mb-4">🔍</div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            帖子不存在
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            该帖子可能已被删除或链接错误
+          </p>
+          <a href="/forum" className="text-blue-600 hover:underline">
+            返回论坛
+          </a>
+        </div>
+      </div>
+    )
+  }
+  
+  return <PostClient post={post} comments={comments} />
 }
