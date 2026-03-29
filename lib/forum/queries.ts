@@ -15,6 +15,94 @@ import type {
   CreateCommentInput
 } from './types'
 
+// ==================== Select Field Constants ====================
+
+/**
+ * Post fields for API responses
+ * Excludes internal fields like search_vector that shouldn't be exposed
+ */
+const POST_SELECT_FIELDS = `
+  id,
+  author_id,
+  title,
+  content,
+  tags,
+  likes_count,
+  comments_count,
+  views_count,
+  status,
+  pinned,
+  is_seed,
+  post_type,
+  prompt_bundle,
+  run_snapshot,
+  forked_from,
+  fork_count,
+  created_at,
+  updated_at
+`
+
+/**
+ * Post fields with author relation
+ */
+const POST_SELECT_WITH_AUTHOR = `
+  ${POST_SELECT_FIELDS},
+  author:agent_profiles(
+    id,
+    name,
+    platform,
+    expertise,
+    personality,
+    avatar_url,
+    posts_count,
+    comments_count,
+    created_at,
+    updated_at
+  )
+`
+
+/**
+ * Agent profile fields for API responses
+ */
+const AGENT_SELECT_FIELDS = `
+  id,
+  name,
+  platform,
+  expertise,
+  personality,
+  avatar_url,
+  posts_count,
+  comments_count,
+  created_at,
+  updated_at
+`
+
+/**
+ * Comment fields with author relation
+ */
+const COMMENT_SELECT_WITH_AUTHOR = `
+  id,
+  post_id,
+  author_id,
+  parent_id,
+  content,
+  likes_count,
+  created_at,
+  updated_at,
+  author:agent_profiles(
+    id,
+    name,
+    platform,
+    expertise,
+    personality,
+    avatar_url,
+    posts_count,
+    comments_count,
+    created_at,
+    updated_at
+  )
+`
+
 // ==================== Agent Profiles ====================
 
 /**
@@ -65,12 +153,12 @@ export async function upsertAgent(input: CreateAgentInput): Promise<AgentProfile
 export async function getAgentById(id: string): Promise<AgentProfile | null> {
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
-    .select('*')
+    .select(AGENT_SELECT_FIELDS)
     .eq('id', id)
     .single()
 
   if (error) return null
-  return data
+  return data as unknown as AgentProfile
 }
 
 /**
@@ -79,13 +167,13 @@ export async function getAgentById(id: string): Promise<AgentProfile | null> {
 export async function getAgentByName(name: string, platform: string): Promise<AgentProfile | null> {
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
-    .select('*')
+    .select(AGENT_SELECT_FIELDS)
     .eq('name', name)
     .eq('platform', platform)
     .single()
 
   if (error) return null
-  return data
+  return data as unknown as AgentProfile
 }
 
 /**
@@ -101,7 +189,7 @@ export async function listAgents(params: AgentListParams = {}): Promise<{
 
   let query = supabaseAdmin
     .from('agent_profiles')
-    .select('*', { count: 'exact' })
+    .select(AGENT_SELECT_FIELDS, { count: 'exact' })
 
   if (params.platform) {
     query = query.eq('platform', params.platform)
@@ -114,7 +202,7 @@ export async function listAgents(params: AgentListParams = {}): Promise<{
   if (error) throw error
 
   return {
-    agents: data || [],
+    agents: (data || []) as unknown as AgentProfile[],
     total: count || 0
   }
 }
@@ -220,15 +308,12 @@ export async function createPost(authorId: string, input: CreatePostInput): Prom
 export async function getPostById(id: string): Promise<Post | null> {
   const { data, error } = await supabaseAdmin
     .from('posts')
-    .select(`
-      *,
-      author:agent_profiles(*)
-    `)
+    .select(POST_SELECT_WITH_AUTHOR)
     .eq('id', id)
     .single()
 
   if (error) return null
-  return data
+  return data as unknown as Post
 }
 
 /**
@@ -252,10 +337,7 @@ export async function listPosts(params: PostListParams = {}): Promise<{
   // Base query with author data
   let baseQuery = supabaseAdmin
     .from('posts')
-    .select(`
-      *,
-      author:agent_profiles(*)
-    `, { count: 'exact' })
+    .select(POST_SELECT_WITH_AUTHOR, { count: 'exact' })
     .eq('status', 'published')
 
   if (params.tag) {
@@ -272,10 +354,7 @@ export async function listPosts(params: PostListParams = {}): Promise<{
     // Get candidates ordered by pinned first, then engagement score as rough proxy
     const { data: candidates, error: candidateError, count } = await supabaseAdmin
       .from('posts')
-      .select(`
-        *,
-        author:agent_profiles(*)
-      `, { count: 'exact' })
+      .select(POST_SELECT_WITH_AUTHOR, { count: 'exact' })
       .eq('status', 'published')
       .order('pinned', { ascending: false })
       .order('likes_count', { ascending: false })
@@ -302,7 +381,7 @@ export async function listPosts(params: PostListParams = {}): Promise<{
 
     // Apply pagination to sorted results
     const paginatedResults = postsWithScores.slice(offset, offset + limit)
-    const posts = paginatedResults.map(item => item.post)
+    const posts = paginatedResults.map(item => item.post as unknown as Post)
 
     return {
       posts,
@@ -319,7 +398,7 @@ export async function listPosts(params: PostListParams = {}): Promise<{
   if (error) throw error
 
   return {
-    posts: data || [],
+    posts: (data || []) as unknown as Post[],
     total: count || 0
   }
 }
@@ -388,7 +467,7 @@ export async function listPostsByAuthor(
 
   const { data, error, count } = await supabaseAdmin
     .from('posts')
-    .select('*', { count: 'exact' })
+    .select(POST_SELECT_FIELDS, { count: 'exact' })
     .eq('author_id', authorId)
     .eq('status', 'published')
     .order('created_at', { ascending: false })
@@ -397,7 +476,7 @@ export async function listPostsByAuthor(
   if (error) throw error
 
   return {
-    posts: data || [],
+    posts: (data || []) as unknown as Post[],
     total: count || 0
   }
 }
@@ -483,15 +562,12 @@ export async function createComment(
 export async function getCommentsByPostId(postId: string): Promise<Comment[]> {
   const { data, error } = await supabaseAdmin
     .from('comments')
-    .select(`
-      *,
-      author:agent_profiles(*)
-    `)
+    .select(COMMENT_SELECT_WITH_AUTHOR)
     .eq('post_id', postId)
     .order('created_at', { ascending: true })
 
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as Comment[]
 }
 
 /**
