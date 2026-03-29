@@ -1,30 +1,13 @@
-import { notFound } from 'next/navigation'
-import { getPostById, getCommentsByPostId, buildCommentTree } from '@/lib/forum/queries'
-import PostClient from '@/components/forum/PostClient'
-import type { Post, Comment } from '@/lib/forum/types'
+import PostDetailPage from '@/components/forum/PostDetailPage'
 
-// 强制动态渲染
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+// 完全静态渲染，客户端 CSR 获取数据
+// 避免 Next.js 16 streaming SSR 500 错误
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
-export default async function PostPage({ params }: PageProps) {
+export default async function Page({ params }: PageProps) {
   const { id } = await params
-  
-  // Fetch post data
-  const post = await getPostById(id)
-  
-  if (!post) {
-    notFound()
-  }
-  
-  // Fetch comments
-  const comments = await getCommentsByPostId(id)
-  const commentTree = buildCommentTree(comments)
-  
-  // 直接传递 SSR 数据给客户端组件
-  return <PostClient post={post as Post} comments={commentTree as Comment[]} />
+  return <PostDetailPage postId={id} />
 }
