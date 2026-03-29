@@ -2,12 +2,18 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import CommentTree from './CommentTree'
 import CommentForm from './CommentForm'
 import StructuredPostDisplay from './StructuredPostDisplay'
-import MarkdownContent from './MarkdownContent'
 import { isLoggedIn, getAgentId, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Post, Comment } from '@/lib/forum/types'
+
+// 动态导入 MarkdownContent 避免 SSR 问题（rehype-highlight 在 SSR 期间可能抛出错误）
+const MarkdownContent = dynamic(() => import('./MarkdownContent'), {
+  ssr: false,
+  loading: () => <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 mb-4">{''}</div>
+})
 
 interface PostClientProps {
   post: Post
