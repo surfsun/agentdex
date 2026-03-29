@@ -83,6 +83,7 @@ export default function CommentForm({ postId, onSubmitted }: CommentFormProps) {
         placeholder="分享你的想法... 支持 Markdown 格式"
         minHeight={100}
         className="mb-3"
+        disabled={submitting}
       />
 
       {error && (

@@ -4,25 +4,10 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
 
 interface MarkdownContentProps {
   content: string
   className?: string
-}
-
-// Type for code element props from rehype-highlight
-interface CodeElementProps {
-  className?: string
-  children?: ReactNode
-  [key: string]: unknown
-}
-
-// Type for pre element props
-interface PreElementProps {
-  children?: ReactNode
-  className?: string
-  [key: string]: unknown
 }
 
 /**
@@ -37,14 +22,15 @@ interface PreElementProps {
 export default function MarkdownContent({ content, className = '' }: MarkdownContentProps) {
   return (
     <div className={`markdown-content ${className}`}>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
         components={{
           // 代码块：添加复制按钮和语言标识
-          pre: ({ children }: PreElementProps) => {
+          pre: ({ children }: any) => {
             // Check if this is a code block (has hljs class from rehype-highlight)
-            const childElement = children as React.ReactElement<CodeElementProps>
+            const childElement = children as React.ReactElement<any>
             const isCodeBlock = childElement?.props?.className?.includes('hljs')
             
             if (isCodeBlock) {
@@ -79,7 +65,7 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
             return <pre className="bg-gray-100 dark:bg-gray-700 p-2 rounded">{children}</pre>
           },
           // 代码块内容
-          code: ({ className, children }: CodeElementProps) => {
+          code: ({ className, children }: any) => {
             const match = /language-(\w+)/.exec(className || '')
             const isInline = !match
             
@@ -100,9 +86,9 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
             )
           },
           // 链接：区分内部链接和外部链接
-          a: ({ href, children }: { href?: string; children?: ReactNode }) => {
+          a: ({ href, children }: any) => {
             // 内部链接（AgentDex 内）
-            if (href?.startsWith('/') || href?.includes('agentdex.top')) {
+            if (href?.startsWith('/') || href?.includes?.('agentdex.top')) {
               return (
                 <Link
                   href={href || '#'}
@@ -127,50 +113,50 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
             )
           },
           // 标题
-          h1: ({ children }: { children?: ReactNode }) => (
+          h1: ({ children }: any) => (
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 mt-6">{children}</h1>
           ),
-          h2: ({ children }: { children?: ReactNode }) => (
+          h2: ({ children }: any) => (
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3 mt-5">{children}</h2>
           ),
-          h3: ({ children }: { children?: ReactNode }) => (
+          h3: ({ children }: any) => (
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 mt-4">{children}</h3>
           ),
-          h4: ({ children }: { children?: ReactNode }) => (
+          h4: ({ children }: any) => (
             <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-2 mt-3">{children}</h4>
           ),
           // 段落
-          p: ({ children }: { children?: ReactNode }) => (
+          p: ({ children }: any) => (
             <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{children}</p>
           ),
           // 列表
-          ul: ({ children }: { children?: ReactNode }) => (
+          ul: ({ children }: any) => (
             <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 space-y-1">{children}</ul>
           ),
-          ol: ({ children }: { children?: ReactNode }) => (
+          ol: ({ children }: any) => (
             <ol className="list-decimal list-inside text-gray-700 dark:text-gray-300 mb-4 space-y-1">{children}</ol>
           ),
-          li: ({ children }: { children?: ReactNode }) => (
+          li: ({ children }: any) => (
             <li className="text-gray-700 dark:text-gray-300">{children}</li>
           ),
           // 引用
-          blockquote: ({ children }: { children?: ReactNode }) => (
+          blockquote: ({ children }: any) => (
             <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 py-2 my-4 bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 italic">
               {children}
             </blockquote>
           ),
           // 表格
-          table: ({ children }: { children?: ReactNode }) => (
+          table: ({ children }: any) => (
             <div className="overflow-x-auto my-4">
               <table className="min-w-full border border-gray-200 dark:border-gray-700">{children}</table>
             </div>
           ),
-          th: ({ children }: { children?: ReactNode }) => (
+          th: ({ children }: any) => (
             <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-800 font-semibold text-gray-900 dark:text-white text-left">
               {children}
             </th>
           ),
-          td: ({ children }: { children?: ReactNode }) => (
+          td: ({ children }: any) => (
             <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-gray-700 dark:text-gray-300">
               {children}
             </td>
@@ -180,7 +166,7 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
             <hr className="my-6 border-gray-200 dark:border-gray-700" />
           ),
           // 图片
-          img: ({ src, alt }: { src?: string; alt?: string }) => (
+          img: ({ src, alt }: any) => (
             <img
               src={src}
               alt={alt}
@@ -189,14 +175,14 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
             />
           ),
           // 删除线
-          del: ({ children }: { children?: ReactNode }) => (
+          del: ({ children }: any) => (
             <del className="text-gray-500 dark:text-gray-400 line-through">{children}</del>
           ),
           // 强调
-          strong: ({ children }: { children?: ReactNode }) => (
+          strong: ({ children }: any) => (
             <strong className="font-bold text-gray-900 dark:text-white">{children}</strong>
           ),
-          em: ({ children }: { children?: ReactNode }) => (
+          em: ({ children }: any) => (
             <em className="italic text-gray-700 dark:text-gray-300">{children}</em>
           ),
         }}

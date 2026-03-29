@@ -9,6 +9,19 @@ vi.mock('next/link', () => ({
   ),
 }))
 
+// Mock MarkdownEditor (dynamic import)
+vi.mock('@/components/forum/MarkdownEditor', () => ({
+  default: ({ value, onChange, placeholder, disabled }: { value: string; onChange: (v: string) => void; placeholder: string; disabled?: boolean }) => (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={3}
+      disabled={disabled}
+    />
+  ),
+}))
+
 // Mock auth functions
 const mockIsLoggedIn = vi.fn()
 const mockGetAuthHeaders = vi.fn()
@@ -40,7 +53,7 @@ describe('CommentForm', () => {
     it('渲染文本输入框', () => {
       render(<CommentForm postId={postId} />)
 
-      expect(screen.getByPlaceholderText('分享你的想法...')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText(/分享你的想法/)).toBeInTheDocument()
     })
 
     it('渲染发送按钮', () => {
@@ -59,7 +72,7 @@ describe('CommentForm', () => {
     it('有内容时发送按钮启用', () => {
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '这是一条评论' } })
 
       const submitBtn = screen.getByRole('button', { name: '发送评论' })
@@ -69,7 +82,7 @@ describe('CommentForm', () => {
     it('textarea 默认 3 行', () => {
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       expect(textarea).toHaveAttribute('rows', '3')
     })
   })
@@ -78,7 +91,7 @@ describe('CommentForm', () => {
     it('输入内容更新 textarea 值', () => {
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '新评论内容' } })
 
       expect(textarea).toHaveValue('新评论内容')
@@ -87,7 +100,7 @@ describe('CommentForm', () => {
     it('空白内容不启用发送按钮', () => {
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '   ' } })
 
       const submitBtn = screen.getByRole('button', { name: '发送评论' })
@@ -102,7 +115,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '内容' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -117,7 +130,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '内容' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -129,7 +142,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '内容' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -142,7 +155,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '内容' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -161,7 +174,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} onSubmitted={mockOnSubmitted} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -175,7 +188,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} onSubmitted={mockOnSubmitted} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -196,7 +209,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -213,7 +226,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -228,7 +241,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -242,7 +255,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -265,7 +278,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -280,7 +293,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -293,7 +306,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -314,7 +327,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -329,7 +342,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 
@@ -358,7 +371,7 @@ describe('CommentForm', () => {
 
       render(<CommentForm postId={postId} />)
 
-      const textarea = screen.getByPlaceholderText('分享你的想法...')
+      const textarea = screen.getByPlaceholderText(/分享你的想法/)
       fireEvent.change(textarea, { target: { value: '测试评论' } })
       fireEvent.click(screen.getByRole('button', { name: '发送评论' }))
 

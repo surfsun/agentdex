@@ -4,7 +4,6 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
-import type { ReactNode } from 'react'
 
 interface MarkdownEditorProps {
   value: string
@@ -12,6 +11,7 @@ interface MarkdownEditorProps {
   placeholder?: string
   minHeight?: number
   className?: string
+  disabled?: boolean
 }
 
 // Toolbar button configuration
@@ -30,20 +30,6 @@ const toolbarButtons = [
   { icon: '|', title: '表格', action: 'table', syntax: '| ', placeholder: '表格' },
 ]
 
-// Type for code element props
-interface CodeElementProps {
-  className?: string
-  children?: ReactNode
-  [key: string]: unknown
-}
-
-// Type for pre element props
-interface PreElementProps {
-  children?: ReactNode
-  className?: string
-  [key: string]: unknown
-}
-
 /**
  * Markdown 编辑器组件
  * 
@@ -60,6 +46,7 @@ export default function MarkdownEditor({
   placeholder = '输入内容，支持 Markdown 格式...',
   minHeight = 300,
   className = '',
+  disabled = false,
 }: MarkdownEditorProps) {
   const [mode, setMode] = useState<'edit' | 'preview' | 'split'>('split')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -171,10 +158,11 @@ export default function MarkdownEditor({
     return () => textarea.removeEventListener('keydown', handleKeyDown)
   }, [insertSyntax])
 
-  // Preview renderer components
-  const previewComponents = {
-    pre: ({ children }: PreElementProps) => {
-      const childElement = children as React.ReactElement<CodeElementProps>
+  // Preview renderer components - using any to avoid react-markdown type issues
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const previewComponents: any = {
+    pre: ({ children }: any) => {
+      const childElement = children as React.ReactElement<any>
       const isCodeBlock = childElement?.props?.className?.includes('hljs')
       
       if (isCodeBlock) {
@@ -197,7 +185,7 @@ export default function MarkdownEditor({
       }
       return <pre className="bg-gray-100 p-2 rounded">{children}</pre>
     },
-    code: ({ className, children }: CodeElementProps) => {
+    code: ({ className, children }: any) => {
       const match = /language-(\w+)/.exec(className || '')
       if (!match) {
         return (
@@ -208,52 +196,52 @@ export default function MarkdownEditor({
       }
       return <code className={className}>{children}</code>
     },
-    p: ({ children }: { children?: ReactNode }) => (
+    p: ({ children }: any) => (
       <p className="text-gray-700 mb-2 leading-relaxed">{children}</p>
     ),
-    h1: ({ children }: { children?: ReactNode }) => (
+    h1: ({ children }: any) => (
       <h1 className="text-xl font-bold text-gray-900 mb-2 mt-3">{children}</h1>
     ),
-    h2: ({ children }: { children?: ReactNode }) => (
+    h2: ({ children }: any) => (
       <h2 className="text-lg font-bold text-gray-900 mb-2 mt-2">{children}</h2>
     ),
-    h3: ({ children }: { children?: ReactNode }) => (
+    h3: ({ children }: any) => (
       <h3 className="text-base font-semibold text-gray-900 mb-1 mt-2">{children}</h3>
     ),
-    ul: ({ children }: { children?: ReactNode }) => (
+    ul: ({ children }: any) => (
       <ul className="list-disc list-inside text-gray-700 mb-2 space-y-0.5">{children}</ul>
     ),
-    ol: ({ children }: { children?: ReactNode }) => (
+    ol: ({ children }: any) => (
       <ol className="list-decimal list-inside text-gray-700 mb-2 space-y-0.5">{children}</ol>
     ),
-    li: ({ children }: { children?: ReactNode }) => (
+    li: ({ children }: any) => (
       <li className="text-gray-700">{children}</li>
     ),
-    blockquote: ({ children }: { children?: ReactNode }) => (
+    blockquote: ({ children }: any) => (
       <blockquote className="border-l-3 border-gray-300 pl-3 py-1 my-2 bg-gray-50 text-gray-600 italic">
         {children}
       </blockquote>
     ),
-    a: ({ href, children }: { href?: string; children?: ReactNode }) => (
+    a: ({ href, children }: any) => (
       <a href={href} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
         {children}
       </a>
     ),
-    strong: ({ children }: { children?: ReactNode }) => (
+    strong: ({ children }: any) => (
       <strong className="font-bold text-gray-900">{children}</strong>
     ),
-    em: ({ children }: { children?: ReactNode }) => (
+    em: ({ children }: any) => (
       <em className="italic">{children}</em>
     ),
-    table: ({ children }: { children?: ReactNode }) => (
+    table: ({ children }: any) => (
       <div className="overflow-x-auto my-2">
         <table className="min-w-full border border-gray-200">{children}</table>
       </div>
     ),
-    th: ({ children }: { children?: ReactNode }) => (
+    th: ({ children }: any) => (
       <th className="border border-gray-200 px-2 py-1 bg-gray-50 font-semibold text-left">{children}</th>
     ),
-    td: ({ children }: { children?: ReactNode }) => (
+    td: ({ children }: any) => (
       <td className="border border-gray-200 px-2 py-1">{children}</td>
     ),
   }
@@ -325,6 +313,7 @@ export default function MarkdownEditor({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
+                disabled={disabled}
                 className="w-full p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none focus:outline-none font-mono text-sm"
                 style={{ minHeight: `${minHeight}px` }}
               />
