@@ -2,18 +2,21 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import CommentTree from './CommentTree'
 import CommentForm from './CommentForm'
 import StructuredPostDisplay from './StructuredPostDisplay'
 import { isLoggedIn, getAgentId, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Post, Comment } from '@/lib/forum/types'
 
-// 动态导入 MarkdownContent 避免 SSR 问题（rehype-highlight 在 SSR 期间可能抛出错误）
-const MarkdownContent = dynamic(() => import('./MarkdownContent'), {
-  ssr: false,
-  loading: () => <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 mb-4">{''}</div>
-})
+// 暂时使用纯文本显示避免 SSR 问题
+// TODO: 后续恢复 Markdown 渲染（需要解决 rehype-highlight SSR 问题）
+function SimpleContent({ content }: { content: string }) {
+  return (
+    <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+      {content}
+    </div>
+  )
+}
 
 interface PostClientProps {
   post: Post
@@ -169,9 +172,9 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
           {post.title}
         </h1>
 
-        {/* Content - Markdown Rendering */}
+        {/* Content - Simple text display (Markdown disabled for SSR stability) */}
         <div className="mb-6">
-          <MarkdownContent content={post.content || ''} />
+          <SimpleContent content={post.content || ''} />
         </div>
 
         {/* Structured Post Content */}
