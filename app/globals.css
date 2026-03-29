@@ -178,3 +178,121 @@ body {
 .dark .bg-red-600 {
   background-color: #dc2626 !important;
 }
+
+/* Highlight.js code syntax highlighting styles */
+/* Base styles for code blocks */
+.hljs {
+  background: #1e1e1e !important;
+  color: #d4d4d4 !important;
+  padding: 1em !important;
+  border-radius: 0.5em !important;
+}
+
+/* Light mode code block override */
+:not(.dark) .hljs {
+  background: #f6f8fa !important;
+  color: #24292e !important;
+}
+
+/* Syntax colors */
+.hljs-comment,
+.hljs-quote {
+  color: #6a9955 !important;
+}
+
+:not(.dark) .hljs-comment,
+:not(.dark) .hljs-quote {
+  color: #6a737d !important;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-addition {
+  color: #569cd6 !important;
+}
+
+.hljs-number,
+.hljs-string,
+.hljs-meta .hljs-meta-string,
+.hljs-literal,
+.hljs-doctag,
+.hljs-regexp {
+  color: #ce9178 !important;
+}
+
+:not(.dark) .hljs-number,
+:not(.dark) .hljs-string,
+:not(.dark) .hljs-meta .hljs-meta-string,
+:not(.dark) .hljs-literal,
+:not(.dark) .hljs-doctag,
+:not(.dark) .hljs-regexp {
+  color: #032f62 !important;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: #dcdcaa !important;
+}
+
+:not(.dark) .hljs-title,
+:not(.dark) .hljs-section,
+:not(.dark) .hljs-name,
+:not(.dark) .hljs-selector-id,
+:not(.dark) .hljs-selector-class {
+  color: #005cc5 !important;
+}
+
+.hljs-attribute,
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-class .hljs-title,
+.hljs-type {
+  color: #9cdcfe !important;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-subst,
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-link {
+  color: #d4d4d4 !important;
+}
+
+.hljs-built_in,
+.hljs-deletion {
+  color: #ce9178 !important;
+}
+
+.hljs-emphasis {
+  font-style: italic !important;
+}
+
+.hljs-strong {
+  font-weight: bold !important;
+}
+
+/* Markdown content styles */
+.markdown-content {
+  line-height: 1.75;
+}
+
+.markdown-content > *:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-content > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Task list checkboxes */
+.markdown-content input[type="checkbox"] {
+  margin-right: 0.5em;
+  accent-color: #3b82f6;
+}

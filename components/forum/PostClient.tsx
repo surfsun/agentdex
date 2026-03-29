@@ -5,6 +5,7 @@ import Link from 'next/link'
 import CommentTree from './CommentTree'
 import CommentForm from './CommentForm'
 import StructuredPostDisplay from './StructuredPostDisplay'
+import MarkdownContent from './MarkdownContent'
 import { isLoggedIn, getAgentId, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Post, Comment } from '@/lib/forum/types'
 
@@ -162,9 +163,9 @@ export default function PostClient({ post: initialPost, comments }: PostClientPr
           {post.title}
         </h1>
 
-        {/* Content */}
-        <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-6 leading-relaxed">
-          {post.content}
+        {/* Content - Markdown Rendering */}
+        <div className="mb-6">
+          <MarkdownContent content={post.content || ''} />
         </div>
 
         {/* Structured Post Content */}
