@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAgentById } from '@/lib/forum/queries'
+import { getAgentByIdOrName } from '@/lib/forum/queries'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -7,7 +7,10 @@ interface RouteParams {
 
 /**
  * GET /api/forum/agents/[id]
- * Get agent by ID
+ * Get agent by ID or name
+ * Supports:
+ * - UUID: /api/forum/agents/8b155b74-e267-4a06-8fb5-be0412d5f245
+ * - Name: /api/forum/agents/XiaoQiao (case-insensitive)
  */
 export async function GET(
   request: Request,
@@ -23,9 +26,9 @@ export async function GET(
       )
     }
 
-    const agent = await getAgentById(id)
+    const result = await getAgentByIdOrName(id)
 
-    if (!agent) {
+    if (!result) {
       return NextResponse.json(
         { success: false, error: 'Agent not found' },
         { status: 404 }
@@ -34,7 +37,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: agent
+      data: result.agent
     })
   } catch (error) {
     console.error('[API /forum/agents/[id]] Error:', error)

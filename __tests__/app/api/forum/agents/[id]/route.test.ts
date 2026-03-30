@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { GET } from '@/app/api/forum/agents/[id]/route'
-import { getAgentById } from '@/lib/forum/queries'
+import { getAgentByIdOrName } from '@/lib/forum/queries'
 
 // Mock queries
 vi.mock('@/lib/forum/queries', () => ({
-  getAgentById: vi.fn(),
+  getAgentByIdOrName: vi.fn(),
 }))
 
 describe('/api/forum/agents/[id]', () => {
@@ -21,7 +21,7 @@ describe('/api/forum/agents/[id]', () => {
       return new Request(`http://localhost/api/forum/agents/${id}`)
     }
 
-    it('成功返回 agent 信息', async () => {
+    it('成功返回 agent 信息 (UUID)', async () => {
       const mockAgent = {
         id: 'agent-123',
         name: 'TestAgent',
@@ -33,7 +33,7 @@ describe('/api/forum/agents/[id]', () => {
         comments_count: 10,
       }
 
-      vi.mocked(getAgentById).mockResolvedValueOnce(mockAgent)
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce({ agent: mockAgent, isUUID: true })
 
       const request = createRequest('agent-123')
       const response = await GET(request, {
@@ -44,11 +44,37 @@ describe('/api/forum/agents/[id]', () => {
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
       expect(data.data).toEqual(mockAgent)
-      expect(getAgentById).toHaveBeenCalledWith('agent-123')
+      expect(getAgentByIdOrName).toHaveBeenCalledWith('agent-123')
+    })
+
+    it('成功返回 agent 信息 (名称)', async () => {
+      const mockAgent = {
+        id: 'agent-uuid',
+        name: 'XiaoQiao',
+        platform: 'agentdex-web',
+        expertise: [],
+        avatar_url: null,
+        created_at: '2026-03-29T00:00:00Z',
+        posts_count: 11,
+        comments_count: 0,
+      }
+
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce({ agent: mockAgent, isUUID: false })
+
+      const request = createRequest('xiaoqiao')
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'xiaoqiao' }),
+      })
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.data.name).toBe('XiaoQiao')
+      expect(getAgentByIdOrName).toHaveBeenCalledWith('xiaoqiao')
     })
 
     it('返回 404 当 agent 不存在', async () => {
-      vi.mocked(getAgentById).mockResolvedValueOnce(null)
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce(null)
 
       const request = createRequest('non-existent')
       const response = await GET(request, {
@@ -74,7 +100,7 @@ describe('/api/forum/agents/[id]', () => {
     })
 
     it('处理数据库错误', async () => {
-      vi.mocked(getAgentById).mockRejectedValueOnce(new Error('Database error'))
+      vi.mocked(getAgentByIdOrName).mockRejectedValueOnce(new Error('Database error'))
 
       const request = createRequest('agent-123')
       const response = await GET(request, {
@@ -99,7 +125,7 @@ describe('/api/forum/agents/[id]', () => {
         comments_count: 200,
       }
 
-      vi.mocked(getAgentById).mockResolvedValueOnce(mockAgent)
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce({ agent: mockAgent, isUUID: true })
 
       const request = createRequest('stats-agent')
       const response = await GET(request, {
@@ -124,7 +150,7 @@ describe('/api/forum/agents/[id]', () => {
         comments_count: 5,
       }
 
-      vi.mocked(getAgentById).mockResolvedValueOnce(mockAgent)
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce({ agent: mockAgent, isUUID: true })
 
       const request = createRequest('chinese-agent')
       const response = await GET(request, {
@@ -148,7 +174,7 @@ describe('/api/forum/agents/[id]', () => {
         comments_count: 0,
       }
 
-      vi.mocked(getAgentById).mockResolvedValueOnce(mockAgent)
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce({ agent: mockAgent, isUUID: true })
 
       const request = createRequest('expert-agent')
       const response = await GET(request, {
@@ -172,7 +198,7 @@ describe('/api/forum/agents/[id]', () => {
         comments_count: 0,
       }
 
-      vi.mocked(getAgentById).mockResolvedValueOnce(mockAgent)
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce({ agent: mockAgent, isUUID: true })
 
       const request = createRequest('no-expert-agent')
       const response = await GET(request, {
@@ -196,7 +222,7 @@ describe('/api/forum/agents/[id]', () => {
         comments_count: 0,
       }
 
-      vi.mocked(getAgentById).mockResolvedValueOnce(mockAgent)
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce({ agent: mockAgent, isUUID: true })
 
       const request = createRequest('no-avatar-agent')
       const response = await GET(request, {
@@ -220,7 +246,7 @@ describe('/api/forum/agents/[id]', () => {
         comments_count: 0,
       }
 
-      vi.mocked(getAgentById).mockResolvedValueOnce(mockAgent)
+      vi.mocked(getAgentByIdOrName).mockResolvedValueOnce({ agent: mockAgent, isUUID: true })
 
       const request = createRequest('avatar-agent')
       const response = await GET(request, {

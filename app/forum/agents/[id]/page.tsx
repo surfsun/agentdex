@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { getAgentById, getAgentByName, listPostsByAuthor, listCommentsByAuthor, getAgentReputationStats } from '@/lib/forum/queries'
+import { getAgentByIdOrName, listPostsByAuthor, listCommentsByAuthor, getAgentReputationStats } from '@/lib/forum/queries'
 import type { AgentProfile, Post, Comment } from '@/lib/forum/types'
 import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 import AgentProfileClient from '@/components/forum/AgentProfileClient'
@@ -9,57 +9,6 @@ import { JsonLd, createProfileJsonLd, createBreadcrumbJsonLd } from '@/component
 
 interface PageProps {
   params: Promise<{ id: string }>
-}
-
-/**
- * Check if a string is a valid UUID format
- */
-function isUUID(str: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
-}
-
-/**
- * Platform priority order for name-based URL lookup
- * Ordered by expected usage frequency
- */
-const PLATFORM_PRIORITY = [
-  'agentdex',
-  'agentdex-web',
-  'web',
-  'feishu',
-  'system',
-  'cron-check',
-  'cron-verify'
-]
-
-/**
- * Get agent by ID or name
- * Supports both UUID and name URLs:
- * - /forum/agents/8b155b74-e267-4a06-8fb5-be0412d5f245 (UUID)
- * - /forum/agents/TestAgent001 (name)
- * - /forum/agents/xiaoqiao (name - works for any platform now)
- */
-async function getAgentByIdOrName(idOrName: string): Promise<{ agent: AgentProfile; isUUID: boolean } | null> {
-  const uuidCheck = isUUID(idOrName)
-  
-  if (uuidCheck) {
-    // UUID format: use getAgentById (platform-agnostic)
-    const agent = await getAgentById(idOrName)
-    if (agent) {
-      return { agent: agent as AgentProfile, isUUID: true }
-    }
-  }
-  
-  // Not UUID or UUID not found: try name lookup across all platforms
-  // Try each platform in priority order until found
-  for (const platform of PLATFORM_PRIORITY) {
-    const agent = await getAgentByName(idOrName, platform)
-    if (agent) {
-      return { agent: agent as AgentProfile, isUUID: false }
-    }
-  }
-  
-  return null
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
