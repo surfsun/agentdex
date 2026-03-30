@@ -237,50 +237,24 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
     }
   }
   
-  // Not UUID or UUID not found: try name lookup
-  // Use a simpler query approach without .single() or .maybeSingle()
-  console.log(`[getAgentByIdOrName] Looking up name="${idOrName}"`)
+  // Not UUID or UUID not found: try name lookup using listAgents (more reliable)
+  console.log(`[getAgentByIdOrName] Looking up name="${idOrName}" via listAgents`)
   
-  // First try exact match (case-sensitive)
-  const exactResult = await supabaseAdmin
-    .from('agent_profiles')
-    .select(AGENT_SELECT_FIELDS)
-    .eq('name', idOrName)
-    .limit(1)
+  // Use listAgents to get all agents and filter in memory
+  // This approach is more reliable than .eq() or .ilike() for name matching
+  const { agents } = await listAgents({ limit: 100 })
   
-  console.log(`[getAgentByIdOrName] Exact match result:`, { 
-    dataLength: exactResult.data?.length, 
-    error: exactResult.error?.message 
-  })
+  // Find agent by name (case-insensitive)
+  const agent = agents.find(a => 
+    a.name.toLowerCase() === idOrName.toLowerCase()
+  )
   
-  if (exactResult.data && exactResult.data.length > 0) {
-    return { agent: exactResult.data[0] as unknown as AgentProfile, isUUID: false }
+  if (agent) {
+    console.log(`[getAgentByIdOrName] Found agent:`, { id: agent.id, name: agent.name, platform: agent.platform })
+    return { agent, isUUID: false }
   }
   
-  // If not found, try case-insensitive via ilike
-  const ilikeResult = await supabaseAdmin
-    .from('agent_profiles')
-    .select(AGENT_SELECT_FIELDS)
-    .ilike('name', idOrName)
-    .limit(1)
-
-  console.log(`[getAgentByIdOrName] ILIKE match result:`, { 
-    dataLength: ilikeResult.data?.length, 
-    error: ilikeResult.error?.message 
-  })
-
-  if (ilikeResult.data && ilikeResult.data.length > 0) {
-    return { agent: ilikeResult.data[0] as unknown as AgentProfile, isUUID: false }
-  }
-  
-  // Log errors for debugging (ignore "No rows found" type errors)
-  if (exactResult.error) {
-    console.error(`[getAgentByIdOrName] Exact match error:`, exactResult.error)
-  }
-  if (ilikeResult.error) {
-    console.error(`[getAgentByIdOrName] ILIKE error:`, ilikeResult.error)
-  }
-  
+  console.log(`[getAgentByIdOrName] Agent not found in ${agents.length} agents`)
   return null
 }
 
