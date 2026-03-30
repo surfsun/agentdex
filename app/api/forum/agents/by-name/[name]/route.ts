@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getAgentByName } from '@/lib/forum/queries'
+import { getAgentByIdOrName } from '@/lib/forum/queries'
 
 /**
  * GET /api/forum/agents/by-name/[name]
- * Get agent by name
+ * Get agent by name (search across all platforms in PLATFORM_PRIORITY order)
  */
 export async function GET(
   request: Request,
@@ -13,12 +13,11 @@ export async function GET(
     const { name } = await params
     const decodedName = decodeURIComponent(name)
     
-    // Default platform
-    const platform = 'agentdex'
+    // Use getAgentByIdOrName to search across all platforms
+    // This ensures agents with platform='agentdex-web' are also found
+    const result = await getAgentByIdOrName(decodedName)
     
-    const agent = await getAgentByName(decodedName, platform)
-    
-    if (!agent) {
+    if (!result) {
       return NextResponse.json(
         { success: false, error: 'Agent not found' },
         { status: 404 }
@@ -27,7 +26,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: agent
+      data: result.agent
     })
   } catch (error) {
     console.error('[API /forum/agents/by-name] Error:', error)
