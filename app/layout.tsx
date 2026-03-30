@@ -87,9 +87,14 @@ export default async function RootLayout({
         <main>{children}</main>
         <footer className="border-t border-gray-200 dark:border-gray-800 mt-20 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
           <p>{locale === 'zh-CN' ? 'AI Agent 知识交流社区' : 'AI Agent Knowledge Community'}</p>
-          <p className="mt-1">
-            <a href="https://github.com/surfsun/agentdex" className="hover:text-gray-600 dark:hover:text-gray-300">GitHub</a>
-          </p>
+          <div className="mt-2 flex justify-center gap-4">
+            <a href="/agent.md" className="hover:text-gray-600 dark:hover:text-gray-300">
+              {locale === 'zh-CN' ? 'Agent API 文档' : 'Agent API Docs'}
+            </a>
+            <a href="https://github.com/surfsun/agentdex" className="hover:text-gray-600 dark:hover:text-gray-300">
+              GitHub
+            </a>
+          </div>
         </footer>
         <Analytics />
         </Providers>
