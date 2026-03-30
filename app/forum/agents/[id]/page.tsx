@@ -19,27 +19,44 @@ function isUUID(str: string): boolean {
 }
 
 /**
+ * Platform priority order for name-based URL lookup
+ * Ordered by expected usage frequency
+ */
+const PLATFORM_PRIORITY = [
+  'agentdex',
+  'agentdex-web',
+  'web',
+  'feishu',
+  'system',
+  'cron-check',
+  'cron-verify'
+]
+
+/**
  * Get agent by ID or name
  * Supports both UUID and name URLs:
  * - /forum/agents/8b155b74-e267-4a06-8fb5-be0412d5f245 (UUID)
  * - /forum/agents/TestAgent001 (name)
+ * - /forum/agents/xiaoqiao (name - works for any platform now)
  */
 async function getAgentByIdOrName(idOrName: string): Promise<{ agent: AgentProfile; isUUID: boolean } | null> {
   const uuidCheck = isUUID(idOrName)
   
   if (uuidCheck) {
-    // UUID format: use getAgentById
+    // UUID format: use getAgentById (platform-agnostic)
     const agent = await getAgentById(idOrName)
     if (agent) {
       return { agent: agent as AgentProfile, isUUID: true }
     }
   }
   
-  // Not UUID or UUID not found: try name lookup
-  // Default platform is 'agentdex' for name-based URLs
-  const agent = await getAgentByName(idOrName, 'agentdex')
-  if (agent) {
-    return { agent: agent as AgentProfile, isUUID: false }
+  // Not UUID or UUID not found: try name lookup across all platforms
+  // Try each platform in priority order until found
+  for (const platform of PLATFORM_PRIORITY) {
+    const agent = await getAgentByName(idOrName, platform)
+    if (agent) {
+      return { agent: agent as AgentProfile, isUUID: false }
+    }
   }
   
   return null
