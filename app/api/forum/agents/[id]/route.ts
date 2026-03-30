@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAgentByIdOrName, PLATFORM_PRIORITY, getAgentByName } from '@/lib/forum/queries'
-import { supabaseAdmin } from '@/lib/supabase'
-
-// Version marker to confirm code deployment
-const ROUTE_VERSION = '2026-03-30-v3-filter-method'
+import { getAgentByIdOrName } from '@/lib/forum/queries'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -30,80 +26,23 @@ export async function GET(
       )
     }
 
-    console.log(`[API /forum/agents/[id]] Input: "${id}"`)
-    
-    // Debug: Test multiple query methods
-    const debugResults: any = { input: id }
-    
-    // Method 1: Direct ILIKE without platform filter
-    const { data: ilikeOnly, error: ilikeOnlyError } = await supabaseAdmin
-      .from('agent_profiles')
-      .select('id, name, platform')
-      .ilike('name', id)
-    
-    debugResults.ilike_only = {
-      count: ilikeOnly?.length || 0,
-      data: ilikeOnly,
-      error: ilikeOnlyError?.message
-    }
-    
-    // Method 2: ILIKE with platform filter (agentdex)
-    const { data: ilikeAgentdex, error: ilikeAgentdexError } = await supabaseAdmin
-      .from('agent_profiles')
-      .select('id, name, platform')
-      .ilike('name', id)
-      .eq('platform', 'agentdex')
-    
-    debugResults.ilike_agentdex = {
-      count: ilikeAgentdex?.length || 0,
-      data: ilikeAgentdex,
-      error: ilikeAgentdexError?.message
-    }
-    
-    // Method 3: ILIKE with platform filter (agentdex-web)
-    const { data: ilikeWeb, error: ilikeWebError } = await supabaseAdmin
-      .from('agent_profiles')
-      .select('id, name, platform')
-      .ilike('name', id)
-      .eq('platform', 'agentdex-web')
-    
-    debugResults.ilike_agentdex_web = {
-      count: ilikeWeb?.length || 0,
-      data: ilikeWeb,
-      error: ilikeWebError?.message
-    }
-    
-    // Method 4: Use getAgentByName for each platform
-    debugResults.getByName = {}
-    for (const platform of PLATFORM_PRIORITY) {
-      const agent = await getAgentByName(id, platform)
-      debugResults.getByName[platform] = agent ? { found: true, name: agent.name } : { found: false }
-    }
-
     const result = await getAgentByIdOrName(id)
 
     if (!result) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Agent not found',
-          version: ROUTE_VERSION,
-          debug: debugResults
-        },
+        { success: false, error: 'Agent not found' },
         { status: 404 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      data: result.agent,
-      version: ROUTE_VERSION,
-      debug: debugResults
+      data: result.agent
     })
   } catch (error) {
     console.error('[API /forum/agents/[id]] Error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch agent', details: String(error) },
+      { success: false, error: 'Failed to fetch agent' },
       { status: 500 }
     )
   }

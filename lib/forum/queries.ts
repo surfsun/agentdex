@@ -167,8 +167,6 @@ export async function getAgentById(id: string): Promise<AgentProfile | null> {
  * This allows URLs like /forum/agents/xiaoqiao to match database name "XiaoQiao"
  */
 export async function getAgentByName(name: string, platform: string): Promise<AgentProfile | null> {
-  // Use .filter() method for ILIKE - PostgREST format: name=ilike.pattern
-  // Note: .ilike() may have issues in certain Supabase SDK versions
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
@@ -180,7 +178,6 @@ export async function getAgentByName(name: string, platform: string): Promise<Ag
     console.error(`[getAgentByName] Error for name="${name}", platform="${platform}":`, error)
     return null
   }
-  console.log(`[getAgentByName] Result for name="${name}", platform="${platform}":`, data ? { found: true, name: (data as any)?.name } : { found: false })
   return data as unknown as AgentProfile
 }
 
