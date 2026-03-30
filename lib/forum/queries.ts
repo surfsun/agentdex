@@ -238,13 +238,20 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
   }
   
   // Not UUID or UUID not found: try name lookup
-  // First try exact match (case-sensitive, faster)
+  // First try exact match (case-sensitive)
+  console.log(`[getAgentByIdOrName] Looking up name="${idOrName}"`)
+  
   const exactMatch = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
     .eq('name', idOrName)
     .limit(1)
-    .maybeSingle()
+    .single()
+  
+  console.log(`[getAgentByIdOrName] Exact match result:`, { 
+    hasData: !!exactMatch.data, 
+    error: exactMatch.error?.message 
+  })
   
   if (exactMatch.data) {
     return { agent: exactMatch.data as unknown as AgentProfile, isUUID: false }
@@ -254,16 +261,25 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
   const ilikeMatch = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
-    .filter('name', 'ilike', idOrName)
+    .ilike('name', idOrName)
     .limit(1)
-    .maybeSingle()
+    .single()
+
+  console.log(`[getAgentByIdOrName] ILIKE match result:`, { 
+    hasData: !!ilikeMatch.data, 
+    error: ilikeMatch.error?.message 
+  })
 
   if (ilikeMatch.data) {
     return { agent: ilikeMatch.data as unknown as AgentProfile, isUUID: false }
   }
   
-  if (ilikeMatch.error) {
-    console.error(`[getAgentByIdOrName] ILIKE error for name="${idOrName}":`, ilikeMatch.error)
+  // Log both errors for debugging
+  if (exactMatch.error && !exactMatch.error.message.includes('No rows found')) {
+    console.error(`[getAgentByIdOrName] Exact match error:`, exactMatch.error)
+  }
+  if (ilikeMatch.error && !ilikeMatch.error.message.includes('No rows found')) {
+    console.error(`[getAgentByIdOrName] ILIKE error:`, ilikeMatch.error)
   }
   
   return null
