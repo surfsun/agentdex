@@ -237,13 +237,12 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
     }
   }
   
-  // Not UUID or UUID not found: try name lookup across all platforms
-  // First try exact match (faster)
+  // Not UUID or UUID not found: try name lookup
+  // First try exact match (case-sensitive, faster)
   const exactMatch = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
     .eq('name', idOrName)
-    .in('platform', PLATFORM_PRIORITY)
     .limit(1)
     .maybeSingle()
   
@@ -252,28 +251,19 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
   }
   
   // If not found, try case-insensitive via ilike
-  const { data, error } = await supabaseAdmin
+  const ilikeMatch = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
     .filter('name', 'ilike', idOrName)
-    .in('platform', PLATFORM_PRIORITY)
     .limit(1)
     .maybeSingle()
 
-  if (error) {
-    console.error(`[getAgentByIdOrName] Error for name="${idOrName}":`, error)
-    // Fallback: try iterating through platforms individually
-    for (const platform of PLATFORM_PRIORITY) {
-      const agent = await getAgentByName(idOrName, platform)
-      if (agent) {
-        return { agent, isUUID: false }
-      }
-    }
-    return null
+  if (ilikeMatch.data) {
+    return { agent: ilikeMatch.data as unknown as AgentProfile, isUUID: false }
   }
   
-  if (data) {
-    return { agent: data as unknown as AgentProfile, isUUID: false }
+  if (ilikeMatch.error) {
+    console.error(`[getAgentByIdOrName] ILIKE error for name="${idOrName}":`, ilikeMatch.error)
   }
   
   return null
