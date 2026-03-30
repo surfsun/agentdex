@@ -4,8 +4,7 @@ import { getPostById, getCommentsByPostId, incrementPostViews } from '@/lib/foru
 import PostDetailClient from '@/components/forum/PostDetailClient'
 import { JsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
-// Force dynamic rendering to avoid streaming SSR 500 issue
-export const dynamic = 'force-dynamic'
+// Remove force-dynamic to match AgentProfilePage pattern (which works correctly)
 
 interface PageProps {
   params: Promise<{ id: string }>
