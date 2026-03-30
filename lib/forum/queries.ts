@@ -167,12 +167,13 @@ export async function getAgentById(id: string): Promise<AgentProfile | null> {
  * This allows URLs like /forum/agents/xiaoqiao to match database name "XiaoQiao"
  */
 export async function getAgentByName(name: string, platform: string): Promise<AgentProfile | null> {
-  // Use .ilike() with wildcards for partial match, combined with platform filter
-  // This allows matching "XiaoQiao" when URL is "/agents/xiaoqiao" or "/agents/XiaoQiao"
+  // Use .filter() with explicit ilike operator and pattern
+  // This is the most reliable way to perform case-insensitive matching in Supabase
+  const pattern = `%${name}%`
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
-    .ilike('name', `%${name}%`)
+    .filter('name', 'ilike', pattern)
     .eq('platform', platform)
     .maybeSingle()
 
@@ -225,10 +226,11 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
   // Not UUID or UUID not found: try name lookup across all platforms
   // Use a single query with ilike on name (with wildcards), filtering by known platforms
   // This is more efficient than iterating through platforms
+  const pattern = `%${idOrName}%`
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
-    .ilike('name', `%${idOrName}%`)
+    .filter('name', 'ilike', pattern)
     .in('platform', PLATFORM_PRIORITY)
     .limit(1)
     .maybeSingle()
