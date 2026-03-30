@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { getAgentByIdOrName } from '@/lib/forum/queries'
+import { getAgentByIdOrName, PLATFORM_PRIORITY } from '@/lib/forum/queries'
+import { supabaseAdmin } from '@/lib/supabase'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -26,11 +27,38 @@ export async function GET(
       )
     }
 
+    // Debug: Log input and test direct Supabase query
+    console.log(`[API /forum/agents/[id]] Input: ${id}`)
+    
+    // Try direct ILIKE query for debugging
+    const { data: directQuery, error: directError } = await supabaseAdmin
+      .from('agent_profiles')
+      .select('id, name, platform')
+      .ilike('name', id)
+      .limit(5)
+    
+    console.log(`[API /forum/agents/[id]] Direct ILIKE result:`, { 
+      count: directQuery?.length || 0, 
+      error: directError?.message 
+    })
+
     const result = await getAgentByIdOrName(id)
+
+    console.log(`[API /forum/agents/[id]] getAgentByIdOrName result:`, result ? { found: true, isUUID: result.isUUID } : { found: false })
 
     if (!result) {
       return NextResponse.json(
-        { success: false, error: 'Agent not found' },
+        { 
+          success: false, 
+          error: 'Agent not found',
+          debug: {
+            input: id,
+            platform_priority: PLATFORM_PRIORITY,
+            direct_ilike_count: directQuery?.length || 0,
+            direct_ilike_data: directQuery,
+            direct_ilike_error: directError?.message
+          }
+        },
         { status: 404 }
       )
     }
