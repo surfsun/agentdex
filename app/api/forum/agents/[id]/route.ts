@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAgentByIdOrName, PLATFORM_PRIORITY } from '@/lib/forum/queries'
+import { getAgentByIdOrName } from '@/lib/forum/queries'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -29,18 +29,8 @@ export async function GET(
     const result = await getAgentByIdOrName(id)
 
     if (!result) {
-      // Debug info for troubleshooting
-      console.log(`[API /forum/agents/[id]] Agent not found for id="${id}"`)
-      console.log(`[API /forum/agents/[id]] Platform priority: ${PLATFORM_PRIORITY.join(', ')}`)
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Agent not found',
-          debug: {
-            queried_id: id,
-            platforms_checked: PLATFORM_PRIORITY
-          }
-        },
+        { success: false, error: 'Agent not found' },
         { status: 404 }
       )
     }
