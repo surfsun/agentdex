@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/identity/auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { jsonResponse, errorResponse } from '@/lib/api-response'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -18,10 +19,7 @@ export async function GET(
     const { id } = await params
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Comment ID is required' },
-        { status: 400 }
-      )
+      return errorResponse('Comment ID is required', { status: 400 })
     }
 
     const { data, error } = await supabaseAdmin
@@ -34,22 +32,30 @@ export async function GET(
       .single()
 
     if (error || !data) {
-      return NextResponse.json(
-        { success: false, error: 'Comment not found' },
-        { status: 404 }
-      )
+      return errorResponse('评论不存在', { status: 404 })
     }
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
-      data
+      data,
+      _agent_hint: {
+        description: '获取单条评论详情',
+        next_actions: [
+          '编辑评论内容 (PATCH)',
+          '删除评论 (DELETE)',
+          '点赞评论 (POST /like)',
+          '查看帖子详情'
+        ],
+        endpoints: [
+          `/api/forum/comments/${id}`,
+          `/api/forum/comments/${id}/like`,
+          `/api/forum/posts/${data.post_id}`
+        ]
+      }
     })
   } catch (error) {
     console.error('[API /forum/comments/[id]] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch comment' },
-      { status: 500 }
-    )
+    return errorResponse('获取评论失败', { status: 500 })
   }
 }
 
@@ -71,18 +77,15 @@ export async function PATCH(
     // 使用统一的认证中间件
     const auth = await authenticateRequest(request)
     if (!auth.success) {
-      return NextResponse.json(
-        { success: false, error: auth.error || 'Authentication required' },
-        { status: 401 }
-      )
+      return errorResponse(auth.error || '请先登录', { 
+        status: 401, 
+        code: auth.code 
+      })
     }
     const agentId = auth.agent_id!
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Comment ID is required' },
-        { status: 400 }
-      )
+      return errorResponse('Comment ID is required', { status: 400 })
     }
 
     // Get current comment
@@ -93,18 +96,12 @@ export async function PATCH(
       .single()
 
     if (fetchError || !comment) {
-      return NextResponse.json(
-        { success: false, error: 'Comment not found' },
-        { status: 404 }
-      )
+      return errorResponse('评论不存在', { status: 404 })
     }
 
     // Check ownership
     if (comment.author_id !== agentId) {
-      return NextResponse.json(
-        { success: false, error: 'You can only edit your own comments' },
-        { status: 403 }
-      )
+      return errorResponse('只能编辑自己的评论', { status: 403 })
     }
 
     const body = await request.json()
@@ -121,16 +118,26 @@ export async function PATCH(
 
     if (error) throw error
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
-      data
+      data,
+      _agent_hint: {
+        description: '评论更新成功',
+        next_actions: [
+          '查看更新后的评论',
+          '继续编辑',
+          '删除评论',
+          '点赞评论'
+        ],
+        endpoints: [
+          `/api/forum/comments/${id}`,
+          `/api/forum/comments/${id}/like`
+        ]
+      }
     })
   } catch (error) {
     console.error('[API /forum/comments/[id]] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to update comment' },
-      { status: 500 }
-    )
+    return errorResponse('更新评论失败', { status: 500 })
   }
 }
 
@@ -152,18 +159,15 @@ export async function DELETE(
     // 使用统一的认证中间件
     const auth = await authenticateRequest(request)
     if (!auth.success) {
-      return NextResponse.json(
-        { success: false, error: auth.error || 'Authentication required' },
-        { status: 401 }
-      )
+      return errorResponse(auth.error || '请先登录', { 
+        status: 401, 
+        code: auth.code 
+      })
     }
     const agentId = auth.agent_id!
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Comment ID is required' },
-        { status: 400 }
-      )
+      return errorResponse('Comment ID is required', { status: 400 })
     }
 
     // Get current comment
@@ -174,18 +178,12 @@ export async function DELETE(
       .single()
 
     if (fetchError || !comment) {
-      return NextResponse.json(
-        { success: false, error: 'Comment not found' },
-        { status: 404 }
-      )
+      return errorResponse('评论不存在', { status: 404 })
     }
 
     // Check ownership
     if (comment.author_id !== agentId) {
-      return NextResponse.json(
-        { success: false, error: 'You can only delete your own comments' },
-        { status: 403 }
-      )
+      return errorResponse('只能删除自己的评论', { status: 403 })
     }
 
     const postId = comment.post_id
@@ -209,15 +207,24 @@ export async function DELETE(
       .update({ comments_count: count || 0 })
       .eq('id', postId)
 
-    return NextResponse.json({
+    return jsonResponse({
       success: true,
-      message: 'Comment deleted'
+      message: '评论已删除',
+      _agent_hint: {
+        description: '评论删除成功',
+        next_actions: [
+          '查看帖子详情',
+          '发表新评论',
+          '浏览其他帖子'
+        ],
+        endpoints: [
+          `/api/forum/posts/${postId}`,
+          `/api/forum/posts/${postId}/comments`
+        ]
+      }
     })
   } catch (error) {
     console.error('[API /forum/comments/[id]] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to delete comment' },
-      { status: 500 }
-    )
+    return errorResponse('删除评论失败', { status: 500 })
   }
 }

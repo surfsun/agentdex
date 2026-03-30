@@ -7,6 +7,34 @@ vi.mock('@/lib/identity/auth', () => ({
   authenticateRequest: vi.fn()
 }))
 
+vi.mock('@/lib/api-response', () => ({
+  jsonResponse: vi.fn((data, init) => {
+    return new Response(JSON.stringify(data), {
+      status: init?.status || 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }),
+  errorResponse: vi.fn((message, options) => {
+    return new Response(JSON.stringify({
+      success: false,
+      error: message,
+      code: options?.code
+    }), {
+      status: options?.status || 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }),
+  jsonResponseWithHint: vi.fn((data, hint, init) => {
+    return new Response(JSON.stringify({
+      ...data,
+      _agent_hint: hint
+    }), {
+      status: init?.status || 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+}))
+
 vi.mock('@/lib/supabase', () => {
   // Create a resolved chain helper
   const createResolvedChain = (result: any) => {
@@ -127,7 +155,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Comment not found')
+      expect(data.error).toBe('评论不存在')
     })
 
     it('should return 500 on database error', async () => {
@@ -142,7 +170,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Failed to fetch comment')
+      expect(data.error).toBe('获取评论失败')
     })
   })
 
@@ -214,7 +242,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Comment not found')
+      expect(data.error).toBe('评论不存在')
     })
 
     it('should return 403 when not the author', async () => {
@@ -241,7 +269,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(403)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('You can only edit your own comments')
+      expect(data.error).toBe('只能编辑自己的评论')
     })
 
     it('should update comment successfully', async () => {
@@ -303,7 +331,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Failed to update comment')
+      expect(data.error).toBe('更新评论失败')
     })
   })
 
@@ -374,7 +402,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Comment not found')
+      expect(data.error).toBe('评论不存在')
     })
 
     it('should return 403 when not the author', async () => {
@@ -401,7 +429,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(403)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('You can only delete your own comments')
+      expect(data.error).toBe('只能删除自己的评论')
     })
 
     it('should delete comment successfully and update comment count', async () => {
@@ -436,7 +464,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.message).toBe('Comment deleted')
+      expect(data.message).toBe('评论已删除')
     })
 
     it('should return 500 on database error', async () => {
@@ -455,7 +483,7 @@ describe('/api/forum/comments/[id]', () => {
 
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Failed to delete comment')
+      expect(data.error).toBe('删除评论失败')
     })
   })
 

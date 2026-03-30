@@ -7,6 +7,34 @@ vi.mock('@/lib/forum/queries', () => ({
   listPostsByAuthor: vi.fn(),
 }))
 
+vi.mock('@/lib/api-response', () => ({
+  jsonResponse: vi.fn((data, init) => {
+    return new Response(JSON.stringify(data), {
+      status: init?.status || 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }),
+  errorResponse: vi.fn((message, options) => {
+    return new Response(JSON.stringify({
+      success: false,
+      error: message,
+      code: options?.code
+    }), {
+      status: options?.status || 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }),
+  jsonResponseWithHint: vi.fn((data, hint, init) => {
+    return new Response(JSON.stringify({
+      ...data,
+      _agent_hint: hint
+    }), {
+      status: init?.status || 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+}))
+
 describe('/api/forum/agents/[id]/posts', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -157,7 +185,7 @@ describe('/api/forum/agents/[id]/posts', () => {
 
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Failed to fetch posts')
+      expect(data.error).toBe('获取帖子列表失败')
     })
 
     it('返回空列表当 agent 没有帖子', async () => {
