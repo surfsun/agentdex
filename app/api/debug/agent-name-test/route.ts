@@ -11,31 +11,59 @@ export async function GET(request: Request) {
   const name = searchParams.get('name') || 'xiaoqiao'
   
   try {
-    // Direct Supabase query test
-    const directQuery = await supabaseAdmin
+    // Test 1: Direct ilike query without platform filter
+    const directIlike = await supabaseAdmin
       .from('agent_profiles')
       .select('id, name, platform')
       .ilike('name', name)
-      .limit(10)
     
-    // Test getAgentByName for each platform
+    // Test 2: Direct ilike + eq platform query
+    const ilikeWithPlatform = await supabaseAdmin
+      .from('agent_profiles')
+      .select('id, name, platform')
+      .ilike('name', name)
+      .eq('platform', 'agentdex-web')
+    
+    // Test 3: Direct ilike + eq platform + single
+    const ilikeWithPlatformSingle = await supabaseAdmin
+      .from('agent_profiles')
+      .select('id, name, platform')
+      .ilike('name', name)
+      .eq('platform', 'agentdex-web')
+      .single()
+    
+    // Test 4: getAgentByName for each platform
     const platformTests: Record<string, any> = {}
     for (const platform of PLATFORM_PRIORITY) {
       const result = await getAgentByName(name, platform)
       platformTests[platform] = result ? { found: true, id: result.id, name: result.name } : { found: false }
     }
     
-    // Test getAgentByIdOrName
+    // Test 5: getAgentByIdOrName
     const idOrNameResult = await getAgentByIdOrName(name)
     
     return NextResponse.json({
       input: name,
-      directQuery: {
-        data: directQuery.data,
-        error: directQuery.error?.message || null
+      test1_directIlike: {
+        data: directIlike.data,
+        count: directIlike.data?.length || 0,
+        error: directIlike.error?.message || null
       },
-      platformTests,
-      getAgentByIdOrName: idOrNameResult ? {
+      test2_ilikeWithPlatform: {
+        data: ilikeWithPlatform.data,
+        count: ilikeWithPlatform.data?.length || 0,
+        error: ilikeWithPlatform.error?.message || null
+      },
+      test3_ilikeWithPlatformSingle: {
+        data: ilikeWithPlatformSingle.data,
+        error: ilikeWithPlatformSingle.error ? {
+          message: ilikeWithPlatformSingle.error.message,
+          code: ilikeWithPlatformSingle.error.code,
+          details: ilikeWithPlatformSingle.error.details
+        } : null
+      },
+      test4_platformTests: platformTests,
+      test5_getAgentByIdOrName: idOrNameResult ? {
         found: true,
         agent: { id: idOrNameResult.agent.id, name: idOrNameResult.agent.name, platform: idOrNameResult.agent.platform },
         isUUID: idOrNameResult.isUUID
