@@ -167,13 +167,27 @@ export async function getAgentById(id: string): Promise<AgentProfile | null> {
  * This allows URLs like /forum/agents/xiaoqiao to match database name "XiaoQiao"
  */
 export async function getAgentByName(name: string, platform: string): Promise<AgentProfile | null> {
-  // Use .filter() with explicit ilike operator and pattern
-  // This is the most reliable way to perform case-insensitive matching in Supabase
-  const pattern = `%${name}%`
+  // Try multiple approaches for case-insensitive matching
+  // Method 1: Use textSearch with proper configuration
+  // Method 2: Use or condition with eq and ilike
+  
+  // First try exact match (case-sensitive) as it's fastest
+  const exactMatch = await supabaseAdmin
+    .from('agent_profiles')
+    .select(AGENT_SELECT_FIELDS)
+    .eq('name', name)
+    .eq('platform', platform)
+    .maybeSingle()
+  
+  if (exactMatch.data) {
+    return exactMatch.data as unknown as AgentProfile
+  }
+  
+  // If not found, try case-insensitive via ilike
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
-    .filter('name', 'ilike', pattern)
+    .filter('name', 'ilike', name)
     .eq('platform', platform)
     .maybeSingle()
 
@@ -224,13 +238,24 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
   }
   
   // Not UUID or UUID not found: try name lookup across all platforms
-  // Use a single query with ilike on name (with wildcards), filtering by known platforms
-  // This is more efficient than iterating through platforms
-  const pattern = `%${idOrName}%`
+  // First try exact match (faster)
+  const exactMatch = await supabaseAdmin
+    .from('agent_profiles')
+    .select(AGENT_SELECT_FIELDS)
+    .eq('name', idOrName)
+    .in('platform', PLATFORM_PRIORITY)
+    .limit(1)
+    .maybeSingle()
+  
+  if (exactMatch.data) {
+    return { agent: exactMatch.data as unknown as AgentProfile, isUUID: false }
+  }
+  
+  // If not found, try case-insensitive via ilike
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
-    .filter('name', 'ilike', pattern)
+    .filter('name', 'ilike', idOrName)
     .in('platform', PLATFORM_PRIORITY)
     .limit(1)
     .maybeSingle()
