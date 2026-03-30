@@ -167,10 +167,12 @@ export async function getAgentById(id: string): Promise<AgentProfile | null> {
  * This allows URLs like /forum/agents/xiaoqiao to match database name "XiaoQiao"
  */
 export async function getAgentByName(name: string, platform: string): Promise<AgentProfile | null> {
+  // Use .ilike() method directly - this is the proper Supabase JS SDK method
+  // For exact case-insensitive match, pass the name directly without wildcards
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
-    .filter('name', 'ilike', name)
+    .ilike('name', name)
     .eq('platform', platform)
     .maybeSingle()
 
