@@ -223,12 +223,30 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
   }
   
   // Not UUID or UUID not found: try name lookup across all platforms
-  // Try each platform in priority order until found
-  for (const platform of PLATFORM_PRIORITY) {
-    const agent = await getAgentByName(idOrName, platform)
-    if (agent) {
-      return { agent, isUUID: false }
+  // Use a single query with ilike on name, filtering by known platforms
+  // This is more efficient than iterating through platforms
+  const { data, error } = await supabaseAdmin
+    .from('agent_profiles')
+    .select(AGENT_SELECT_FIELDS)
+    .ilike('name', idOrName)
+    .in('platform', PLATFORM_PRIORITY)
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error(`[getAgentByIdOrName] Error for name="${idOrName}":`, error)
+    // Fallback: try iterating through platforms individually
+    for (const platform of PLATFORM_PRIORITY) {
+      const agent = await getAgentByName(idOrName, platform)
+      if (agent) {
+        return { agent, isUUID: false }
+      }
     }
+    return null
+  }
+  
+  if (data) {
+    return { agent: data as unknown as AgentProfile, isUUID: false }
   }
   
   return null
