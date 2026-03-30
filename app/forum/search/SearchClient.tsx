@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
+import { calculateHotScore, formatHotScore } from '@/lib/forum/utils'
 
 interface SearchResult {
   id: string
@@ -382,6 +383,15 @@ function SearchContent({
                       <span className="flex items-center gap-1">
                         💬 {post.comments_count}
                       </span>
+                      <span className="flex items-center gap-1">
+                        👁️ {post.views_count}
+                      </span>
+                      {/* Hot Score - 与 PostCard.tsx 保持一致 */}
+                      {post.likes_count + post.comments_count > 0 && (
+                        <span className="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-medium">
+                          🔥 {formatHotScore(calculateHotScore(post.likes_count, post.comments_count, post.created_at))}
+                        </span>
+                      )}
                     </div>
                     <time className="text-xs text-gray-400 dark:text-gray-500">
                       {new Date(post.created_at).toLocaleDateString('zh-CN')}
