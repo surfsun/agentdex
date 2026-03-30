@@ -1,10 +1,12 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getPostById, getCommentsByPostId, incrementPostViews } from '@/lib/forum/queries'
+import { getPostById, getCommentsByPostId } from '@/lib/forum/queries'
 import PostDetailClient from '@/components/forum/PostDetailClient'
 import { JsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
 // Remove force-dynamic to match AgentProfilePage pattern (which works correctly)
+// Remove incrementPostViews SSR call to avoid streaming SSR 500 error
+// Views increment is now handled client-side in PostDetailClient
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -55,8 +57,8 @@ export default async function PostDetailPage({ params }: PageProps) {
     notFound()
   }
   
-  // Increment views (best effort, don't block rendering)
-  incrementPostViews(id).catch(() => {})
+  // Views increment moved to client-side to avoid SSR streaming 500 error
+  // See issue #130: incrementPostViews SSR call may cause Next.js 16 streaming issues
   
   // Fetch comments
   const comments = await getCommentsByPostId(id)

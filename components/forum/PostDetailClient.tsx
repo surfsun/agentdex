@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -29,6 +29,17 @@ export default function PostDetailClient({
   const [post, setPost] = useState<Post>(initialPost)
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [liked, setLiked] = useState(false)
+
+  // Increment views on client-side (moved from SSR to avoid streaming 500 error)
+  // See issue #130: incrementPostViews SSR call may cause Next.js 16 streaming issues
+  useEffect(() => {
+    // Fire-and-forget view increment - best effort, no UI update needed
+    fetch(`/api/forum/posts/${initialPost.id}/view`, {
+      method: 'POST',
+    }).catch(() => {
+      // Silently ignore errors - view count is not critical
+    })
+  }, [initialPost.id])
 
   // Author should always exist from API response (with fallback)
   const author = post.author || {
