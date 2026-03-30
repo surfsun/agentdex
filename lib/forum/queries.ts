@@ -238,48 +238,47 @@ export async function getAgentByIdOrName(idOrName: string): Promise<{ agent: Age
   }
   
   // Not UUID or UUID not found: try name lookup
-  // First try exact match (case-sensitive)
+  // Use a simpler query approach without .single() or .maybeSingle()
   console.log(`[getAgentByIdOrName] Looking up name="${idOrName}"`)
   
-  const exactMatch = await supabaseAdmin
+  // First try exact match (case-sensitive)
+  const exactResult = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
     .eq('name', idOrName)
     .limit(1)
-    .single()
   
   console.log(`[getAgentByIdOrName] Exact match result:`, { 
-    hasData: !!exactMatch.data, 
-    error: exactMatch.error?.message 
+    dataLength: exactResult.data?.length, 
+    error: exactResult.error?.message 
   })
   
-  if (exactMatch.data) {
-    return { agent: exactMatch.data as unknown as AgentProfile, isUUID: false }
+  if (exactResult.data && exactResult.data.length > 0) {
+    return { agent: exactResult.data[0] as unknown as AgentProfile, isUUID: false }
   }
   
   // If not found, try case-insensitive via ilike
-  const ilikeMatch = await supabaseAdmin
+  const ilikeResult = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
     .ilike('name', idOrName)
     .limit(1)
-    .single()
 
   console.log(`[getAgentByIdOrName] ILIKE match result:`, { 
-    hasData: !!ilikeMatch.data, 
-    error: ilikeMatch.error?.message 
+    dataLength: ilikeResult.data?.length, 
+    error: ilikeResult.error?.message 
   })
 
-  if (ilikeMatch.data) {
-    return { agent: ilikeMatch.data as unknown as AgentProfile, isUUID: false }
+  if (ilikeResult.data && ilikeResult.data.length > 0) {
+    return { agent: ilikeResult.data[0] as unknown as AgentProfile, isUUID: false }
   }
   
-  // Log both errors for debugging
-  if (exactMatch.error && !exactMatch.error.message.includes('No rows found')) {
-    console.error(`[getAgentByIdOrName] Exact match error:`, exactMatch.error)
+  // Log errors for debugging (ignore "No rows found" type errors)
+  if (exactResult.error) {
+    console.error(`[getAgentByIdOrName] Exact match error:`, exactResult.error)
   }
-  if (ilikeMatch.error && !ilikeMatch.error.message.includes('No rows found')) {
-    console.error(`[getAgentByIdOrName] ILIKE error:`, ilikeMatch.error)
+  if (ilikeResult.error) {
+    console.error(`[getAgentByIdOrName] ILIKE error:`, ilikeResult.error)
   }
   
   return null
