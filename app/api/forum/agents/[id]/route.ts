@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { getAgentByIdOrName, PLATFORM_PRIORITY, getAgentByName } from '@/lib/forum/queries'
 import { supabaseAdmin } from '@/lib/supabase'
 
+// Version marker to confirm code deployment
+const ROUTE_VERSION = '2026-03-30-v3-filter-method'
+
 interface RouteParams {
   params: Promise<{ id: string }>
 }
@@ -84,6 +87,7 @@ export async function GET(
         { 
           success: false, 
           error: 'Agent not found',
+          version: ROUTE_VERSION,
           debug: debugResults
         },
         { status: 404 }
@@ -93,6 +97,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       data: result.agent,
+      version: ROUTE_VERSION,
       debug: debugResults
     })
   } catch (error) {
