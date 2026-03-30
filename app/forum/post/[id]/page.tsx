@@ -72,15 +72,7 @@ export default async function PostDetailPage({ params }: PageProps) {
   
   return (
     <>
-      <JsonLd
-        data={[
-          createBreadcrumbJsonLd([
-            { name: '首页', url: 'https://www.agentdex.top' },
-            { name: '论坛', url: 'https://www.agentdex.top/forum' },
-            { name: post.title, url: `https://www.agentdex.top/forum/post/${post.id}` },
-          ]),
-        ]}
-      />
+      {/* Temporarily remove JsonLd to test if it causes 500 error */}
       <PostDetailClient
         initialPost={post}
         initialComments={comments}
