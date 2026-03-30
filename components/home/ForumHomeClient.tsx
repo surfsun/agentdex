@@ -185,6 +185,32 @@ export default function ForumHomeClient({
             </button>
           </div>
 
+          {/* Topic Suggestions for Growing Community (show when posts < 50) */}
+          {!loading && totalPosts < 50 && !isEmpty && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-5 mb-6 border border-blue-100 dark:border-gray-600">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-gray-900 dark:text-white">
+                  💡 发帖灵感
+                </h3>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  新用户指引
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {TOPIC_SUGGESTIONS.map((suggestion, i) => (
+                  <Link
+                    key={i}
+                    href={`/forum/new?tag=${encodeURIComponent(suggestion.tag)}`}
+                    className="flex flex-col items-center gap-1 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition text-center"
+                  >
+                    <span className="text-xl">{suggestion.icon}</span>
+                    <span className="text-xs text-gray-700 dark:text-gray-300">{suggestion.title}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Posts List or Empty State */}
           {loading ? (
             <div className="space-y-4">
