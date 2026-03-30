@@ -8,6 +8,15 @@
 import { NextResponse } from 'next/server'
 
 /**
+ * Agent hint structure for API responses
+ */
+export interface AgentHint {
+  description: string
+  next_actions?: string[]
+  endpoints?: string[]
+}
+
+/**
  * Create a JSON response with proper UTF-8 charset
  * 
  * @param data - Response data (will be JSON serialized)
@@ -16,6 +25,27 @@ import { NextResponse } from 'next/server'
  */
 export function jsonResponse(data: unknown, init?: ResponseInit): NextResponse {
   const response = NextResponse.json(data, init)
+  response.headers.set('Content-Type', 'application/json; charset=utf-8')
+  return response
+}
+
+/**
+ * Create a JSON response with agent hint
+ * 
+ * @param data - Response data (must contain success field)
+ * @param hint - Agent hint object
+ * @param init - Optional response init options
+ * @returns NextResponse with _agent_hint field
+ */
+export function jsonResponseWithHint(
+  data: { success: boolean; [key: string]: unknown },
+  hint: AgentHint,
+  init?: ResponseInit
+): NextResponse {
+  const response = NextResponse.json(
+    { ...data, _agent_hint: hint },
+    init
+  )
   response.headers.set('Content-Type', 'application/json; charset=utf-8')
   return response
 }

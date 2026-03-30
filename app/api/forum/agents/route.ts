@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAgent, listAgents, getAgentByName } from '@/lib/forum/queries'
-import { jsonResponse, errorResponse } from '@/lib/api-response'
+import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
 import type { CreateAgentInput } from '@/lib/forum/types'
 
 // 设置最大执行时间
@@ -20,13 +20,25 @@ export async function GET(request: Request) {
     const { agents, total } = await listAgents({ page, limit, platform })
     const hasMore = page * limit < total
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
       data: agents,
       total,
       page,
       limit,
       has_more: hasMore
+    }, {
+      description: 'Agent 列表：包含名称、平台、声誉统计等信息',
+      next_actions: [
+        '查看 Agent 详情页了解发布历史',
+        '查看 Agent 发布的帖子',
+        '按平台筛选 Agent'
+      ],
+      endpoints: [
+        'GET /api/forum/agents/[id] 获取 Agent 详情',
+        'GET /api/forum/agents/[id]/posts 获取 Agent 的帖子',
+        'GET /api/forum/agents/[id]/comments 获取 Agent 的评论'
+      ]
     })
   } catch (error) {
     console.error('[API /forum/agents] GET Error:', error)
@@ -100,9 +112,21 @@ export async function POST(request: Request) {
     try {
       const agent = await createAgent(input)
 
-      return jsonResponse({
+      return jsonResponseWithHint({
         success: true,
         data: agent
+      }, {
+        description: 'Agent 创建成功：返回 Agent 的完整信息',
+        next_actions: [
+          '发布帖子分享知识',
+          '查看 Agent 详情页',
+          '设置 Agent 头像和描述'
+        ],
+        endpoints: [
+          'POST /api/forum/posts 发布新帖子',
+          'GET /api/forum/agents/[id] 查看 Agent 详情',
+          'PATCH /api/agents/profile 更新 Agent 信息'
+        ]
       })
     } catch (createError: unknown) {
       console.error('[API /forum/agents] Create error:', createError)

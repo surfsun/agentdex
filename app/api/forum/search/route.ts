@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { jsonResponse, errorResponse } from '@/lib/api-response'
+import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
 import { calculateHotScore } from '@/lib/forum/utils'
 import type { Post } from '@/lib/forum/types'
 
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const hasTag = tag && tag.trim().length > 0
     
     if (!hasQuery && !hasTag) {
-      return jsonResponse({
+      return jsonResponseWithHint({
         success: false,
         error: '请提供搜索关键词（至少2个字符）或选择一个标签',
         data: [],
@@ -44,6 +44,18 @@ export async function GET(request: Request) {
         page: 1,
         limit: 20,
         has_more: false
+      }, {
+        description: '搜索参数缺失：需要关键词或标签',
+        next_actions: [
+          '输入搜索关键词（至少2个字符）',
+          '选择一个标签进行筛选',
+          '浏览帖子列表'
+        ],
+        endpoints: [
+          'GET /api/forum/search?q=关键词 搜索帖子',
+          'GET /api/forum/search?tag=标签名 按标签筛选',
+          'GET /api/forum/posts 浏览所有帖子'
+        ]
       })
     }
 
@@ -198,7 +210,7 @@ export async function GET(request: Request) {
       }
     } catch (dbError) {
       console.error('[API /forum/search] Database error:', dbError)
-      return jsonResponse({
+      return jsonResponseWithHint({
         success: true,
         query: searchTerm,
         tag: tagFilter,
@@ -207,12 +219,23 @@ export async function GET(request: Request) {
         page,
         limit,
         has_more: false
+      }, {
+        description: '搜索暂时不可用，请稍后重试',
+        next_actions: [
+          '刷新页面重试',
+          '使用不同的关键词',
+          '浏览帖子列表'
+        ],
+        endpoints: [
+          'GET /api/forum/posts 浏览帖子列表',
+          'GET /api/forum/search 重新搜索'
+        ]
       })
     }
 
     if (error) {
       console.error('[API /forum/search] Database error:', error)
-      return jsonResponse({
+      return jsonResponseWithHint({
         success: true,
         query: searchTerm,
         tag: tagFilter,
@@ -221,6 +244,17 @@ export async function GET(request: Request) {
         page,
         limit,
         has_more: false
+      }, {
+        description: '搜索暂时不可用，请稍后重试',
+        next_actions: [
+          '刷新页面重试',
+          '使用不同的关键词',
+          '浏览帖子列表'
+        ],
+        endpoints: [
+          'GET /api/forum/posts 浏览帖子列表',
+          'GET /api/forum/search 重新搜索'
+        ]
       })
     }
 
@@ -256,7 +290,7 @@ export async function GET(request: Request) {
 
     const hasMore = (count || 0) > page * limit
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
       query: searchTerm,
       tag: tagFilter,
@@ -265,6 +299,18 @@ export async function GET(request: Request) {
       page,
       limit,
       has_more: hasMore
+    }, {
+      description: `搜索结果：找到 ${count || 0} 个相关帖子`,
+      next_actions: [
+        '点击帖子查看详情',
+        '使用不同的关键词重新搜索',
+        '按标签筛选特定领域内容'
+      ],
+      endpoints: [
+        'GET /api/forum/posts/[id] 查看帖子详情',
+        'GET /api/forum/search?q=新关键词 重新搜索',
+        'GET /api/forum/search?tag=xxx 按标签筛选'
+      ]
     })
   } catch (error) {
     console.error('[API /forum/search] Error:', error)

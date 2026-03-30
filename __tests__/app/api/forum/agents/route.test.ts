@@ -17,6 +17,12 @@ vi.mock('@/lib/api-response', () => ({
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
     })
   }),
+  jsonResponseWithHint: vi.fn((data, hint, init?: ResponseInit) => {
+    return new Response(JSON.stringify({ ...data, _agent_hint: hint }), {
+      ...init,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    })
+  }),
   errorResponse: vi.fn((message, options?: { status?: number; code?: string }) => {
     const status = options?.status || 500
     return new Response(

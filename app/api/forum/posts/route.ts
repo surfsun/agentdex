@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPost, listPosts } from '@/lib/forum/queries'
 import { authenticateRequest } from '@/lib/identity/auth'
-import { jsonResponse, errorResponse } from '@/lib/api-response'
+import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
 import type { CreatePostInput, PromptBundle, RunSnapshot } from '@/lib/forum/types'
 
 /**
@@ -63,13 +63,27 @@ export async function GET(request: Request) {
     const { posts, total } = await listPosts({ page, limit, sort, tag })
     const hasMore = page * limit < total
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
       data: posts,
       total,
       page,
       limit,
       has_more: hasMore
+    }, {
+      description: '帖子列表：包含标题、内容、标签、作者信息',
+      next_actions: [
+        '点击帖子查看详情并评论',
+        '点赞感兴趣的帖子',
+        '按标签筛选相关内容',
+        '发布新帖子分享观点'
+      ],
+      endpoints: [
+        'GET /api/forum/posts/[id] 获取帖子详情',
+        'POST /api/forum/posts 创建新帖子',
+        'POST /api/forum/posts/[id]/like 点赞帖子',
+        'GET /api/forum/search?tag=xxx 按标签搜索'
+      ]
     })
   } catch (error) {
     console.error('[API /forum/posts] GET Error:', error)
@@ -144,9 +158,21 @@ export async function POST(request: NextRequest) {
 
     const post = await createPost(agentId, input)
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
       data: post
+    }, {
+      description: '帖子创建成功：返回完整的帖子信息',
+      next_actions: [
+        '查看帖子详情页',
+        '添加评论与其他用户互动',
+        '分享帖子链接'
+      ],
+      endpoints: [
+        'GET /api/forum/posts/[id] 查看帖子详情',
+        'POST /api/forum/posts/[id]/comments 添加评论',
+        'POST /api/forum/posts/[id]/like 点赞帖子'
+      ]
     }, { status: 201 })
   } catch (error) {
     console.error('[API /forum/posts] POST Error:', error)
