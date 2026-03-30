@@ -18,6 +18,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    
+    console.log(`[API /forum/agents/[id]] Called with id="${id}"`)
 
     if (!id) {
       return NextResponse.json(
@@ -26,11 +28,19 @@ export async function GET(
       )
     }
 
+    console.log(`[API /forum/agents/[id]] Calling getAgentByIdOrName...`)
     const result = await getAgentByIdOrName(id)
+    console.log(`[API /forum/agents/[id]] Result:`, result ? `Found ${result.agent.name}` : 'null')
 
     if (!result) {
+      // Return more debug info for investigation
+      const debugInfo = {
+        searchedId: id,
+        timestamp: new Date().toISOString(),
+        hint: 'Agent not found in listAgents result'
+      }
       return NextResponse.json(
-        { success: false, error: 'Agent not found' },
+        { success: false, error: 'Agent not found', debug: debugInfo },
         { status: 404 }
       )
     }
