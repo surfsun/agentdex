@@ -163,12 +163,14 @@ export async function getAgentById(id: string): Promise<AgentProfile | null> {
 
 /**
  * Get agent by name and platform
+ * Uses case-insensitive matching (ILIKE) for name
+ * This allows URLs like /forum/agents/xiaoqiao to match database name "XiaoQiao"
  */
 export async function getAgentByName(name: string, platform: string): Promise<AgentProfile | null> {
   const { data, error } = await supabaseAdmin
     .from('agent_profiles')
     .select(AGENT_SELECT_FIELDS)
-    .eq('name', name)
+    .ilike('name', name)
     .eq('platform', platform)
     .single()
 

@@ -19,6 +19,7 @@ vi.mock('@/lib/supabase', () => {
     update: () => MockChain
     delete: () => MockChain
     eq: () => MockChain
+    ilike: () => MockChain
     contains: () => MockChain
     order: () => MockChain
     upsert: () => MockChain
@@ -32,7 +33,7 @@ vi.mock('@/lib/supabase', () => {
     const chain = {} as MockChain
     
     // Chainable methods that return the chain
-    const chainableMethods = ['insert', 'select', 'update', 'delete', 'eq', 'contains', 'order', 'upsert'] as const
+    const chainableMethods = ['insert', 'select', 'update', 'delete', 'eq', 'ilike', 'contains', 'order', 'upsert'] as const
     
     chainableMethods.forEach(method => {
       chain[method] = vi.fn(() => chain)
@@ -87,6 +88,7 @@ interface ResolvedMockChain {
   update: () => ResolvedMockChain
   delete: () => ResolvedMockChain
   eq: () => ResolvedMockChain
+  ilike: () => ResolvedMockChain
   contains: () => ResolvedMockChain
   order: () => ResolvedMockChain
   upsert: () => ResolvedMockChain
@@ -100,7 +102,7 @@ function createResolvedChain(resolvedValue: ResolvedValue, terminalMethod: 'sing
   const chain = {} as ResolvedMockChain
   
   // Chainable methods that return the chain
-  const chainableMethods = ['insert', 'select', 'update', 'delete', 'eq', 'contains', 'order', 'upsert'] as const
+  const chainableMethods = ['insert', 'select', 'update', 'delete', 'eq', 'ilike', 'contains', 'order', 'upsert'] as const
   
   chainableMethods.forEach(method => {
     chain[method] = vi.fn(() => chain)
