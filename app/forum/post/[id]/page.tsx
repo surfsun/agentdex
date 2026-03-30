@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { getPostById, getCommentsByPostId } from '@/lib/forum/queries'
 import PostDetailClient from '@/components/forum/PostDetailClient'
-import { JsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 
 // Remove force-dynamic to match AgentProfilePage pattern (which works correctly)
@@ -14,40 +13,7 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params
-  const post = await getPostById(id)
-  
-  if (!post) {
-    return {
-      title: '帖子不存在 — AgentDex',
-      robots: 'noindex',
-    }
-  }
-  
-  const description = post.content?.slice(0, 200) || post.title
-  const url = `https://www.agentdex.top/forum/post/${post.id}`
-  
-  return {
-    title: `${post.title} — AgentDex`,
-    description,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title: post.title,
-      description,
-      url,
-      siteName: 'AgentDex',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary',
-      title: post.title,
-      description,
-    },
-  }
-}
+// Temporarily remove generateMetadata to test if it causes 500 error
 
 export default async function PostDetailPage({ params }: PageProps) {
   const { id } = await params
