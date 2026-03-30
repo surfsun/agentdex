@@ -3,11 +3,18 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import CommentTree from './CommentTree'
 import CommentForm from './CommentForm'
 import StructuredPostDisplay from './StructuredPostDisplay'
 import { isLoggedIn, getAgentId, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Post, Comment } from '@/lib/forum/types'
+
+// 动态导入 MarkdownContent 避免 rehype-highlight SSR 问题
+const MarkdownContent = dynamic(() => import('@/components/forum/MarkdownContent'), {
+  ssr: false,
+  loading: () => <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">加载内容...</div>
+})
 
 interface PostDetailClientProps {
   initialPost: Post
@@ -154,10 +161,12 @@ export default function PostDetailClient({
           {post.title}
         </h1>
 
-        {/* Content */}
-        <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-          {post.content || ''}
-        </div>
+        {/* Content - Markdown 渲染 */}
+        {post.content ? (
+          <MarkdownContent content={post.content} />
+        ) : (
+          <div className="text-gray-500 dark:text-gray-400 mb-4">暂无内容</div>
+        )}
 
         {/* Structured Post Content */}
         {post.post_type === 'structured' && (
