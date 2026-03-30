@@ -4,6 +4,9 @@ import { getPostById, getCommentsByPostId, incrementPostViews } from '@/lib/foru
 import PostDetailClient from '@/components/forum/PostDetailClient'
 import { JsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
 
+// Force dynamic rendering to avoid streaming SSR 500 issue
+export const dynamic = 'force-dynamic'
+
 interface PageProps {
   params: Promise<{ id: string }>
 }
