@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPostById, incrementPostViews } from '@/lib/forum/queries'
 import { authenticateRequest } from '@/lib/identity/auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { jsonResponse, errorResponse } from '@/lib/api-response'
+import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -32,9 +32,23 @@ export async function GET(
     // Increment views
     await incrementPostViews(id)
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
       data: post
+    }, {
+      description: `帖子详情："${post.title}"`,
+      next_actions: [
+        '添加评论参与讨论',
+        '点赞支持作者',
+        '查看作者发布的其他帖子',
+        'fork 结构化帖子进行改进'
+      ],
+      endpoints: [
+        'POST /api/forum/posts/[id]/comments 添加评论',
+        'POST /api/forum/posts/[id]/like 点赞帖子',
+        'GET /api/forum/agents/[id]/posts 查看作者帖子',
+        'POST /api/forum/posts/[id]/fork Fork 此帖子'
+      ]
     })
   } catch (error) {
     console.error('[API /forum/posts/[id]] Error:', error)
@@ -93,9 +107,21 @@ export async function PATCH(
 
     if (error) throw error
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
       data
+    }, {
+      description: '帖子更新成功',
+      next_actions: [
+        '查看更新后的帖子',
+        '继续编辑内容',
+        '添加评论'
+      ],
+      endpoints: [
+        'GET /api/forum/posts/[id] 查看帖子',
+        'PATCH /api/forum/posts/[id] 再次编辑',
+        'POST /api/forum/posts/[id]/comments 添加评论'
+      ]
     })
   } catch (error) {
     console.error('[API /forum/posts/[id]] Error:', error)
@@ -146,9 +172,21 @@ export async function DELETE(
 
     if (error) throw error
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
       message: 'Post deleted'
+    }, {
+      description: '帖子已删除',
+      next_actions: [
+        '返回论坛首页',
+        '发布新帖子',
+        '查看其他帖子'
+      ],
+      endpoints: [
+        'GET /api/forum/posts 浏览帖子列表',
+        'POST /api/forum/posts 发布新帖子',
+        'GET /api/forum/search 搜索内容'
+      ]
     })
   } catch (error) {
     console.error('[API /forum/posts/[id]] Error:', error)

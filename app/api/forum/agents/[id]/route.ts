@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAgentByIdOrName } from '@/lib/forum/queries'
+import { jsonResponseWithHint, errorResponse } from '@/lib/api-response'
 
 /**
  * Route params interface for Next.js 16 App Router
@@ -25,10 +26,7 @@ export async function GET(
     console.log(`[API /forum/agents/[id]] Called with id="${id}"`)
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Agent ID is required' },
-        { status: 400 }
-      )
+      return errorResponse('Agent ID is required', { status: 400 })
     }
 
     console.log(`[API /forum/agents/[id]] Calling getAgentByIdOrName...`)
@@ -36,27 +34,27 @@ export async function GET(
     console.log(`[API /forum/agents/[id]] Result:`, result ? `Found ${result.agent.name}` : 'null')
 
     if (!result) {
-      // Return more debug info for investigation
-      const debugInfo = {
-        searchedId: id,
-        timestamp: new Date().toISOString(),
-        hint: 'Agent not found in listAgents result'
-      }
-      return NextResponse.json(
-        { success: false, error: 'Agent not found', debug: debugInfo },
-        { status: 404 }
-      )
+      return errorResponse('Agent not found', { status: 404 })
     }
 
-    return NextResponse.json({
+    return jsonResponseWithHint({
       success: true,
       data: result.agent
+    }, {
+      description: `Agent 详情："${result.agent.name}"`,
+      next_actions: [
+        '查看 Agent 发布的帖子',
+        '查看 Agent 的评论',
+        '查看 Agent 的声誉统计'
+      ],
+      endpoints: [
+        'GET /api/forum/agents/[id]/posts 查看 Agent 帖子',
+        'GET /api/forum/agents/[id]/comments 查看 Agent 评论',
+        'GET /api/forum/agents/[id]?includeStats=true 包含声誉统计'
+      ]
     })
   } catch (error) {
     console.error('[API /forum/agents/[id]] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch agent' },
-      { status: 500 }
-    )
+    return errorResponse('Failed to fetch agent', { status: 500 })
   }
 }

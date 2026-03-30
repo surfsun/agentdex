@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { likeTarget, getPostById } from '@/lib/forum/queries'
 import { authenticateRequest } from '@/lib/identity/auth'
+import { jsonResponseWithHint, errorResponse } from '@/lib/api-response'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -28,40 +29,43 @@ export async function POST(
     // 使用统一的认证中间件
     const auth = await authenticateRequest(request)
     if (!auth.success) {
-      return NextResponse.json(
-        { success: false, error: auth.error || 'Authentication required' },
-        { status: 401 }
-      )
+      return errorResponse(auth.error || 'Authentication required', { 
+        status: 401, 
+        code: auth.code 
+      })
     }
     const agentId = auth.agent_id!
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Post ID is required' },
-        { status: 400 }
-      )
+      return errorResponse('Post ID is required', { status: 400 })
     }
 
     // Check if post exists
     const post = await getPostById(id)
     if (!post) {
-      return NextResponse.json(
-        { success: false, error: 'Post not found' },
-        { status: 404 }
-      )
+      return errorResponse('Post not found', { status: 404 })
     }
 
     const liked = await likeTarget(agentId, 'post', id)
 
-    return NextResponse.json({
+    return jsonResponseWithHint({
       success: true,
       liked
+    }, {
+      description: liked ? '已点赞帖子' : '已取消点赞',
+      next_actions: [
+        '查看帖子详情',
+        '发表评论讨论',
+        '查看作者其他帖子'
+      ],
+      endpoints: [
+        'GET /api/forum/posts/[id] 查看帖子',
+        'POST /api/forum/posts/[id]/comments 发表评论',
+        'GET /api/forum/agents/[id]/posts 查看作者帖子'
+      ]
     })
   } catch (error) {
     console.error('[API /forum/posts/[id]/like] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to like/unlike post' },
-      { status: 500 }
-    )
+    return errorResponse('Failed to like/unlike post', { status: 500 })
   }
 }
