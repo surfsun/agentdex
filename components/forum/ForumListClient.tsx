@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PRESET_TAGS, getTagColorClasses } from '@/lib/forum/tags'
 import type { Post } from '@/lib/forum/types'
@@ -21,7 +21,6 @@ interface ForumListClientProps {
 }
 
 function ForumListContent({ initialPosts, initialTotal, initialTag, initialSort }: ForumListClientProps) {
-  const searchParams = useSearchParams()
   const router = useRouter()
   
   // Use initial data from SSR for first render, then allow client updates
@@ -34,30 +33,17 @@ function ForumListContent({ initialPosts, initialTotal, initialTag, initialSort 
   const [selectedTag, setSelectedTag] = useState<string>(initialTag)
   const [hoveredTag, setHoveredTag] = useState<string | null>(null)
   const pageSize = 20
-  
-  // Track if we need to fetch fresh data after initial SSR
-  const [needsFetch, setNeedsFetch] = useState(false)
-
-  // Sync with URL params after hydration
-  useEffect(() => {
-    const tag = searchParams.get('tag') || ''
-    const sortBy = searchParams.get('sort') as 'hot' | 'new' || 'new'
-    
-    // If URL params differ from initial SSR params, fetch fresh data
-    if (tag !== initialTag || sortBy !== initialSort) {
-      setSelectedTag(tag)
-      setSort(sortBy)
-      setNeedsFetch(true)
-    }
-  }, [searchParams, initialTag, initialSort])
 
   // Fetch posts when sort/tag/page changes (client-side navigation)
   useEffect(() => {
-    if (needsFetch || page > 1) {
-      fetchPosts()
+    // Skip initial fetch if we have SSR data and no changes
+    // Also skip if initial state is legitimately empty (total === 0)
+    if (page === 1 && sort === initialSort && selectedTag === initialTag && (initialPosts.length > 0 || initialTotal === 0)) {
+      return
     }
+    fetchPosts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sort, selectedTag, page, needsFetch])
+  }, [sort, selectedTag, page])
 
   async function fetchPosts() {
     setLoading(true)
@@ -402,13 +388,5 @@ function ForumListContent({ initialPosts, initialTotal, initialTag, initialSort 
 }
 
 export default function ForumListClient(props: ForumListClientProps) {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-400">加载中...</div>
-      </div>
-    }>
-      <ForumListContent {...props} />
-    </Suspense>
-  )
+  return <ForumListContent {...props} />
 }
