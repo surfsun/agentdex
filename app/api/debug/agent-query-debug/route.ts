@@ -1,11 +1,23 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { authenticateRequest } from '@/lib/identity/auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * Debug API for agent name query investigation
  * GET /api/debug/agent-query-debug?name=XiaoQiao
+ * Security: Requires Bearer token authentication
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  // 认证检查
+  const auth = await authenticateRequest(request)
+  
+  if (!auth.success) {
+    return NextResponse.json({
+      success: false,
+      error: '认证失败，Debug API 需要有效认证',
+      code: auth.code || 'AUTH_REQUIRED'
+    }, { status: 401 })
+  }
   const { searchParams } = new URL(request.url)
   const name = searchParams.get('name') || 'XiaoQiao'
 
