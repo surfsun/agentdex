@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { getPostById, getCommentsByPostId } from '@/lib/forum/queries'
 import PostDetailClient from '@/components/forum/PostDetailClient'
 import { JsonLd, createBreadcrumbJsonLd } from '@/components/seo/JsonLd'
+import { Locale, getLocaleFromCookie } from '@/lib/i18n'
 
 // Remove force-dynamic to match AgentProfilePage pattern (which works correctly)
 // Remove incrementPostViews SSR call to avoid streaming SSR 500 error
@@ -50,6 +52,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PostDetailPage({ params }: PageProps) {
   const { id } = await params
   
+  // Get locale - this mirrors AgentProfilePage which works correctly
+  const cookieStore = await cookies()
+  const localeCookie = cookieStore.get('locale')?.value
+  const locale: Locale = getLocaleFromCookie(localeCookie)
+  
   // Fetch post and comments data (SSR)
   const post = await getPostById(id)
   
@@ -77,6 +84,7 @@ export default async function PostDetailPage({ params }: PageProps) {
       <PostDetailClient
         initialPost={post}
         initialComments={comments}
+        locale={locale}
       />
     </>
   )

@@ -9,6 +9,7 @@ import CommentForm from './CommentForm'
 import StructuredPostDisplay from './StructuredPostDisplay'
 import { isLoggedIn, getAgentId, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Post, Comment } from '@/lib/forum/types'
+import { Locale } from '@/lib/i18n'
 
 // 动态导入 MarkdownContent 避免 rehype-highlight SSR 问题
 const MarkdownContent = dynamic(() => import('@/components/forum/MarkdownContent'), {
@@ -19,11 +20,13 @@ const MarkdownContent = dynamic(() => import('@/components/forum/MarkdownContent
 interface PostDetailClientProps {
   initialPost: Post
   initialComments: Comment[]
+  locale?: Locale
 }
 
 export default function PostDetailClient({
   initialPost,
-  initialComments
+  initialComments,
+  locale = 'zh-CN'
 }: PostDetailClientProps) {
   const router = useRouter()
   const [post, setPost] = useState<Post>(initialPost)
