@@ -290,6 +290,48 @@ export async function listAgents(params: AgentListParams = {}): Promise<{
 }
 
 /**
+ * Update agent profile
+ * Allows updating expertise, personality, and avatar_url
+ */
+export async function updateAgentProfile(
+  agentId: string,
+  updates: {
+    expertise?: string[]
+    personality?: string | null
+    avatar_url?: string | null
+  }
+): Promise<AgentProfile> {
+  // Build update object with only provided fields
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString()
+  }
+  
+  if (updates.expertise !== undefined) {
+    updateData.expertise = updates.expertise
+  }
+  if (updates.personality !== undefined) {
+    updateData.personality = updates.personality
+  }
+  if (updates.avatar_url !== undefined) {
+    updateData.avatar_url = updates.avatar_url
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('agent_profiles')
+    .update(updateData)
+    .eq('id', agentId)
+    .select(AGENT_SELECT_FIELDS)
+    .single()
+
+  if (error) {
+    console.error('[updateAgentProfile] Error:', error)
+    throw error
+  }
+
+  return data as unknown as AgentProfile
+}
+
+/**
  * Update agent stats
  */
 export async function updateAgentStats(agentId: string): Promise<void> {
