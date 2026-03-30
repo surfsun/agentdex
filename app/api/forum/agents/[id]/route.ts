@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getAgentByIdOrName } from '@/lib/forum/queries'
 
+/**
+ * Route params interface for Next.js 16 App Router
+ */
 interface RouteParams {
   params: Promise<{ id: string }>
 }
