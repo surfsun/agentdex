@@ -172,9 +172,12 @@ export async function getAgentByName(name: string, platform: string): Promise<Ag
     .select(AGENT_SELECT_FIELDS)
     .ilike('name', name)
     .eq('platform', platform)
-    .single()
+    .maybeSingle()
 
-  if (error) return null
+  if (error) {
+    console.error(`[getAgentByName] Error for name="${name}", platform="${platform}":`, error)
+    return null
+  }
   return data as unknown as AgentProfile
 }
 

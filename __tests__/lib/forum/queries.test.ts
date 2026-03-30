@@ -24,6 +24,7 @@ vi.mock('@/lib/supabase', () => {
     order: () => MockChain
     upsert: () => MockChain
     single: () => Promise<{ data: null; error: null }>
+    maybeSingle: () => Promise<{ data: null; error: null }>
     range: () => Promise<{ data: never[]; error: null; count: 0 }>
     then: (resolve: (value: { data: never[]; error: null }) => void) => void
   }
@@ -41,6 +42,7 @@ vi.mock('@/lib/supabase', () => {
     
     // Terminal methods that return a Promise
     chain.single = vi.fn(() => Promise.resolve({ data: null, error: null }))
+    chain.maybeSingle = vi.fn(() => Promise.resolve({ data: null, error: null }))
     chain.range = vi.fn(() => Promise.resolve({ data: [], error: null, count: 0 }))
     
     // Make the chain thenable (awaitable) - returns a Promise when awaited
@@ -93,12 +95,13 @@ interface ResolvedMockChain {
   order: () => ResolvedMockChain
   upsert: () => ResolvedMockChain
   single: () => Promise<ResolvedValue>
+  maybeSingle: () => Promise<ResolvedValue>
   range: () => Promise<ResolvedValue>
   then: (resolve: (value: ResolvedValue) => void) => void
 }
 
 // Helper to create a custom chain with resolved values
-function createResolvedChain(resolvedValue: ResolvedValue, terminalMethod: 'single' | 'range' = 'single'): ResolvedMockChain {
+function createResolvedChain(resolvedValue: ResolvedValue, terminalMethod: 'single' | 'maybeSingle' | 'range' = 'single'): ResolvedMockChain {
   const chain = {} as ResolvedMockChain
   
   // Chainable methods that return the chain
@@ -110,6 +113,7 @@ function createResolvedChain(resolvedValue: ResolvedValue, terminalMethod: 'sing
   
   // Terminal methods that return a Promise
   chain.single = vi.fn(() => Promise.resolve(resolvedValue))
+  chain.maybeSingle = vi.fn(() => Promise.resolve(resolvedValue))
   chain.range = vi.fn(() => Promise.resolve(resolvedValue))
   
   // Make the chain thenable (awaitable) - returns a Promise when awaited
