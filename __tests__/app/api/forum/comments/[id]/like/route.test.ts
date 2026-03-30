@@ -12,6 +12,30 @@ vi.mock('@/lib/identity/auth', () => ({
   authenticateRequest: vi.fn()
 }))
 
+vi.mock('@/lib/api-response', () => ({
+  jsonResponse: vi.fn((data, init) => {
+    const response = new Response(JSON.stringify(data), {
+      status: init?.status || 200,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    })
+    return response
+  }),
+  errorResponse: vi.fn((error, options) => {
+    const body: any = { success: false, error }
+    if (options?.code) body.code = options.code
+    return new Response(JSON.stringify(body), {
+      status: options?.status || 500,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    })
+  }),
+  jsonResponseWithHint: vi.fn((data, hint, init) => {
+    return new Response(JSON.stringify({ ...data, _agent_hint: hint }), {
+      status: init?.status || 200,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    })
+  })
+}))
+
 vi.mock('@/lib/supabase', () => {
   const createResolvedChain = (result: any) => {
     const chain: any = {
@@ -98,7 +122,7 @@ describe('/api/forum/comments/[id]/like', () => {
 
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Comment ID is required')
+      expect(data.error).toBe('评论 ID 不能为空')
     })
 
     it('should return 404 when comment not found', async () => {
@@ -122,7 +146,7 @@ describe('/api/forum/comments/[id]/like', () => {
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Comment not found')
+      expect(data.error).toBe('评论不存在')
       expect(likeTarget).not.toHaveBeenCalled()
     })
 
@@ -231,7 +255,7 @@ describe('/api/forum/comments/[id]/like', () => {
 
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Failed to like/unlike comment')
+      expect(data.error).toBe('点赞失败，请稍后重试')
     })
 
     it('should return 500 when likeTarget throws', async () => {
@@ -259,7 +283,7 @@ describe('/api/forum/comments/[id]/like', () => {
 
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Failed to like/unlike comment')
+      expect(data.error).toBe('点赞失败，请稍后重试')
     })
   })
 
@@ -287,7 +311,7 @@ describe('/api/forum/comments/[id]/like', () => {
       expect(response.headers.get('content-type')).toContain('application/json')
     })
 
-    it('should return correct JSON structure', async () => {
+    it('should return correct JSON structure with _agent_hint', async () => {
       vi.mocked(authenticateRequest).mockResolvedValue({ success: true, agent_id: 'a1' })
       const { supabaseAdmin } = await import('@/lib/supabase')
       
@@ -310,6 +334,10 @@ describe('/api/forum/comments/[id]/like', () => {
 
       expect(data).toHaveProperty('success')
       expect(data).toHaveProperty('liked')
+      expect(data).toHaveProperty('_agent_hint')
+      expect(data._agent_hint).toHaveProperty('description')
+      expect(data._agent_hint).toHaveProperty('next_actions')
+      expect(data._agent_hint).toHaveProperty('endpoints')
       expect(typeof data.success).toBe('boolean')
       expect(typeof data.liked).toBe('boolean')
     })

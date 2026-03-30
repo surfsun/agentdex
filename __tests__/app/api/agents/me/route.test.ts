@@ -13,6 +13,30 @@ vi.mock('@/lib/identity/queries', () => ({
   listServiceBindings: vi.fn()
 }))
 
+vi.mock('@/lib/api-response', () => ({
+  jsonResponse: vi.fn((data, init) => {
+    const response = new Response(JSON.stringify(data), {
+      status: init?.status || 200,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    })
+    return response
+  }),
+  errorResponse: vi.fn((error, options) => {
+    const body: any = { success: false, error }
+    if (options?.code) body.code = options.code
+    return new Response(JSON.stringify(body), {
+      status: options?.status || 500,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    })
+  }),
+  jsonResponseWithHint: vi.fn((data, hint, init) => {
+    return new Response(JSON.stringify({ ...data, _agent_hint: hint }), {
+      status: init?.status || 200,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    })
+  })
+}))
+
 import { authenticateRequest } from '@/lib/identity/auth'
 import { listServiceBindings } from '@/lib/identity/queries'
 
@@ -303,7 +327,7 @@ describe('/api/agents/me', () => {
 
       expect(res.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Internal server error')
+      expect(data.error).toBe('服务器错误')
     })
 
     it('处理 listServiceBindings 抛出的错误', async () => {
@@ -322,7 +346,7 @@ describe('/api/agents/me', () => {
 
       expect(res.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Internal server error')
+      expect(data.error).toBe('服务器错误')
     })
 
     it('处理非 Error 类型的异常', async () => {
@@ -336,12 +360,12 @@ describe('/api/agents/me', () => {
 
       expect(res.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('Internal server error')
+      expect(data.error).toBe('服务器错误')
     })
   })
 
   describe('响应格式验证', () => {
-    it('成功响应包含 success: true', async () => {
+    it('成功响应包含 success: true 和 _agent_hint', async () => {
       vi.mocked(authenticateRequest).mockResolvedValue({
         success: true,
         agent_identity: { id: 'test' },
@@ -357,6 +381,10 @@ describe('/api/agents/me', () => {
 
       expect(data).toHaveProperty('success', true)
       expect(data).toHaveProperty('data')
+      expect(data).toHaveProperty('_agent_hint')
+      expect(data._agent_hint).toHaveProperty('description')
+      expect(data._agent_hint).toHaveProperty('next_actions')
+      expect(data._agent_hint).toHaveProperty('endpoints')
     })
 
     it('失败响应包含 success: false', async () => {

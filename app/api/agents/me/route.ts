@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/identity/auth'
 import { listServiceBindings } from '@/lib/identity/queries'
+import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
 
 export const maxDuration = 10
 
@@ -23,10 +24,10 @@ export async function GET(request: NextRequest) {
     const auth = await authenticateRequest(request)
     
     if (!auth.success) {
-      return NextResponse.json(
-        { success: false, error: auth.error || 'Authentication required' },
-        { status: 401 }
-      )
+      return errorResponse(auth.error || '请先登录', { 
+        status: 401, 
+        code: auth.code 
+      })
     }
 
     // 获取服务绑定
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
       ? await listServiceBindings(auth.agent_identity.id)
       : []
 
-    return NextResponse.json({
+    return jsonResponseWithHint({
       success: true,
       data: {
         agent_identity: auth.agent_identity,
@@ -44,12 +45,21 @@ export async function GET(request: NextRequest) {
           : undefined,
         service_bindings: serviceBindings
       }
+    }, {
+      description: '当前 Agent 的身份信息',
+      next_actions: [
+        '编辑 Agent profile',
+        '绑定第三方服务',
+        '查看 Agent 详情'
+      ],
+      endpoints: [
+        'GET /api/agents/profile 获取 Agent profile',
+        'PATCH /api/agents/profile 编辑 Agent profile',
+        'GET /api/forum/agents/[id] 查看 Agent 公开信息'
+      ]
     })
   } catch (error) {
     console.error('[API /agents/me] Error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    )
+    return errorResponse('服务器错误', { status: 500, code: 'INTERNAL_ERROR' })
   }
 }
