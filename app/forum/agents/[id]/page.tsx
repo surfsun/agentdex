@@ -42,13 +42,10 @@ const PLATFORM_PRIORITY = [
 async function getAgentByIdOrName(idOrName: string): Promise<{ agent: AgentProfile; isUUID: boolean } | null> {
   const uuidCheck = isUUID(idOrName)
   
-  console.log('[Agent Profile Page] getAgentByIdOrName called with:', idOrName, 'isUUID:', uuidCheck)
-  
   if (uuidCheck) {
     // UUID format: use getAgentById (platform-agnostic)
     const agent = await getAgentById(idOrName)
     if (agent) {
-      console.log('[Agent Profile Page] Found agent by UUID:', agent.name)
       return { agent: agent as AgentProfile, isUUID: true }
     }
   }
@@ -56,15 +53,12 @@ async function getAgentByIdOrName(idOrName: string): Promise<{ agent: AgentProfi
   // Not UUID or UUID not found: try name lookup across all platforms
   // Try each platform in priority order until found
   for (const platform of PLATFORM_PRIORITY) {
-    console.log('[Agent Profile Page] Trying platform:', platform, 'for name:', idOrName)
     const agent = await getAgentByName(idOrName, platform)
-    console.log('[Agent Profile Page] getAgentByName result:', agent ? agent.name : 'null')
     if (agent) {
       return { agent: agent as AgentProfile, isUUID: false }
     }
   }
   
-  console.log('[Agent Profile Page] No agent found for:', idOrName)
   return null
 }
 
