@@ -13,18 +13,18 @@ import { calculateHotScore, formatHotScore, getTimeAgo } from '@/lib/forum/utils
 describe('calculateHotScore', () => {
   it('should calculate correct score for fresh high engagement post', () => {
     // 100 likes, 50 comments, 0 hours
-    // Score = (100 + 50 * 2) / (0 + 2)^1.5 = 200 / 2.83 = ~70.7
+    // With freshness boost: (100 + 50 * 2 + 3) / (0 + 2)^1.5 = 203 / 2.83 = ~71.7
     const score = calculateHotScore(100, 50, new Date())
-    expect(score).toBeGreaterThan(70)
-    expect(score).toBeLessThan(71)
+    expect(score).toBeGreaterThan(71)
+    expect(score).toBeLessThan(72)
   })
 
   it('should calculate correct score for medium engagement post', () => {
     // 10 likes, 5 comments, 0 hours
-    // Score = (10 + 5 * 2) / (0 + 2)^1.5 = 20 / 2.83 = ~7.1
+    // With freshness boost: (10 + 5 * 2 + 3) / (0 + 2)^1.5 = 23 / 2.83 = ~8.1
     const score = calculateHotScore(10, 5, new Date())
-    expect(score).toBeGreaterThan(7)
-    expect(score).toBeLessThan(7.5)
+    expect(score).toBeGreaterThan(8)
+    expect(score).toBeLessThan(8.5)
   })
 
   it('should apply time decay', () => {
@@ -41,18 +41,43 @@ describe('calculateHotScore', () => {
   it('should weight comments twice as much as likes', () => {
     const now = new Date()
     
-    // 10 likes, 0 comments
+    // 10 likes, 0 comments (freshness boost = 3)
     const likesOnly = calculateHotScore(10, 0, now)
     
-    // 0 likes, 5 comments (5 * 2 = 10 engagement score)
+    // 0 likes, 5 comments (5 * 2 = 10 engagement score, freshness boost = 3)
     const commentsOnly = calculateHotScore(0, 5, now)
     
-    // Should be approximately equal since 5 comments = 10 engagement
+    // Should be approximately equal since 5 comments = 10 engagement, both get boost
     expect(Math.abs(likesOnly - commentsOnly)).toBeLessThan(0.01)
   })
 
-  it('should return 0 for posts with no engagement', () => {
+  it('should give new posts (no engagement) initial visibility via freshness boost', () => {
+    // Fresh post (0 hours) with no engagement gets boost score
+    // Score = (0 + 0 + 3) / (0 + 2)^1.5 = 3 / 2.83 = ~1.06
     const score = calculateHotScore(0, 0, new Date())
+    expect(score).toBeGreaterThan(1)
+    expect(score).toBeLessThan(1.1)
+  })
+
+  it('should decay freshness boost over time', () => {
+    const now = new Date()
+    const oneHourAgo = new Date(now.getTime() - 3600000)
+    const twoHoursAgo = new Date(now.getTime() - 2 * 3600000)
+    
+    // All have no engagement, but different freshness boost
+    const freshScore = calculateHotScore(0, 0, now)       // boost = 3
+    const oneHourScore = calculateHotScore(0, 0, oneHourAgo)  // boost = 2
+    const twoHourScore = calculateHotScore(0, 0, twoHoursAgo) // boost = 1
+    
+    // Score should decrease as boost decays
+    expect(freshScore).toBeGreaterThan(oneHourScore)
+    expect(oneHourScore).toBeGreaterThan(twoHourScore)
+  })
+
+  it('should return 0 for old posts with no engagement (no freshness boost)', () => {
+    // Post older than 3 hours with no engagement gets no boost
+    const fourHoursAgo = new Date(Date.now() - 4 * 3600000)
+    const score = calculateHotScore(0, 0, fourHoursAgo)
     expect(score).toBe(0)
   })
 
@@ -60,7 +85,7 @@ describe('calculateHotScore', () => {
     const now = new Date()
     const oneDayAgo = new Date(now.getTime() - 86400000)
     
-    // 10 likes, 5 comments, 24 hours
+    // 10 likes, 5 comments, 24 hours (no freshness boost)
     // Score = (10 + 5 * 2) / (24 + 2)^1.5 = 20 / 132.8 = ~0.15
     const score = calculateHotScore(10, 5, oneDayAgo)
     expect(score).toBeLessThan(0.2)

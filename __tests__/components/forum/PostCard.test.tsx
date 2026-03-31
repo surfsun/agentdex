@@ -223,8 +223,8 @@ describe('PostCard', () => {
   describe('热度分数', () => {
     it('有互动的帖子显示热度分数', () => {
       // 10 likes + 5 comments = 20 engagement
-      // Created at now, hours = 0
-      // hot_score = 20 / (0 + 2)^1.5 = 20 / 2.83 ≈ 7.07
+      // Created at now, hours = 0, freshness boost = 3
+      // hot_score = (20 + 3) / (0 + 2)^1.5 = 23 / 2.83 ≈ 8.1
       render(<PostCard post={{ 
         ...mockPost, 
         likes_count: 10, 
@@ -232,22 +232,26 @@ describe('PostCard', () => {
         created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
       }} />)
       expect(screen.getByText('🔥')).toBeInTheDocument()
-      expect(screen.getByText('7.1')).toBeInTheDocument()
+      expect(screen.getByText('8.1')).toBeInTheDocument()
     })
 
-    it('无互动的帖子不显示热度分数', () => {
+    it('无互动的新帖子显示新鲜度分数', () => {
+      // Fresh post (hours = 0) with no engagement gets freshness boost
+      // hot_score = (0 + 3) / (0 + 2)^1.5 = 3 / 2.83 ≈ 1.06
       render(<PostCard post={{ 
         ...mockPost, 
         likes_count: 0, 
-        comments_count: 0 
+        comments_count: 0,
+        created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
       }} />)
-      expect(screen.queryByText('🔥')).not.toBeInTheDocument()
+      expect(screen.getByText('🔥')).toBeInTheDocument()
+      expect(screen.getByText('1.1')).toBeInTheDocument()
     })
 
     it('高热度帖子显示整数分数', () => {
       // 100 likes + 50 comments = 200 engagement
-      // Created at now, hours = 0
-      // hot_score = 200 / (0 + 2)^1.5 = 200 / 2.83 ≈ 70.7
+      // Created at now, hours = 0, freshness boost = 3
+      // hot_score = (200 + 3) / (0 + 2)^1.5 = 203 / 2.83 ≈ 71.7
       render(<PostCard post={{ 
         ...mockPost, 
         likes_count: 100, 
@@ -255,12 +259,12 @@ describe('PostCard', () => {
         created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
       }} />)
       expect(screen.getByText('🔥')).toBeInTheDocument()
-      expect(screen.getByText('71')).toBeInTheDocument()
+      expect(screen.getByText('72')).toBeInTheDocument()
     })
 
     it('时间衰减降低热度分数', () => {
       // 10 likes + 5 comments = 20 engagement
-      // Created 24 hours ago
+      // Created 24 hours ago (no freshness boost)
       // hot_score = 20 / (24 + 2)^1.5 = 20 / 132.8 ≈ 0.15
       render(<PostCard post={{ 
         ...mockPost, 
@@ -273,8 +277,8 @@ describe('PostCard', () => {
     })
 
     it('评论权重高于点赞（2x）', () => {
-      // Post A: 20 likes + 0 comments = 20 engagement
-      // Post B: 0 likes + 10 comments = 20 engagement (10 * 2 = 20)
+      // Post A: 20 likes + 0 comments = 20 engagement + 3 boost
+      // Post B: 0 likes + 10 comments = 20 engagement + 3 boost
       // Both have same hot_score if same time
       const { rerender } = render(<PostCard post={{ 
         ...mockPost, 
@@ -283,7 +287,7 @@ describe('PostCard', () => {
         created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
       }} />)
       
-      const scoreA = screen.getByText('7.1')
+      const scoreA = screen.getByText('8.1')
       expect(scoreA).toBeInTheDocument()
       
       rerender(<PostCard post={{ 
@@ -293,7 +297,7 @@ describe('PostCard', () => {
         created_at: new Date('2026-03-28T13:35:00+08:00').toISOString()
       }} />)
       
-      expect(screen.getByText('7.1')).toBeInTheDocument()
+      expect(screen.getByText('8.1')).toBeInTheDocument()
     })
   })
 })

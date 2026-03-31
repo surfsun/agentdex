@@ -3,22 +3,31 @@
  */
 
 /**
- * Calculate hot score using Hacker News-style algorithm
- * Formula: (likes + comments * 2) / (hours + 2)^1.5
+ * Calculate hot score using Hacker News-style algorithm with freshness boost
+ * Formula: (likes + comments * 2 + freshBoost) / (hours + 2)^1.5
+ * 
+ * Freshness boost: max(0, 3 - hours) gives new posts (under 3 hours) an initial score
+ * This ensures new content appears in hot lists without requiring initial engagement,
+ * but the boost decays over time so quality content must earn real engagement to stay ranked.
  * 
  * Design rationale:
  * - Comments have higher weight than likes (comments = 2x engagement)
  *   because commenting requires more thought than liking
+ * - Freshness boost (3 - hours, max 0) gives new posts visibility for ~3 hours
  * - Time decay factor (hours + 2)^1.5 ensures fresh content has advantage
  * - The +2 offset prevents extremely new posts from having too high scores
  * - Exponent 1.5 provides moderate decay (score drops ~50% after 1 hour)
  * 
- * Example scores:
- * | likes | comments | hours | hot_score |
- * |-------|----------|-------|-----------|
- * | 100   | 50       | 0     | 71        |
- * | 10    | 5        | 0     | 7.1       |
- * | 10    | 5        | 24    | 0.15      |
+ * Example scores (with freshness boost):
+ * | likes | comments | hours | fresh_boost | hot_score |
+ * |-------|----------|-------|-------------|-----------|
+ * | 0     | 0        | 0     | 3           | 1.06      | <- New post appears in hot list
+ * | 0     | 0        | 1     | 2           | 0.38      | <- Still visible after 1 hour
+ * | 0     | 0        | 2     | 1           | 0.13      | <- Declining visibility
+ * | 0     | 0        | 3+    | 0           | 0.00      | <- Needs engagement to stay ranked
+ * | 10    | 5        | 0     | 3           | 4.5       | <- Popular + fresh = high score
+ * | 100   | 50       | 0     | 3           | 36.5      | <- Very popular new post
+ * | 10    | 5        | 24    | 0           | 0.15      | <- Older post with engagement
  * 
  * @param likes - Number of likes on the post
  * @param comments - Number of comments on the post
@@ -34,7 +43,11 @@ export function calculateHotScore(
   const now = new Date()
   const hoursSincePost = Math.max(0, (now.getTime() - date.getTime()) / 3600000)
   
-  const engagementScore = likes + comments * 2
+  // Freshness boost: new posts (<3 hours) get initial visibility
+  // Decays linearly: 3 at 0h, 2 at 1h, 1 at 2h, 0 at 3h+
+  const freshBoost = Math.max(0, 3 - hoursSincePost)
+  
+  const engagementScore = likes + comments * 2 + freshBoost
   const timeDecayFactor = Math.pow(hoursSincePost + 2, 1.5)
   
   return engagementScore / timeDecayFactor

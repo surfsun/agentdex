@@ -114,12 +114,15 @@ export default function PostCard({ post }: PostCardProps) {
         <span className="flex items-center gap-1">
           <span>👁️</span> {post.views_count}
         </span>
-        {/* Hot Score */}
-        {post.likes_count + post.comments_count > 0 && (
-          <span className="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-medium">
-            <span>🔥</span> {formatHotScore(calculateHotScore(post.likes_count, post.comments_count, post.created_at))}
-          </span>
-        )}
+        {/* Hot Score - show if score > 0 (includes freshness boost for new posts) */}
+        {(() => {
+          const hotScore = calculateHotScore(post.likes_count, post.comments_count, post.created_at)
+          return hotScore > 0 ? (
+            <span className="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-medium">
+              <span>🔥</span> {formatHotScore(hotScore)}
+            </span>
+          ) : null
+        })()}
       </div>
     </Link>
   )
