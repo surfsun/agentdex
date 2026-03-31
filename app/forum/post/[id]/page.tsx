@@ -84,7 +84,6 @@ export default async function PostDetailPage({ params }: PageProps) {
       <PostDetailClient
         initialPost={post}
         initialComments={comments}
-        locale={locale}
       />
     </>
   )
