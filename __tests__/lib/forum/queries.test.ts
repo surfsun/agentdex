@@ -501,10 +501,10 @@ describe('Forum Queries', () => {
   describe('buildCommentTree', () => {
     it('should build flat list into tree', () => {
       const flatComments = [
-        { id: 'c1', parent_id: null, content: 'Root 1' },
-        { id: 'c2', parent_id: 'c1', content: 'Reply to Root 1' },
-        { id: 'c3', parent_id: 'c1', content: 'Another reply' },
-        { id: 'c4', parent_id: null, content: 'Root 2' },
+        { id: 'c1', post_id: 'p1', author_id: 'a1', parent_id: null, content: 'Root 1', likes_count: 0, created_at: '2026-03-27T10:00:00Z', updated_at: '2026-03-27T10:00:00Z' },
+        { id: 'c2', post_id: 'p1', author_id: 'a1', parent_id: 'c1', content: 'Reply to Root 1', likes_count: 0, created_at: '2026-03-27T10:01:00Z', updated_at: '2026-03-27T10:01:00Z' },
+        { id: 'c3', post_id: 'p1', author_id: 'a1', parent_id: 'c1', content: 'Another reply', likes_count: 0, created_at: '2026-03-27T10:02:00Z', updated_at: '2026-03-27T10:02:00Z' },
+        { id: 'c4', post_id: 'p1', author_id: 'a1', parent_id: null, content: 'Root 2', likes_count: 0, created_at: '2026-03-27T10:03:00Z', updated_at: '2026-03-27T10:03:00Z' },
       ]
 
       const tree = buildCommentTree(flatComments)
@@ -516,9 +516,9 @@ describe('Forum Queries', () => {
 
     it('should handle deeply nested comments', () => {
       const flatComments = [
-        { id: 'c1', parent_id: null, content: 'Root' },
-        { id: 'c2', parent_id: 'c1', content: 'Level 1' },
-        { id: 'c3', parent_id: 'c2', content: 'Level 2' },
+        { id: 'c1', post_id: 'p1', author_id: 'a1', parent_id: null, content: 'Root', likes_count: 0, created_at: '2026-03-27T10:00:00Z', updated_at: '2026-03-27T10:00:00Z' },
+        { id: 'c2', post_id: 'p1', author_id: 'a1', parent_id: 'c1', content: 'Level 1', likes_count: 0, created_at: '2026-03-27T10:01:00Z', updated_at: '2026-03-27T10:01:00Z' },
+        { id: 'c3', post_id: 'p1', author_id: 'a1', parent_id: 'c2', content: 'Level 2', likes_count: 0, created_at: '2026-03-27T10:02:00Z', updated_at: '2026-03-27T10:02:00Z' },
       ]
 
       const tree = buildCommentTree(flatComments)
@@ -541,7 +541,7 @@ describe('Forum Queries', () => {
       const checkChain = createResolvedChain({ data: null, error: { message: 'Not found' } })
 
       // Second call: insert like
-      const insertChain = createResolvedChain({ error: null })
+      const insertChain = createResolvedChain({ data: { id: 'like-new' }, error: null })
 
       mockFrom
         .mockReturnValueOnce(checkChain)
@@ -558,7 +558,7 @@ describe('Forum Queries', () => {
       const checkChain = createResolvedChain({ data: { id: 'like-123' }, error: null })
 
       // Second call: delete like
-      const deleteChain = createResolvedChain({ error: null })
+      const deleteChain = createResolvedChain({ data: null, error: null })
 
       mockFrom
         .mockReturnValueOnce(checkChain)

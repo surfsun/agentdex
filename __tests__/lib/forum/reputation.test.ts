@@ -5,12 +5,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { getAgentReputationStats } from '@/lib/forum/queries'
 
-// Type for mock chain
+// Type for mock chain - must match ResolvedValue structure
+interface ResolvedValue {
+  data: unknown
+  error: null | { message: string }
+}
+
 interface MockChain {
   select: () => MockChain
   eq: () => MockChain
   rpc: () => Promise<{ data: null; error: null }>
-  then: (resolve: (value: { data: unknown; error: null }) => void) => void
+  then: (resolve: (value: ResolvedValue) => void) => void
 }
 
 // Mock supabaseAdmin
@@ -20,7 +25,7 @@ vi.mock('@/lib/supabase', () => {
     chain.select = vi.fn(() => chain)
     chain.eq = vi.fn(() => chain)
     chain.rpc = vi.fn(() => Promise.resolve({ data: null, error: null }))
-    chain.then = vi.fn((resolve: (value: { data: unknown; error: null }) => void) => resolve({ data: [], error: null }))
+    chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => resolve({ data: [], error: null }))
     return chain
   }
 
@@ -39,10 +44,11 @@ describe('getAgentReputationStats', () => {
   it('returns zeros when agent has no posts or comments', async () => {
     // Mock empty responses
     const mockSupabase = await import('@/lib/supabase')
-    const chain = mockSupabase.supabaseAdmin.from('posts') as MockChain
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chain = (mockSupabase.supabaseAdmin.from as any)('posts') as MockChain
 
     // Override then to return empty data
-    chain.then = vi.fn((resolve: (value: { data: unknown; error: null }) => void) => resolve({ data: [], error: null }))
+    chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => resolve({ data: [], error: null }))
 
     const result = await getAgentReputationStats('agent-123')
 
@@ -53,12 +59,13 @@ describe('getAgentReputationStats', () => {
   it('calculates likes from posts', async () => {
     const mockSupabase = await import('@/lib/supabase')
 
-    // Mock posts with likes
+    // Mock posts with likes - use type assertion for mock flexibility
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockSupabase.supabaseAdmin.from = vi.fn((table: string): MockChain => {
       const chain = {} as MockChain
       chain.select = vi.fn(() => chain)
       chain.eq = vi.fn(() => chain)
-      chain.then = vi.fn((resolve: (value: { data: unknown; error: null }) => void) => {
+      chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => {
         if (table === 'posts') {
           resolve({ data: [{ likes_count: 5 }, { likes_count: 3 }], error: null })
         } else {
@@ -66,7 +73,7 @@ describe('getAgentReputationStats', () => {
         }
       })
       return chain
-    })
+    }) as any
 
     const result = await getAgentReputationStats('agent-123')
 
@@ -78,11 +85,12 @@ describe('getAgentReputationStats', () => {
     const mockSupabase = await import('@/lib/supabase')
 
     // Mock comments with likes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockSupabase.supabaseAdmin.from = vi.fn((table: string): MockChain => {
       const chain = {} as MockChain
       chain.select = vi.fn(() => chain)
       chain.eq = vi.fn(() => chain)
-      chain.then = vi.fn((resolve: (value: { data: unknown; error: null }) => void) => {
+      chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => {
         if (table === 'comments') {
           resolve({ data: [{ likes_count: 2 }, { likes_count: 1 }], error: null })
         } else {
@@ -90,7 +98,7 @@ describe('getAgentReputationStats', () => {
         }
       })
       return chain
-    })
+    }) as any
 
     const result = await getAgentReputationStats('agent-123')
 
@@ -102,11 +110,12 @@ describe('getAgentReputationStats', () => {
     const mockSupabase = await import('@/lib/supabase')
 
     // Mock posts and comments with likes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockSupabase.supabaseAdmin.from = vi.fn((table: string): MockChain => {
       const chain = {} as MockChain
       chain.select = vi.fn(() => chain)
       chain.eq = vi.fn(() => chain)
-      chain.then = vi.fn((resolve: (value: { data: unknown; error: null }) => void) => {
+      chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => {
         if (table === 'posts') {
           resolve({ data: [{ likes_count: 10 }, { likes_count: 5 }], error: null })
         } else if (table === 'comments') {
@@ -116,7 +125,7 @@ describe('getAgentReputationStats', () => {
         }
       })
       return chain
-    })
+    }) as any
 
     const result = await getAgentReputationStats('agent-123')
 
@@ -128,11 +137,12 @@ describe('getAgentReputationStats', () => {
     const mockSupabase = await import('@/lib/supabase')
 
     // Mock posts with fork_count
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockSupabase.supabaseAdmin.from = vi.fn((table: string): MockChain => {
       const chain = {} as MockChain
       chain.select = vi.fn(() => chain)
       chain.eq = vi.fn(() => chain)
-      chain.then = vi.fn((resolve: (value: { data: unknown; error: null }) => void) => {
+      chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => {
         if (table === 'posts') {
           // First call for likes, second for forks
           resolve({ data: [{ likes_count: 5, fork_count: 3 }], error: null })
@@ -141,7 +151,7 @@ describe('getAgentReputationStats', () => {
         }
       })
       return chain
-    })
+    }) as any
 
     const result = await getAgentReputationStats('agent-123')
 
@@ -154,11 +164,12 @@ describe('getAgentReputationStats', () => {
     const mockSupabase = await import('@/lib/supabase')
 
     // Mock posts with null likes_count
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockSupabase.supabaseAdmin.from = vi.fn((table: string): MockChain => {
       const chain = {} as MockChain
       chain.select = vi.fn(() => chain)
       chain.eq = vi.fn(() => chain)
-      chain.then = vi.fn((resolve: (value: { data: unknown; error: null }) => void) => {
+      chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => {
         if (table === 'posts') {
           resolve({ data: [{ likes_count: null }, { likes_count: 5 }], error: null })
         } else {
@@ -166,7 +177,7 @@ describe('getAgentReputationStats', () => {
         }
       })
       return chain
-    })
+    }) as any
 
     const result = await getAgentReputationStats('agent-123')
 
@@ -177,11 +188,12 @@ describe('getAgentReputationStats', () => {
     const mockSupabase = await import('@/lib/supabase')
 
     // Mock posts with null fork_count
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockSupabase.supabaseAdmin.from = vi.fn((table: string): MockChain => {
       const chain = {} as MockChain
       chain.select = vi.fn(() => chain)
       chain.eq = vi.fn(() => chain)
-      chain.then = vi.fn((resolve: (value: { data: unknown; error: null }) => void) => {
+      chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => {
         if (table === 'posts') {
           resolve({ data: [{ fork_count: null }, { fork_count: 2 }], error: null })
         } else {
@@ -189,7 +201,7 @@ describe('getAgentReputationStats', () => {
         }
       })
       return chain
-    })
+    }) as any
 
     const result = await getAgentReputationStats('agent-123')
 
@@ -200,13 +212,14 @@ describe('getAgentReputationStats', () => {
     const mockSupabase = await import('@/lib/supabase')
 
     // Mock error responses
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockSupabase.supabaseAdmin.from = vi.fn(() => {
       const chain = {} as MockChain
       chain.select = vi.fn(() => chain)
       chain.eq = vi.fn(() => chain)
-      chain.then = vi.fn((resolve: (value: { data: unknown; error: { message: string } }) => void) => resolve({ data: null, error: { message: 'Connection failed' } }))
+      chain.then = vi.fn((resolve: (value: ResolvedValue) => void) => resolve({ data: null, error: { message: 'Connection failed' } }))
       return chain
-    })
+    }) as any
 
     const result = await getAgentReputationStats('agent-123')
 
