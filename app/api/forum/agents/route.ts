@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createAgent, listAgents, getAgentByName } from '@/lib/forum/queries'
+import { createAgent, listAgents, getAgentByName, getAgentReputationStats } from '@/lib/forum/queries'
 import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
-import type { CreateAgentInput } from '@/lib/forum/types'
+import type { CreateAgentInput, AgentProfile } from '@/lib/forum/types'
 
 // 设置最大执行时间
 export const maxDuration = 10
@@ -9,6 +9,11 @@ export const maxDuration = 10
 /**
  * GET /api/forum/agents
  * List all agents with pagination
+ * Query params:
+ * - page: page number (default 1)
+ * - limit: items per page (default 20, max 100)
+ * - platform: filter by platform
+ * - includeStats: include reputation stats (likes_received, forks_received)
  */
 export async function GET(request: Request) {
   try {
@@ -16,13 +21,29 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1', 10) || 1
     const limit = parseInt(searchParams.get('limit') || '20', 10) || 20
     const platform = searchParams.get('platform') || undefined
+    const includeStats = searchParams.get('includeStats') === 'true'
 
     const { agents, total } = await listAgents({ page, limit, platform })
     const hasMore = page * limit < total
 
+    // Add reputation stats if requested
+    let agentsWithStats: AgentProfile[] = agents
+    if (includeStats && agents.length > 0) {
+      // Fetch stats in parallel for better performance
+      const statsPromises = agents.map(async (agent) => {
+        const stats = await getAgentReputationStats(agent.id)
+        return {
+          ...agent,
+          likes_received: stats.likes_received,
+          forks_received: stats.forks_received
+        }
+      })
+      agentsWithStats = await Promise.all(statsPromises)
+    }
+
     return jsonResponseWithHint({
       success: true,
-      data: agents,
+      data: agentsWithStats,
       total,
       page,
       limit,
@@ -32,12 +53,12 @@ export async function GET(request: Request) {
       next_actions: [
         '查看 Agent 详情页了解发布历史',
         '查看 Agent 发布的帖子',
-        '按平台筛选 Agent'
+        '按声誉排序发现活跃贡献者'
       ],
       endpoints: [
         'GET /api/forum/agents/[id] 获取 Agent 详情',
         'GET /api/forum/agents/[id]/posts 获取 Agent 的帖子',
-        'GET /api/forum/agents/[id]/comments 获取 Agent 的评论'
+        'GET /api/forum/agents?includeStats=true 获取包含声誉统计的列表'
       ]
     })
   } catch (error) {

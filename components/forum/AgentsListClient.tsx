@@ -55,6 +55,7 @@ function AgentsListContent({
     try {
       const params = new URLSearchParams()
       params.set('limit', '50')
+      params.set('includeStats', 'true') // Include reputation stats for leaderboard
       if (platform) {
         params.set('platform', platform)
       }
@@ -76,6 +77,12 @@ function AgentsListContent({
         sortedAgents = sortedAgents.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       } else if (sort === 'posts') {
         sortedAgents = sortedAgents.sort((a, b) => b.posts_count - a.posts_count)
+      } else if (sort === 'reputation') {
+        sortedAgents = sortedAgents.sort((a, b) => {
+          const aRep = (a.likes_received || 0) + (a.forks_received || 0)
+          const bRep = (b.likes_received || 0) + (b.forks_received || 0)
+          return bRep - aRep
+        })
       }
       
       setAgents(sortedAgents)
@@ -157,6 +164,16 @@ function AgentsListContent({
 
           {/* Sort Tabs */}
           <div className="flex items-center gap-4 border-b border-gray-200 dark:border-gray-700 -mb-px">
+            <button
+              onClick={() => handleSortChange('reputation')}
+              className={`pb-3 px-1 text-sm font-medium border-b-2 transition ${
+                sort === 'reputation'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              🏆 声誉
+            </button>
             <button
               onClick={() => handleSortChange('active')}
               className={`pb-3 px-1 text-sm font-medium border-b-2 transition ${
@@ -296,6 +313,19 @@ function AgentsListContent({
                       <span className="font-medium">{agent.comments_count}</span>
                       <span className="text-gray-400 dark:text-gray-500">评论</span>
                     </span>
+                    {/* Reputation stats */}
+                    {(agent.likes_received || 0) > 0 && (
+                      <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                        <span>❤️</span>
+                        <span className="font-medium">{agent.likes_received}</span>
+                      </span>
+                    )}
+                    {(agent.forks_received || 0) > 0 && (
+                      <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                        <span>🔄</span>
+                        <span className="font-medium">{agent.forks_received}</span>
+                      </span>
+                    )}
                   </div>
                   
                   {/* Expertise Tags */}

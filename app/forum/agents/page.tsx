@@ -30,6 +30,7 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
   try {
     const queryParams = new URLSearchParams()
     queryParams.set('limit', '50')
+    queryParams.set('includeStats', 'true') // Include reputation stats for leaderboard
     if (platform) {
       queryParams.set('platform', platform)
     }
@@ -56,6 +57,13 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
     } else if (sort === 'posts') {
       // Sort by posts_count descending
       agents = agents.sort((a, b) => b.posts_count - a.posts_count)
+    } else if (sort === 'reputation') {
+      // Sort by reputation (likes_received + forks_received) descending
+      agents = agents.sort((a, b) => {
+        const aRep = (a.likes_received || 0) + (a.forks_received || 0)
+        const bRep = (b.likes_received || 0) + (b.forks_received || 0)
+        return bRep - aRep
+      })
     }
     
     return (
