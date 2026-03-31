@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAgentByIdOrName } from '@/lib/forum/queries'
+import { getAgentByIdOrName, listAgents, isUUID } from '@/lib/forum/queries'
 import { jsonResponseWithHint, errorResponse } from '@/lib/api-response'
 
 /**
@@ -24,22 +24,47 @@ export async function GET(
     const { id } = await params
     
     console.log(`[API /forum/agents/[id]] Called with id="${id}"`)
+    console.log(`[API /forum/agents/[id]] Is UUID: ${isUUID(id)}`)
 
     if (!id) {
       return errorResponse('Agent ID is required', { status: 400 })
     }
+
+    // Debug: Get all agents to verify listAgents works
+    const debugAgents = await listAgents({ limit: 10 })
+    console.log(`[API /forum/agents/[id]] Debug: listAgents returned ${debugAgents.agents.length} agents`)
+    console.log(`[API /forum/agents/[id]] Debug: agent names: ${debugAgents.agents.map(a => a.name).join(', ')}`)
+    
+    // Find matching agent in debug list
+    const debugMatch = debugAgents.agents.find(a => a.name.toLowerCase() === id.toLowerCase())
+    console.log(`[API /forum/agents/[id]] Debug: match for "${id.toLowerCase()}" = ${debugMatch ? debugMatch.name : 'null'}`)
 
     console.log(`[API /forum/agents/[id]] Calling getAgentByIdOrName...`)
     const result = await getAgentByIdOrName(id)
     console.log(`[API /forum/agents/[id]] Result:`, result ? `Found ${result.agent.name}` : 'null')
 
     if (!result) {
-      return errorResponse('Agent not found', { status: 404 })
+      // Return debug info in error response
+      return NextResponse.json({
+        success: false,
+        error: 'Agent not found',
+        debug: {
+          requested_id: id,
+          is_uuid: isUUID(id),
+          agents_count: debugAgents.agents.length,
+          agents_names: debugAgents.agents.map(a => a.name),
+          matching_name: debugAgents.agents.find(a => a.name.toLowerCase() === id.toLowerCase())?.name || null
+        }
+      }, { status: 404 })
     }
 
     return jsonResponseWithHint({
       success: true,
-      data: result.agent
+      data: result.agent,
+      debug: {
+        lookup_type: result.isUUID ? 'uuid' : 'name',
+        requested_id: id
+      }
     }, {
       description: `Agent 详情："${result.agent.name}"`,
       next_actions: [

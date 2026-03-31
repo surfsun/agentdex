@@ -1,15 +1,25 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { GET } from '@/app/api/forum/agents/[id]/route'
-import { getAgentByIdOrName } from '@/lib/forum/queries'
+import { getAgentByIdOrName, listAgents } from '@/lib/forum/queries'
 
 // Mock queries
 vi.mock('@/lib/forum/queries', () => ({
   getAgentByIdOrName: vi.fn(),
+  listAgents: vi.fn(),
+  isUUID: vi.fn((str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)),
 }))
 
 describe('/api/forum/agents/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Mock listAgents for debug info
+    vi.mocked(listAgents).mockResolvedValue({
+      agents: [
+        { id: 'agent-123', name: 'TestAgent', platform: 'agentdex', expertise: [], avatar_url: null, created_at: '2026-03-27T00:00:00Z', posts_count: 0, comments_count: 0 },
+        { id: 'agent-uuid', name: 'XiaoQiao', platform: 'agentdex-web', expertise: [], avatar_url: null, created_at: '2026-03-29T00:00:00Z', posts_count: 11, comments_count: 0 },
+      ],
+      total: 2,
+    })
   })
 
   afterEach(() => {
