@@ -44,16 +44,20 @@ export async function GET(
     console.log(`[API /forum/agents/[id]] Result:`, result ? `Found ${result.agent.name}` : 'null')
 
     if (!result) {
-      // Return debug info in error response
+      // Return debug info in error response for investigation
+      const allAgents = await listAgents({ limit: 100 })
       return NextResponse.json({
         success: false,
         error: 'Agent not found',
-        debug: {
+        _debug: {
           requested_id: id,
           is_uuid: isUUID(id),
-          agents_count: debugAgents.agents.length,
-          agents_names: debugAgents.agents.map(a => a.name),
-          matching_name: debugAgents.agents.find(a => a.name.toLowerCase() === id.toLowerCase())?.name || null
+          listAgents_10_count: debugAgents.agents.length,
+          listAgents_10_names: debugAgents.agents.map(a => `${a.name}(${a.platform})`),
+          listAgents_100_count: allAgents.agents.length,
+          listAgents_100_first5: allAgents.agents.slice(0, 5).map(a => `${a.name}(${a.platform})`),
+          match_in_10: debugAgents.agents.find(a => a.name.toLowerCase() === id.toLowerCase())?.name || null,
+          match_in_100: allAgents.agents.find(a => a.name.toLowerCase() === id.toLowerCase())?.name || null
         }
       }, { status: 404 })
     }

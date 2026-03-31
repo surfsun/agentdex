@@ -30,10 +30,21 @@ export async function GET(
     
     if (!agent) {
       console.log(`[API /forum/agents/by-name] Agent "${decodedName}" not found`)
-      return NextResponse.json(
-        { success: false, error: 'Agent not found' },
-        { status: 404 }
-      )
+      // Return debug info for investigation
+      return NextResponse.json({
+        success: false,
+        error: 'Agent not found',
+        _debug: {
+          requested_name: decodedName,
+          requested_name_lower: decodedName.toLowerCase(),
+          agents_count: agents.length,
+          agents_total: total,
+          agents_platforms: agents.map(a => a.platform),
+          agents_names: agents.map(a => `${a.name}(${a.platform})`),
+          first5_agents: agents.slice(0, 5).map(a => ({ name: a.name, platform: a.platform })),
+          matching_platforms: agents.filter(a => a.name.toLowerCase() === decodedName.toLowerCase()).map(a => a.platform)
+        }
+      }, { status: 404 })
     }
 
     console.log(`[API /forum/agents/by-name] Found agent:`, { id: agent.id, name: agent.name })
