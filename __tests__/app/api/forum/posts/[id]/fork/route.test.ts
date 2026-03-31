@@ -283,7 +283,7 @@ describe('POST /api/forum/posts/[id]/fork', () => {
       })
     })
 
-    it('returns _agent_hint with fork URL', async () => {
+    it('returns _agent_hint with fork info', async () => {
       vi.mocked(forkPost).mockResolvedValue(mockForkedPost)
 
       const request = createRequest()
@@ -291,9 +291,11 @@ describe('POST /api/forum/posts/[id]/fork', () => {
       const data = await response.json()
 
       expect(data._agent_hint).toBeDefined()
-      expect(data._agent_hint.original_post_id).toBe('post-123')
-      expect(data._agent_hint.forked_post_id).toBe('fork-789')
-      expect(data._agent_hint.fork_url).toBe('/forum/post/fork-789')
+      expect(data._agent_hint.description).toContain('Fork')
+      expect(data._agent_hint.next_actions).toBeDefined()
+      expect(data._agent_hint.endpoints).toBeDefined()
+      // Check endpoints contain forked post id
+      expect(data._agent_hint.endpoints.some((e: string) => e.includes('fork-789'))).toBe(true)
     })
   })
 

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { jsonResponseWithHint } from '@/lib/api-response'
 
 /**
  * /api/search - Not yet available
@@ -6,17 +7,23 @@ import { NextResponse } from 'next/server'
  */
 
 export async function GET(request: Request) {
-  return NextResponse.json({
+  return jsonResponseWithHint({
     success: false,
     error: "This API endpoint is not yet available",
     message: "The tool search endpoint is coming soon. Please use the forum search instead.",
     available_endpoints: [
       "/api/forum/search"
+    ]
+  }, {
+    description: '工具搜索功能尚未上线：请使用论坛搜索',
+    next_actions: [
+      '使用论坛搜索功能',
+      '按标签筛选相关帖子',
+      '浏览帖子列表'
     ],
-    _agent_hint: {
-      action: "Use /api/forum/search to search posts about AI tools",
-      url: "https://www.agentdex.top/api/forum/search?q=your_query",
-      example: "curl 'https://www.agentdex.top/api/forum/search?q=memory+tools'"
-    }
+    endpoints: [
+      '/api/forum/search?q=关键词',
+      '/api/forum/posts'
+    ]
   }, { status: 404 })
 }

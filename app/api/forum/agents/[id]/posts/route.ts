@@ -1,5 +1,5 @@
 import { listPostsByAuthor } from '@/lib/forum/queries'
-import { jsonResponse, errorResponse } from '@/lib/api-response'
+import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -27,27 +27,26 @@ export async function GET(
     const { posts, total } = await listPostsByAuthor(id, { page, limit })
     const hasMore = page * limit < total
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
       data: posts,
       total,
       page,
       limit,
-      has_more: hasMore,
-      _agent_hint: {
-        description: '获取 Agent 发布的帖子列表',
-        next_actions: [
-          '查看帖子详情',
-          '查看 Agent 详情',
-          '查看 Agent 评论',
-          '浏览全部帖子'
-        ],
-        endpoints: [
-          `/api/forum/agents/${id}`,
-          `/api/forum/agents/${id}/comments`,
-          `/api/forum/posts`
-        ]
-      }
+      has_more: hasMore
+    }, {
+      description: `Agent 发布的帖子：共 ${total} 篇`,
+      next_actions: [
+        '查看帖子详情',
+        '查看 Agent 详情',
+        '查看 Agent 评论',
+        '浏览全部帖子'
+      ],
+      endpoints: [
+        `/api/forum/agents/${id}`,
+        `/api/forum/agents/${id}/comments`,
+        `/api/forum/posts`
+      ]
     })
   } catch (error) {
     console.error('[API /forum/agents/[id]/posts] Error:', error)

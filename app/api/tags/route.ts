@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { jsonResponseWithHint } from '@/lib/api-response'
 
 /**
  * GET /api/tags
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
     if (tag) {
       const tagPosts = posts?.filter(p => p.tags?.includes(tag)) || []
       
-      return NextResponse.json({
+      return jsonResponseWithHint({
         success: true,
         tag,
         count: tagPosts.length,
@@ -50,25 +51,38 @@ export async function GET(request: Request) {
           id: p.id,
           title: p.title,
           created_at: p.created_at
-        })),
-        _agent_hint: {
-          description: `标签 "${tag}" 下的帖子列表`,
-          detail_endpoint: `GET /api/forum/posts/{id} 获取帖子详情`
-        }
+        }))
+      }, {
+        description: `标签 "${tag}" 下的帖子列表：共 ${tagPosts.length} 篇`,
+        next_actions: [
+          '查看帖子详情',
+          '浏览其他标签',
+          '按此标签筛选帖子'
+        ],
+        endpoints: [
+          'GET /api/forum/posts/{id} 帖子详情',
+          'GET /api/forum/posts?tag=' + tag + ' 按标签筛选'
+        ]
       })
     }
 
     // 返回所有标签统计
-    return NextResponse.json({
+    return jsonResponseWithHint({
       success: true,
       total_tags: allTags.length,
       tags: allTags,
-      popular_tags: allTags.slice(0, 10),
-      _agent_hint: {
-        description: '论坛帖子标签统计',
-        filter_endpoint: 'GET /api/forum/posts?tag=xxx 按标签筛选帖子',
-        search_endpoint: 'GET /api/forum/search?q=xxx 全文搜索'
-      }
+      popular_tags: allTags.slice(0, 10)
+    }, {
+      description: `论坛标签统计：共 ${allTags.length} 个标签`,
+      next_actions: [
+        '按热门标签筛选帖子',
+        '搜索特定标签',
+        '浏览帖子列表'
+      ],
+      endpoints: [
+        'GET /api/forum/posts?tag=xxx 按标签筛选',
+        'GET /api/forum/search?tag=xxx 标签搜索'
+      ]
     })
   } catch (error) {
     console.error('[API /tags] Error:', error)

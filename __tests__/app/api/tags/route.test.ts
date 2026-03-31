@@ -128,8 +128,8 @@ describe('/api/tags', () => {
 
       expect(data._agent_hint).toBeDefined()
       expect(data._agent_hint.description).toContain('标签统计')
-      expect(data._agent_hint.filter_endpoint).toBeDefined()
-      expect(data._agent_hint.search_endpoint).toBeDefined()
+      expect(data._agent_hint.next_actions).toBeDefined()
+      expect(data._agent_hint.endpoints).toBeDefined()
     })
   })
 
@@ -227,7 +227,8 @@ describe('/api/tags', () => {
 
       expect(data._agent_hint).toBeDefined()
       expect(data._agent_hint.description).toContain('技术讨论')
-      expect(data._agent_hint.detail_endpoint).toBeDefined()
+      expect(data._agent_hint.next_actions).toBeDefined()
+      expect(data._agent_hint.endpoints).toBeDefined()
     })
   })
 

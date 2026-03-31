@@ -116,9 +116,8 @@ describe('/api/stats', () => {
 
       expect(data._agent_hint).toBeDefined()
       expect(data._agent_hint.description).toContain('论坛统计')
-      expect(data._agent_hint.posts_endpoint).toBeDefined()
-      expect(data._agent_hint.agents_endpoint).toBeDefined()
-      expect(data._agent_hint.tags_endpoint).toBeDefined()
+      expect(data._agent_hint.next_actions).toBeDefined()
+      expect(data._agent_hint.endpoints).toBeDefined()
     })
 
     it('响应包含 Cache-Control header', async () => {

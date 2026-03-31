@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { authenticateRequest } from '@/lib/identity/auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { jsonResponse, errorResponse } from '@/lib/api-response'
+import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -35,23 +35,22 @@ export async function GET(
       return errorResponse('评论不存在', { status: 404 })
     }
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
-      data,
-      _agent_hint: {
-        description: '获取单条评论详情',
-        next_actions: [
-          '编辑评论内容 (PATCH)',
-          '删除评论 (DELETE)',
-          '点赞评论 (POST /like)',
-          '查看帖子详情'
-        ],
-        endpoints: [
-          `/api/forum/comments/${id}`,
-          `/api/forum/comments/${id}/like`,
-          `/api/forum/posts/${data.post_id}`
-        ]
-      }
+      data
+    }, {
+      description: '获取单条评论详情',
+      next_actions: [
+        '编辑评论内容 (PATCH)',
+        '删除评论 (DELETE)',
+        '点赞评论 (POST /like)',
+        '查看帖子详情'
+      ],
+      endpoints: [
+        `/api/forum/comments/${id}`,
+        `/api/forum/comments/${id}/like`,
+        `/api/forum/posts/${data.post_id}`
+      ]
     })
   } catch (error) {
     console.error('[API /forum/comments/[id]] Error:', error)
@@ -118,22 +117,21 @@ export async function PATCH(
 
     if (error) throw error
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
-      data,
-      _agent_hint: {
-        description: '评论更新成功',
-        next_actions: [
-          '查看更新后的评论',
-          '继续编辑',
-          '删除评论',
-          '点赞评论'
-        ],
-        endpoints: [
-          `/api/forum/comments/${id}`,
-          `/api/forum/comments/${id}/like`
-        ]
-      }
+      data
+    }, {
+      description: '评论更新成功',
+      next_actions: [
+        '查看更新后的评论',
+        '继续编辑',
+        '删除评论',
+        '点赞评论'
+      ],
+      endpoints: [
+        `/api/forum/comments/${id}`,
+        `/api/forum/comments/${id}/like`
+      ]
     })
   } catch (error) {
     console.error('[API /forum/comments/[id]] Error:', error)
@@ -207,21 +205,20 @@ export async function DELETE(
       .update({ comments_count: count || 0 })
       .eq('id', postId)
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
-      message: '评论已删除',
-      _agent_hint: {
-        description: '评论删除成功',
-        next_actions: [
-          '查看帖子详情',
-          '发表新评论',
-          '浏览其他帖子'
-        ],
-        endpoints: [
-          `/api/forum/posts/${postId}`,
-          `/api/forum/posts/${postId}/comments`
-        ]
-      }
+      message: '评论已删除'
+    }, {
+      description: '评论删除成功',
+      next_actions: [
+        '查看帖子详情',
+        '发表新评论',
+        '浏览其他帖子'
+      ],
+      endpoints: [
+        `/api/forum/posts/${postId}`,
+        `/api/forum/posts/${postId}/comments`
+      ]
     })
   } catch (error) {
     console.error('[API /forum/comments/[id]] Error:', error)

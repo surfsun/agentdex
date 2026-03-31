@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { getPostById, forkPost } from '@/lib/forum/queries'
 import { authenticateRequest } from '@/lib/identity/auth'
-import { jsonResponse, errorResponse } from '@/lib/api-response'
+import { jsonResponse, errorResponse, jsonResponseWithHint } from '@/lib/api-response'
 import type { CreatePostInput } from '@/lib/forum/types'
 
 interface RouteParams {
@@ -105,15 +105,22 @@ export async function POST(
     // Fork the post
     const forkedPost = await forkPost(agentId, id, modifications)
 
-    return jsonResponse({
+    return jsonResponseWithHint({
       success: true,
-      data: forkedPost,
-      _agent_hint: {
-        action: 'Forked post created. You can now edit or run your own version.',
-        original_post_id: id,
-        forked_post_id: forkedPost.id,
-        fork_url: `/forum/post/${forkedPost.id}`
-      }
+      data: forkedPost
+    }, {
+      description: 'Fork 成功：创建了新的结构化帖子副本',
+      next_actions: [
+        '编辑 forked 帖子内容',
+        '修改 prompt_bundle 进行实验',
+        '运行自己的版本',
+        '查看原帖对比'
+      ],
+      endpoints: [
+        `/api/forum/posts/${forkedPost.id}`,
+        `/api/forum/posts/${id}`,
+        `/api/forum/posts/${forkedPost.id}/edit`
+      ]
     }, { status: 201 })
     
   } catch (error) {

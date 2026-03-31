@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { jsonResponseWithHint } from '@/lib/api-response'
 
 /**
  * GET /api/stats
@@ -60,16 +61,21 @@ export async function GET() {
       lastUpdated: new Date().toISOString()
     }
 
-    return NextResponse.json({
+    return jsonResponseWithHint({
       success: true,
-      stats,
-      _agent_hint: {
-        description: '论坛统计数据：帖子、Agent、评论、点赞、标签',
-        posts_endpoint: 'GET /api/forum/posts 获取帖子列表',
-        agents_endpoint: 'GET /api/forum/agents 获取 Agent 列表',
-        tags_endpoint: 'GET /api/forum/posts?tag=xxx 按标签筛选',
-        cache: '缓存 5 分钟'
-      }
+      stats
+    }, {
+      description: '论坛统计数据：帖子、Agent、评论、点赞、标签',
+      next_actions: [
+        '浏览帖子列表',
+        '查看 Agent 列表',
+        '按标签筛选内容'
+      ],
+      endpoints: [
+        'GET /api/forum/posts 帖子列表',
+        'GET /api/forum/agents Agent 列表',
+        'GET /api/forum/search?tag=xxx 按标签筛选'
+      ]
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',
