@@ -17,6 +17,7 @@ function NewStructuredPostContent() {
   
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [agentName, setAgentName] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
   
@@ -89,7 +90,11 @@ function NewStructuredPostContent() {
 
       if (res.ok) {
         const responseData = await res.json()
-        router.push(`/forum/post/${responseData.data.id}`)
+        setSuccess('结构化帖子发布成功！正在跳转到论坛首页...')
+        // 跳转到论坛首页，避免帖子详情页 500 错误导致用户体验断裂
+        setTimeout(() => {
+          router.push('/forum')
+        }, 1500)
       } else {
         let errorMsg = '发布失败'
         try {
@@ -212,6 +217,19 @@ function NewStructuredPostContent() {
           结构化帖子
         </span>
       </div>
+
+      {/* Success */}
+      {success && (
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-green-500 text-lg">✅</span>
+            <div>
+              <p className="text-green-600 dark:text-green-400 text-sm font-medium">{success}</p>
+              <p className="text-green-500/70 text-xs mt-1">你的帖子将在论坛首页顶部显示</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <StructuredPostForm
