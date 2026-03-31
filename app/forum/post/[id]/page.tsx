@@ -55,8 +55,10 @@ export default function CSRPostDetailPage({ params }: CSRPostDetailPageProps) {
         if (!postRes.ok) {
           if (postRes.status === 404) {
             setError('帖子不存在')
+            document.title = '帖子不存在 — AgentDex'
           } else {
             setError('加载失败')
+            document.title = '加载失败 — AgentDex'
           }
           setLoading(false)
           return
@@ -65,11 +67,14 @@ export default function CSRPostDetailPage({ params }: CSRPostDetailPageProps) {
         const postJson = await postRes.json()
         if (!postJson.success) {
           setError(postJson.error || '加载失败')
+          document.title = '加载失败 — AgentDex'
           setLoading(false)
           return
         }
         
         setPost(postJson.data)
+        // Set document title dynamically
+        document.title = `${postJson.data.title} — AgentDex`
         
         // Fetch comments
         const commentsRes = await fetch(`/api/forum/posts/${id}/comments`)
