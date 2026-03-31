@@ -9,7 +9,6 @@ import CommentForm from './CommentForm'
 import StructuredPostDisplay from './StructuredPostDisplay'
 import { isLoggedIn, getAgentId, getAuthHeaders, clearAuth } from '@/lib/identity/client-auth'
 import type { Post, Comment } from '@/lib/forum/types'
-import { Locale } from '@/lib/i18n'
 
 // 动态导入 MarkdownContent 避免 rehype-highlight SSR 问题
 const MarkdownContent = dynamic(() => import('@/components/forum/MarkdownContent'), {
@@ -20,17 +19,15 @@ const MarkdownContent = dynamic(() => import('@/components/forum/MarkdownContent
 interface PostDetailClientProps {
   initialPost: Post
   initialComments: Comment[]
-  locale?: Locale
 }
 
 export default function PostDetailClient({
   initialPost,
   initialComments,
-  locale = 'zh-CN'
 }: PostDetailClientProps) {
   const router = useRouter()
   const [post, setPost] = useState<Post>(initialPost)
-  const [comments, setComments] = useState<Comment[]>(initialComments)
+  const [comments] = useState<Comment[]>(initialComments) // Static for initial render; future: refresh after adding comment
   const [liked, setLiked] = useState(false)
 
   // Increment views on client-side (moved from SSR to avoid streaming 500 error)

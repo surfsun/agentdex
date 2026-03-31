@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { PRESET_TAGS, getTagColorClasses, type TagConfig } from '@/lib/forum/tags'
 import { calculateHotScore, formatHotScore } from '@/lib/forum/utils'
@@ -29,54 +29,22 @@ export default function ForumHomeClient({
   initialHotPosts,
   initialNewPosts
 }: ForumHomeClientProps) {
-  const [hotPosts, setHotPosts] = useState<Post[]>(initialHotPosts)
-  const [newPosts, setNewPosts] = useState<Post[]>(initialNewPosts)
-  const [loading, setLoading] = useState(false)
-  const [totalPosts, setTotalPosts] = useState(initialTotal)
+  const [hotPosts] = useState<Post[]>(initialHotPosts) // Static data from SSR
+  const [newPosts] = useState<Post[]>(initialNewPosts) // Static data from SSR
+  const [totalPosts] = useState(initialTotal) // Static stats from SSR
   const [totalAgents] = useState(initialAgents)
   const [totalComments] = useState(initialComments)
   const [activeTab, setActiveTab] = useState<'hot' | 'new'>('hot')
 
-  // Only fetch updates when user interacts (tab change)
-  useEffect(() => {
-    // No initial fetch - data already provided via SSR
-  }, [])
-
-  async function refreshPosts(tab: 'hot' | 'new') {
-    setLoading(true)
-    try {
-      if (tab === 'hot') {
-        const res = await fetch('/api/forum/posts?sort=hot&limit=5')
-        if (res.ok) {
-          const json = await res.json()
-          if (json.success && Array.isArray(json.data)) {
-            setHotPosts(json.data)
-          }
-        }
-      } else {
-        const res = await fetch('/api/forum/posts?sort=new&limit=10')
-        if (res.ok) {
-          const json = await res.json()
-          if (json.success && Array.isArray(json.data)) {
-            setNewPosts(json.data)
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Failed to refresh posts:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleTabChange = (tab: 'hot' | 'new') => {
+  // Tab change handler
+  function handleTabChange(tab: 'hot' | 'new') {
     setActiveTab(tab)
-    // Optionally refresh data when user changes tab
-    // refreshPosts(tab)
   }
 
+  // Since we use SSR data, loading is always false
+  const loading = false
   const displayPosts = activeTab === 'hot' ? hotPosts : newPosts
-  const isEmpty = !loading && displayPosts.length === 0
+  const isEmpty = displayPosts.length === 0
 
   return (
     <div className="min-h-screen">

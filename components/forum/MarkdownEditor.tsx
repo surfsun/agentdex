@@ -1,9 +1,30 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
+
+// Type definitions for react-markdown components
+interface BaseProps {
+  children?: ReactNode
+  className?: string
+}
+
+// Alias types for react-markdown components that only need base props
+type PreProps = BaseProps
+type CodeProps = BaseProps
+type HeadingProps = BaseProps
+type ListProps = BaseProps
+type ListItemProps = BaseProps
+type BlockquoteProps = BaseProps
+
+interface LinkProps extends BaseProps {
+  href?: string
+}
+
+type TableProps = BaseProps
+type TableCellProps = BaseProps
 
 interface MarkdownEditorProps {
   value: string
@@ -158,11 +179,10 @@ export default function MarkdownEditor({
     return () => textarea.removeEventListener('keydown', handleKeyDown)
   }, [insertSyntax])
 
-  // Preview renderer components - using any to avoid react-markdown type issues
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const previewComponents: any = {
-    pre: ({ children }: any) => {
-      const childElement = children as React.ReactElement<any>
+  // Preview renderer components with proper types
+  const previewComponents = {
+    pre: ({ children }: PreProps) => {
+      const childElement = children as React.ReactElement<CodeProps>
       const isCodeBlock = childElement?.props?.className?.includes('hljs')
       
       if (isCodeBlock) {
@@ -185,7 +205,7 @@ export default function MarkdownEditor({
       }
       return <pre className="bg-gray-100 p-2 rounded">{children}</pre>
     },
-    code: ({ className, children }: any) => {
+    code: ({ className, children }: CodeProps) => {
       const match = /language-(\w+)/.exec(className || '')
       if (!match) {
         return (
@@ -196,52 +216,52 @@ export default function MarkdownEditor({
       }
       return <code className={className}>{children}</code>
     },
-    p: ({ children }: any) => (
+    p: ({ children }: BaseProps) => (
       <p className="text-gray-700 mb-2 leading-relaxed">{children}</p>
     ),
-    h1: ({ children }: any) => (
+    h1: ({ children }: HeadingProps) => (
       <h1 className="text-xl font-bold text-gray-900 mb-2 mt-3">{children}</h1>
     ),
-    h2: ({ children }: any) => (
+    h2: ({ children }: HeadingProps) => (
       <h2 className="text-lg font-bold text-gray-900 mb-2 mt-2">{children}</h2>
     ),
-    h3: ({ children }: any) => (
+    h3: ({ children }: HeadingProps) => (
       <h3 className="text-base font-semibold text-gray-900 mb-1 mt-2">{children}</h3>
     ),
-    ul: ({ children }: any) => (
+    ul: ({ children }: ListProps) => (
       <ul className="list-disc list-inside text-gray-700 mb-2 space-y-0.5">{children}</ul>
     ),
-    ol: ({ children }: any) => (
+    ol: ({ children }: ListProps) => (
       <ol className="list-decimal list-inside text-gray-700 mb-2 space-y-0.5">{children}</ol>
     ),
-    li: ({ children }: any) => (
+    li: ({ children }: ListItemProps) => (
       <li className="text-gray-700">{children}</li>
     ),
-    blockquote: ({ children }: any) => (
+    blockquote: ({ children }: BlockquoteProps) => (
       <blockquote className="border-l-3 border-gray-300 pl-3 py-1 my-2 bg-gray-50 text-gray-600 italic">
         {children}
       </blockquote>
     ),
-    a: ({ href, children }: any) => (
+    a: ({ href, children }: LinkProps) => (
       <a href={href} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
         {children}
       </a>
     ),
-    strong: ({ children }: any) => (
+    strong: ({ children }: BaseProps) => (
       <strong className="font-bold text-gray-900">{children}</strong>
     ),
-    em: ({ children }: any) => (
+    em: ({ children }: BaseProps) => (
       <em className="italic">{children}</em>
     ),
-    table: ({ children }: any) => (
+    table: ({ children }: TableProps) => (
       <div className="overflow-x-auto my-2">
         <table className="min-w-full border border-gray-200">{children}</table>
       </div>
     ),
-    th: ({ children }: any) => (
+    th: ({ children }: TableCellProps) => (
       <th className="border border-gray-200 px-2 py-1 bg-gray-50 font-semibold text-left">{children}</th>
     ),
-    td: ({ children }: any) => (
+    td: ({ children }: TableCellProps) => (
       <td className="border border-gray-200 px-2 py-1">{children}</td>
     ),
   }
