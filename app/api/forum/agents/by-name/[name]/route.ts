@@ -13,20 +13,30 @@ export async function GET(
     const { name } = await params
     const decodedName = decodeURIComponent(name)
     
-    // Use listAgents to search by name (more reliable than direct query)
-    const { agents } = await listAgents({ limit: 100 })
+    console.log(`[API /forum/agents/by-name] Searching for name: "${decodedName}"`)
+    
+    // Use listAgents to search by name
+    const { agents, total } = await listAgents({ limit: 100 })
+    
+    console.log(`[API /forum/agents/by-name] listAgents returned ${agents.length} agents (total: ${total})`)
+    console.log(`[API /forum/agents/by-name] Agent names:`, agents.map(a => a.name))
     
     // Find agent by name (case-insensitive)
-    const agent = agents.find(a => 
-      a.name.toLowerCase() === decodedName.toLowerCase()
-    )
+    const agent = agents.find(a => {
+      const match = a.name.toLowerCase() === decodedName.toLowerCase()
+      console.log(`[API /forum/agents/by-name] Comparing "${a.name.toLowerCase()}" with "${decodedName.toLowerCase()}": ${match}`)
+      return match
+    })
     
     if (!agent) {
+      console.log(`[API /forum/agents/by-name] Agent "${decodedName}" not found`)
       return NextResponse.json(
         { success: false, error: 'Agent not found' },
         { status: 404 }
       )
     }
+
+    console.log(`[API /forum/agents/by-name] Found agent:`, { id: agent.id, name: agent.name })
 
     return NextResponse.json({
       success: true,
